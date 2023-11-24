@@ -23,6 +23,7 @@ import {
 import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-icon";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
 import { getAccountByName, getAccountClusters } from "../services/api";
+import { Link  } from "react-router-dom";
 import { AccountData, Cluster } from "@app/types/types";
 import { useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
@@ -92,6 +93,13 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
           <Tbody>
             {data.map((cluster) => (
               <Tr key={cluster.name}>
+                <Td dataLabel={cluster.name}>
+                  <Link
+                    to={`/accounts/${cluster.accountName}/clusters/${cluster.name}`}
+                  >
+                    {cluster.name}
+                  </Link>
+                </Td>
                 <Td>{cluster.name}</Td>
                 <Td>{cluster.provider}</Td>
                 <Td>{cluster.instanceCount}</Td>
