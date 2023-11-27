@@ -13,9 +13,9 @@ const apiClient = axios.create({
 
 
 // Fetch cluster by name
-export async function getCluster(ClusterName) {
+export async function getCluster(clusterID) {
     try {
-      const response = await apiClient.get(`/clusters/${ClusterName}`);
+      const response = await apiClient.get(`/clusters/${clusterID}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching mocked clusters:", error);
@@ -80,14 +80,9 @@ export async function getAccountClusters(accountName) {
 }
 
 
-export async function getClusterInstances(accountName, clusterName) {
+export async function getClusterInstances(accountName, clusterID) {
     try {
-      const response = await apiClient.get(
-        // HARDCODED, CHANGE
-        `clusters/${clusterName}/instances`
-        // TO-DO in case we move to path parameters replace the above line with the below line
-        // `accounts/${accountName}/clusters/${clusterName}`
-      );
+      const response = await apiClient.get(`clusters/${clusterID}/instances`);
       return response.data.instances;
     } catch (error) {
       console.error("Error fetching Instances:", error);

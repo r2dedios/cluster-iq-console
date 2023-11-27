@@ -85,9 +85,10 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
         <Table aria-label="Simple table">
           <Thead>
             <Tr>
+              <Th>ID</Th>
               <Th>Name</Th>
               <Th>Provider</Th>
-              <Th>Cluster Count</Th>
+              <Th>Instance Count</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -95,9 +96,9 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
               <Tr key={cluster.name}>
                 <Td dataLabel={cluster.name}>
                   <Link
-                    to={`/accounts/${cluster.accountName}/clusters/${cluster.name}`}
+                    to={`/accounts/${cluster.accountName}/clusters/${cluster.id}`}
                   >
-                    {cluster.name}
+                    {cluster.id}
                   </Link>
                 </Td>
                 <Td>{cluster.name}</Td>
@@ -180,6 +181,10 @@ const AccountDetails: React.FunctionComponent = () => {
             <DescriptionListTerm>Name</DescriptionListTerm>
             <DescriptionListDescription>
               {accountData.accounts[0].name}
+            </DescriptionListDescription>
+            <DescriptionListTerm>Account ID</DescriptionListTerm>
+            <DescriptionListDescription>
+              {accountData.accounts[0].id}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

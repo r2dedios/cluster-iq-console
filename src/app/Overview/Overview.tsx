@@ -68,6 +68,13 @@ const AggregateStatusCards: React.FunctionComponent = () => {
     clusterCounts[provider] = (clusterCounts[provider] || 0) + clusterCount;
   });
 
+  const accountCounts = {};
+  clusterPerCP.accounts.forEach(account => {
+    const provider = account.provider;
+    //const clusterCount = Object.keys(account.clusters).length;
+    accountCounts[provider] = (accountCounts[provider] || 0) + 1;
+  });
+
   // to-do instead of static structure of page content make it dynamic (lets saywe add tomorrow IBM cloud, we dont need to change the FE)
     const cardData = {
       clusters: [
@@ -102,7 +109,8 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           title: "Servers",
           content: [
             {
-              count: instances.count
+              count: instances.count,
+              ref: "/servers"
             },
           ],
           layout: "multiIcon",
@@ -164,7 +172,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           title: "AWS Accounts",
           content: [
             {
-              count: clusterCounts["AWS"] || 0,
+              count: accountCounts["AWS"] || 0,
               icon: (
                 <AwsIcon color="var(--pf-v5-global--danger-color--100)" />
               ),
@@ -177,7 +185,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           title: "GCP accounts",
           content: [
             {
-              count: clusterCounts["GCP"] || 0,
+              count: accountCounts["GCP"] || 0,
               icon: (
                 <CloudIcon color="var(--pf-v5-global--danger-color--100)" />
               ),
@@ -190,7 +198,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           title: "Azure accounts",
           content: [
             {
-              count: clusterCounts["Azure"] || 0,
+              count: accountCounts["Azure"] || 0,
               icon: (
                 <AzureIcon color="var(--pf-v5-global--danger-color--100)" />
               ),
@@ -204,7 +212,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
 
     };
 
-    
+
     const renderContent = (title: string, content: any[], layout: string) => {
     if (layout === "icon") {
       return content[0].icon;

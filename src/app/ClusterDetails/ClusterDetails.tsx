@@ -55,7 +55,7 @@ const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
 const AggregateInstancesPerCluster: React.FunctionComponent = () => {
   const [data, setData] = useState<Instance[] | []>([]);
   const [loading, setLoading] = useState(true);
-  const { clusterName } = useParams();
+  const { clusterID } = useParams();
   const { accountName } = useParams();
 
 
@@ -63,7 +63,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
     const fetchData = async () => {
       try {
           console.log("Fetching data...");
-          const fetchedInstancesPerCluster = await getClusterInstances(accountName,clusterName);
+          const fetchedInstancesPerCluster = await getClusterInstances(accountName,clusterID);
           console.log("Fetched data:", fetchedInstancesPerCluster);
           setData(fetchedInstancesPerCluster);
       } catch (error) {
@@ -123,7 +123,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
 };
 
 const ClusterDetails: React.FunctionComponent = () => {
-  const { clusterName } = useParams();
+  const { clusterID } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
   const [cluster, setClusterData] = useState<ClusterData>({
     count: 0,
@@ -136,7 +136,7 @@ const ClusterDetails: React.FunctionComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          const fetchedCluster = await getCluster(clusterName);
+          const fetchedCluster = await getCluster(clusterID);
           setClusterData(fetchedCluster);
       } catch (error) {
         console.error("Error fetching data:", error);

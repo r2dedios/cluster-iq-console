@@ -19,6 +19,7 @@ export type AccountData = {
 };
 
 export type Account = {
+  id: string;
   name: string;
   provider: string;
   clusterCount: number;
