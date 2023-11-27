@@ -36,7 +36,7 @@ export type ClusterPerCP = {
 export type Instance = {
     id: string;
     name: string;
-    region: string;
+    availabilityZone: string;
     instanceType: string;
     state: string;
     provider: string;
