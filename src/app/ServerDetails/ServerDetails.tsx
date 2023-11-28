@@ -110,9 +110,13 @@ const ServerDetails: React.FunctionComponent = () => {
             <DescriptionListDescription>
               {instanceID}
             </DescriptionListDescription>
-            <DescriptionListTerm>Account ID</DescriptionListTerm>
+            <DescriptionListTerm>Cluster ID</DescriptionListTerm>
             <DescriptionListDescription>
-              {instanceData.instances[0].id}
+              <Link
+                to={`/clusters/${instanceData.instances[0].clusterID}`}
+              >
+                {instanceData.instances[0].clusterID}
+              </Link>
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
@@ -128,13 +132,17 @@ const ServerDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {instanceData.instances[0].tags.filter(label => label.key == "LaunchTime").map(label => (
+                <Label key={label.key}>{label.value}</Label>
+              ))}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Created at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {instanceData.instances[0].tags.filter(label => label.key == "LaunchTime").map(label => (
+                <Label key={label.key}>{label.value}</Label>
+              ))}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>

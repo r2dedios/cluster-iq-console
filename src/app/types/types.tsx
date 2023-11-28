@@ -47,6 +47,7 @@ export type Instance = {
     availabilityZone: string;
     instanceType: string;
     state: string;
+    clusterID: string;
     provider: string;
     tags: Array<Tag>;
 }
