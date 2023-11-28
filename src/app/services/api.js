@@ -57,6 +57,17 @@ export const getAccounts = async () => {
 };
 
 // Fetch Instances
+export async function getInstanceByID(instanceID) {
+  try {
+    const response = await apiClient.get(`/instances/${instanceID}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Instance By ID:", error);
+   throw error;
+  }
+}
+
+// Fetch Instances
 export const getInstances = async () => {
   try {
     const response = await apiClient.get("/instances");
@@ -86,6 +97,17 @@ export async function getClusterInstances(accountName, clusterID) {
       return response.data.instances;
     } catch (error) {
       console.error("Error fetching Instances:", error);
+      throw error;
+    }
+}
+
+
+export async function getClusterTags(clusterID) {
+    try {
+      const response = await apiClient.get(`clusters/${clusterID}/tags`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Tags:", error);
       throw error;
     }
 }

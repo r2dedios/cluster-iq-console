@@ -23,7 +23,7 @@ import {
 } from "@patternfly/react-core";
 import { Table, Thead, Tr, Th, Tbody, Td } from "@patternfly/react-table";
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { getInstances } from "../services/api";
 import { Instances } from "@app/types/types";
 import { FilterIcon } from "@patternfly/react-icons";
@@ -572,7 +572,11 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
             {filteredData.instances.map((instance) => (
               <Tr key={instance.id}>
                 <Td dataLabel={columnNames.id} width={15}>
-                  {instance.id}
+                  <Link
+                    to={`/servers/${instance.id}`}
+                  >
+                    {instance.id}
+                  </Link>
                 </Td>
                 <Td dataLabel={columnNames.name} width={30}>
                   {instance.name}

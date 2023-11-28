@@ -26,7 +26,15 @@ export type Account = {
   clusters: Record<string, Cluster>;
 };
 
+export type TagData = {
+  count: number;
+  tags: Tag[];
+}
 
+export type Tag = {
+  key: string;
+  value: string;
+}
 
 export type ClusterPerCP = {
   count: number;
@@ -40,10 +48,7 @@ export type Instance = {
     instanceType: string;
     state: string;
     provider: string;
-    tags: Array<{
-        key: string;
-        value: string;
-    }>;
+    tags: Array<Tag>;
 }
 
 export type Instances = {
