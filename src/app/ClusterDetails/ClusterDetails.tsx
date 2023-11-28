@@ -97,7 +97,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
               <Th>ID</Th>
               <Th>Name</Th>
               <Th>Type</Th>
-              <Th>Region</Th>
+              <Th>AvailabilityZone</Th>
               <Th>State</Th>
             </Tr>
           </Thead>
@@ -113,7 +113,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
                 </Td>
                 <Td>{instance.name}</Td>
                 <Td>{instance.instanceType}</Td>
-                <Td>{instance.region}</Td>
+                <Td>{instance.availabilityZone}</Td>
                 <Td dataLabel={instance.state}>
                   {renderLabel(instance.state)}
                 </Td>
@@ -232,7 +232,7 @@ const ClusterDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Region</DescriptionListTerm>
             <DescriptionListDescription>
-              {cluster.clusters[0].region}
+              {cluster.clusters[0].region || "unknown"}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
