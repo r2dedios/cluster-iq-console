@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import {
+  Breadcrumb,
+  BreadcrumbItem,
   PageSection,
   PageSectionVariants,
   Tabs,
@@ -28,6 +30,15 @@ import { Link, useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
   labels: Array<Tag>;
 }
+
+const BreadcrumbBasic = (
+  <Breadcrumb ouiaId="BasicBreadcrumb">
+    <BreadcrumbItem to="/clusters">Clusters</BreadcrumbItem>
+    <BreadcrumbItem to="#" isActive>
+      Cluster Details
+    </BreadcrumbItem>
+  </Breadcrumb>
+);
 
 const renderLabel = (labelText: string | null | undefined) => {
   switch (labelText) {
@@ -305,7 +316,9 @@ const ClusterDetails: React.FunctionComponent = () => {
 
 
   return (
-    <Page>
+    <Page
+      breadcrumb={BreadcrumbBasic}
+    >
 
       {/* Page header */}
       <PageSection isWidthLimited variant={PageSectionVariants.light}>

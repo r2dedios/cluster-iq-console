@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import {
+  Breadcrumb,
+  BreadcrumbItem,
   PageSection,
   PageSectionVariants,
   Tabs,
@@ -31,6 +33,15 @@ interface LabelGroupOverflowProps {
     text: string;
   }[];
 }
+
+const BreadcrumbBasic = (
+  <Breadcrumb ouiaId="BasicBreadcrumb">
+    <BreadcrumbItem to="/accounts">Accounts</BreadcrumbItem>
+    <BreadcrumbItem to="#" isActive>
+      Account Details
+    </BreadcrumbItem>
+  </Breadcrumb>
+);
 
 const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
   labels,
@@ -224,7 +235,9 @@ const AccountDetails: React.FunctionComponent = () => {
 
 
   return (
-    <Page>
+    <Page
+      breadcrumb={BreadcrumbBasic}
+    >
 
       {/* Page header */}
       <PageSection isWidthLimited variant={PageSectionVariants.light}>
