@@ -21,11 +21,11 @@ import {
   Badge,
   ToolbarToggleGroup,
 } from "@patternfly/react-core";
-import { Table, Thead, Tr, Th, Tbody, Td } from "@patternfly/react-table";
+import { Table, Thead, Tr, Th, Tbody, Td, ThProps } from "@patternfly/react-table";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getInstances } from "../services/api";
-import { Instances } from "@app/types/types";
+import { Instance, Instances } from "@app/types/types";
 import { FilterIcon } from "@patternfly/react-icons";
 
 interface ServersTableProps {
@@ -42,6 +42,8 @@ interface TableToolbarProps {
   setProviderSelections: (value: string[]) => void;
   providerSelections: string[];
 }
+
+
 
 const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
   searchValue,
@@ -461,10 +463,7 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   providerSelections,
   searchValue,
 }) => {
-  const [filteredData, setFilteredData] = useState<Instances>({
-    count: 0,
-    instances: [],
-  });
+  const [filteredData, setFilteredData] = useState<Instance[] | []>([]);
 
   const [instancesData, setInstancesData] = useState<Instances>({
     count: 0,
@@ -512,10 +511,7 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
       // console.log("Filtered by name:", filtered);
     }
 
-    setFilteredData({
-      count: filtered.length,
-      instances: filtered,
-    });
+    setFilteredData(filtered);
   }, [
     instancesData.instances,
     statusSelection,
@@ -543,6 +539,54 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
     }
   };
 
+  //### Sorting ###
+  // Index of the currently active column
+  const [activeSortIndex, setActiveSortIndex] = React.useState<number | undefined>(0);
+  // sort direction of the currently active column
+  const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
+  // sort dropdown expansion
+  const getSortableRowValues = (instance: Instance): (string | number | null)[] => {
+    const { id, name, availabilityZone, instanceType, state, clusterID, provider } = instance;
+    return [id, name, availabilityZone, instanceType, state, clusterID, provider];
+  };
+
+  // Note that we perform the sort as part of the component's render logic and not in onSort.
+  // We shouldn't store the list of data in state because we don't want to have to sync that with props.
+  let sortedData = filteredData;
+  if (typeof activeSortIndex === 'number' && activeSortIndex !== null) {
+    sortedData = filteredData.sort((a, b) => {
+      const aValue = getSortableRowValues(a)[activeSortIndex];
+      const bValue = getSortableRowValues(b)[activeSortIndex];
+      if (typeof aValue === 'number') {
+        // Numeric sort
+        if (activeSortDirection === 'asc') {
+          return (aValue as number) - (bValue as number);
+        }
+        return (bValue as number) - (aValue as number);
+      } else {
+        // String sort
+        if (activeSortDirection === 'asc') {
+          return (aValue as string).localeCompare(bValue as string);
+        }
+        return (bValue as string).localeCompare(aValue as string);
+      }
+    });
+  }
+
+  const getSortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: {
+      index: activeSortIndex,
+      direction: activeSortDirection,
+      defaultDirection: 'asc' // starting sort direction when first sorting a column. Defaults to 'asc'
+    },
+    onSort: (_event, index, direction) => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex
+  });
+  //### --- ###
+
   return (
     <React.Fragment>
       {loading ? (
@@ -560,16 +604,16 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
         <Table aria-label="Simple table">
           <Thead>
             <Tr>
-              <Th>{columnNames.id}</Th>
-              <Th>{columnNames.name}</Th>
-              <Th>{columnNames.state}</Th>
-              <Th>{columnNames.provider}</Th>
-              <Th>{columnNames.availabilityZone}</Th>
-              <Th>{columnNames.instanceType}</Th>
+              <Th sort={getSortParams(0)}>{columnNames.id}</Th>
+              <Th sort={getSortParams(1)}>{columnNames.name}</Th>
+              <Th sort={getSortParams(4)}>{columnNames.state}</Th>
+              <Th sort={getSortParams(6)}>{columnNames.provider}</Th>
+              <Th sort={getSortParams(2)}>{columnNames.availabilityZone}</Th>
+              <Th sort={getSortParams(3)}>{columnNames.instanceType}</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {filteredData.instances.map((instance) => (
+            {sortedData.map((instance) => (
               <Tr key={instance.id}>
                 <Td dataLabel={columnNames.id} width={15}>
                   <Link
