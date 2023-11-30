@@ -17,38 +17,38 @@ import {
   Text,
 } from "@patternfly/react-core";
 import CheckCircleIcon from "@patternfly/react-icons/dist/js/icons/check-circle-icon";
-import { OpenshiftIcon, KeyIcon, ClusterIcon, CloudIcon, AwsIcon, GoogleIcon, AzureIcon, ErrorCircleOIcon, WarningTriangleIcon } from "@patternfly/react-icons";
-import { getClusters, getAccounts, getInstances, getAccountClusters } from "../services/api";
-import { ClusterData, ClusterPerCP, Instances } from '../types/types';
+import { OpenshiftIcon, AwsIcon, GoogleIcon, AzureIcon, ErrorCircleOIcon, WarningTriangleIcon } from "@patternfly/react-icons";
+import { getClusters, getAccounts, getInstances } from "../services/api";
+import { AccountList, ClusterList, InstanceList } from '../types/types';
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AggregateStatusCards: React.FunctionComponent = () => {
-  const [clusterData, setClusterData] = useState<ClusterData | null>(null);
-  const [clusterPerCP, setClusterPerCP] = useState<ClusterPerCP | null>(null);
-  const [instances, setInstances] = useState<Instances | null>(null);
+  const [accountList, setAccountList] = useState<AccountList | null>(null);
+  const [clusterList, setClusterList] = useState<ClusterList | null>(null);
+  const [instanceList, setInstanceList] = useState<InstanceList | null>(null);
 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedClusters = await getClusters();
-        setClusterData(fetchedClusters);
-        
         const fetchedAccounts = await getAccounts();
-        setClusterPerCP(fetchedAccounts);
+        setAccountList(fetchedAccounts);
+
+        const fetchedClusters = await getClusters();
+        setClusterList(fetchedClusters);
 
         const fetchedInstances = await getInstances();
-        setInstances(fetchedInstances)
+        setInstanceList(fetchedInstances)
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching Overview data:", error);
       }
     };
 
     fetchData();
   }, []);
 
-  if (!clusterData || !clusterPerCP || !instances) {
+  if (!accountList || !clusterList || !instanceList) {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <Spinner aria-label="Loading data" />
@@ -56,12 +56,12 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       );
   }
 
-  const activeClusters = clusterData.clusters.filter(cluster => cluster.status === "Running").length;
-  const inactiveClusters = clusterData.clusters.filter(cluster => cluster.status === "Stopped").length;
-  const unknownStatusClusters = clusterData.clusters.filter(cluster => cluster.status === "Unknown").length;
+  const activeClusters = clusterList.clusters.filter(cluster => cluster.status === "Running").length;
+  const inactiveClusters = clusterList.clusters.filter(cluster => cluster.status === "Stopped").length;
+  const unknownStatusClusters = clusterList.clusters.filter(cluster => cluster.status === "Unknown").length;
 
   const clusterCounts = {};
-  clusterPerCP.accounts.forEach(account => {
+  accountList.accounts.forEach(account => {
     const provider = account.provider;
     //const clusterCount = Object.keys(account.clusters).length;
     const clusterCount = account.clusterCount
@@ -69,7 +69,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
   });
 
   const accountCounts = {};
-  clusterPerCP.accounts.forEach(account => {
+  accountList.accounts.forEach(account => {
     const provider = account.provider;
     //const clusterCount = Object.keys(account.clusters).length;
     accountCounts[provider] = (accountCounts[provider] || 0) + 1;
@@ -109,7 +109,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           title: "Servers",
           content: [
             {
-              count: instances.count,
+              count: instanceList.count,
               ref: "/servers"
             },
           ],

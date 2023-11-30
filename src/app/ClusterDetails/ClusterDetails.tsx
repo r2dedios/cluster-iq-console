@@ -22,10 +22,9 @@ import {
   Spinner,
   LabelGroup,
 } from "@patternfly/react-core";
-import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-icon";
 import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from "@patternfly/react-table";
 import { getCluster, getClusterInstances, getClusterTags } from "../services/api";
-import { ClusterData, Instance, Tag, TagData } from "@app/types/types";
+import { ClusterList, Instance, InstanceList, Tag, TagList } from "@app/types/types";
 import { Link, useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
   labels: Array<Tag>;
@@ -62,7 +61,10 @@ const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
 );
 
 const AggregateInstancesPerCluster: React.FunctionComponent = () => {
-  const [data, setData] = useState<Instance[] | []>([]);
+  const [data, setData] = useState<InstanceList>({
+    count: 0,
+    instances: []
+  });
   const [loading, setLoading] = useState(true);
   const { clusterID } = useParams();
   const { accountName } = useParams();
@@ -71,9 +73,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          console.log("Fetching data...");
           const fetchedInstancesPerCluster = await getClusterInstances(accountName,clusterID);
-          console.log("Fetched data:", fetchedInstancesPerCluster);
           setData(fetchedInstancesPerCluster);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -85,8 +85,6 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  console.log("Rendered with data:", data);
 
   //### Sorting ###
   // Index of the currently active column
@@ -100,9 +98,9 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
   };
 
   // Sorting
-  let sortedData = data;
+  let sortedData = data.instances;
   if (typeof activeSortIndex === 'number' && activeSortIndex !== null) {
-    sortedData = data.sort((a, b) => {
+    sortedData = data.instances.sort((a, b) => {
       const aValue = getSortableRowValues(a)[activeSortIndex];
       const bValue = getSortableRowValues(b)[activeSortIndex];
       if (typeof aValue === 'number') {
@@ -188,11 +186,11 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
 const ClusterDetails: React.FunctionComponent = () => {
   const { clusterID } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
-  const [tags, setTagData] = useState<TagData>({
+  const [tags, setTagData] = useState<TagList>({
     count: 0,
     tags: []
   });
-  const [cluster, setClusterData] = useState<ClusterData>({
+  const [cluster, setClusterData] = useState<ClusterList>({
     count: 0,
     clusters: []
   });

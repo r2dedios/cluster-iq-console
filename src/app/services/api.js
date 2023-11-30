@@ -18,7 +18,7 @@ export async function getCluster(clusterID) {
       const response = await apiClient.get(`/clusters/${clusterID}`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching mocked clusters:", error);
+      console.error("Error fetching clusters:", error);
       throw error;
     }
 }
@@ -29,7 +29,7 @@ export const getClusters = async () => {
     const response = await apiClient.get("/clusters");
     return response.data;
   } catch (error) {
-    console.error("Error fetching mocked clusters:", error);
+    console.error("Error fetching clusters:", error);
     throw error;
   }
 };
@@ -40,7 +40,7 @@ export async function getAccountByName(AccountName) {
     const response = await apiClient.get(`/accounts/${AccountName}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching mocked accounts:", error);
+    console.error("Error fetching accounts:", error);
     throw error;
   }
 }
@@ -51,7 +51,7 @@ export const getAccounts = async () => {
     const response = await apiClient.get("/accounts");
     return response.data;
   } catch (error) {
-    console.error("Error fetching mocked accounts:", error);
+    console.error("Error fetching accounts:", error);
     throw error;
   }
 };
@@ -83,7 +83,7 @@ export const getInstances = async () => {
 export async function getAccountClusters(accountName) {
   try {
     const response = await apiClient.get(`/accounts/${accountName}/clusters`);
-    return response.data.clusters;
+    return response.data;
   } catch (error) {
     console.error("Error fetching Instances:", error);
     throw error;
@@ -94,7 +94,7 @@ export async function getAccountClusters(accountName) {
 export async function getClusterInstances(accountName, clusterID) {
     try {
       const response = await apiClient.get(`clusters/${clusterID}/instances`);
-      return response.data.instances;
+      return response.data;
     } catch (error) {
       console.error("Error fetching Instances:", error);
       throw error;

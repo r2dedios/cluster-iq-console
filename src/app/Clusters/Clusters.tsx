@@ -33,50 +33,26 @@ import { Table, Thead, Tr, Th, Tbody, Td, ThProps } from "@patternfly/react-tabl
 import React, { useEffect, useState } from "react";
 import { Link, useLocation  } from "react-router-dom";
 import { getClusters } from "../services/api";
-import CloneIcon from '@patternfly/react-icons/dist/esm/icons/clone-icon';
-import EditIcon from '@patternfly/react-icons/dist/esm/icons/edit-icon';
-import SyncIcon from '@patternfly/react-icons/dist/esm/icons/sync-icon';
-import CodeIcon from '@patternfly/react-icons/dist/esm/icons/code-icon';
-import CodeBranchIcon from '@patternfly/react-icons/dist/esm/icons/code-branch-icon';
-import SortAmountDownIcon from '@patternfly/react-icons/dist/esm/icons/sort-amount-down-icon';
-import CubeIcon from '@patternfly/react-icons/dist/esm/icons/cube-icon';
-import DashboardWrapper from '@patternfly/react-core/src/demos/examples/DashboardWrapper';
-import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
-import { Cluster } from "@app/types/types";
+import { Cluster, ClusterList } from "@app/types/types";
+import { TableToolbar } from "../utils/PageToolBar";
+
+interface ClusterTableProps {
+  statusSelection: string;
+  providerSelections: string[];
+  searchValue: string;
+}
 
 
-const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => void;}> = ({ onSearchChange }) => {
-  const [value, setValue] = React.useState("");
-
-  const onChange = (value: string) => {
-    setValue(value);
-    onSearchChange(value);
-  };
-
-  return (
-    <Toolbar id="table-toolbar">
-      <ToolbarContent>
-        <ToolbarItem variant="search-filter">
-          <SearchInput
-            aria-label="Search by name..."
-            placeholder="Search by name..."
-            value={value}
-            onChange={(_event, value) => onChange(value)}
-            onClear={() => onChange("")}
-          />
-        </ToolbarItem>
-      </ToolbarContent>
-    </Toolbar>
-  );
-};
-
-const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter: string | null, cloudProviderFilter: string | null }> = ({
+const ClusterTable: React.FunctionComponent<ClusterTableProps> = ({
+  statusSelection,
+  providerSelections,
   searchValue,
-  statusFilter,
-  cloudProviderFilter,
 }) => {
 
-  const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
+  const [clusterData, setClusterData] = useState<ClusterList>({
+    count: 0,
+    clusters: []
+  });
   const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
 
@@ -86,9 +62,9 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
       try {
         setLoading(true);
         const fetchedClusters = await getClusters();
-        setClusterData(fetchedClusters.clusters);
+        setClusterData(fetchedClusters);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching clusters:", error);
       } finally {
         setLoading(false);
       }
@@ -98,22 +74,38 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
   }, []);
 
   useEffect(() => {
-    let filtered = clusterData.filter((cluster) =>
-      cluster.name.toLowerCase().includes(searchValue.toLowerCase())
-    );
+    if (clusterData !== undefined) {
+      let filtered = clusterData.clusters
 
-    if (statusFilter) {
-      filtered = filtered.filter((cluster) => cluster.status === statusFilter);
+      // Status Filtering
+      if (statusSelection) {
+        filtered = filtered.filter((cluster) =>
+          cluster.status.includes(statusSelection)
+        );
+      }
+
+      // Provider filtering
+      if (providerSelections && providerSelections.length > 0) {
+        filtered = filtered.filter((cluster) =>
+          providerSelections.some((provider) => cluster.provider === provider)
+        );
+      }
+
+      // Search Value filtering (Name)
+      if (searchValue) {
+        filtered = filtered.filter((cluster) =>
+          cluster.name.toLowerCase().includes(searchValue.toLowerCase())
+        );
+      }
+
+      setFilteredData(filtered || []);
     }
-
-    if (cloudProviderFilter) {
-      console.log(cloudProviderFilter);
-      console.log(clusterData);
-      filtered = filtered.filter((cluster) => cluster.provider === cloudProviderFilter);
-    }
-
-    setFilteredData(filtered);
-      }, [searchValue, clusterData, statusFilter, cloudProviderFilter]);
+  }, [
+    clusterData,
+    statusSelection,
+    providerSelections,
+    searchValue,
+  ]);
 
   const renderLabel = (labelText: string | null | undefined) => {
     switch (labelText) {
@@ -204,7 +196,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
             <Tr>
               <Th sort={getSortParams(0)}>{columnNames.id}</Th>
               <Th sort={getSortParams(1)}>{columnNames.name}</Th>
-              <Th>{columnNames.status}</Th>
+              <Th sort={getSortParams(2)}>{columnNames.status}</Th>
               <Th sort={getSortParams(3)}>{columnNames.account}</Th>
               <Th sort={getSortParams(4)}>{columnNames.cloudProvider}</Th>
               <Th sort={getSortParams(5)}>{columnNames.region}</Th>
@@ -255,11 +247,20 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
 };
 
 const Clusters: React.FunctionComponent = () => {
-  const [searchValue, setSearchValue] = useState<string>("");
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const statusFilter = queryParams.get('status');
   const cloudProviderFilter = queryParams.get('provider');
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [statusSelection, setStatusSelection] = useState("");
+  const [providerSelections, setProviderSelections] = useState<string[]>([]);
+
+  useEffect(() => {
+    setStatusSelection(statusFilter || '')
+    if (cloudProviderFilter !== undefined && cloudProviderFilter != null) {
+      setProviderSelections([cloudProviderFilter])
+    }
+  }, []);
 
   return (
     <React.Fragment>
@@ -270,8 +271,20 @@ const Clusters: React.FunctionComponent = () => {
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
-          <TableToolbar onSearchChange={setSearchValue} />{" "}
-          <ClusterTable searchValue={searchValue} statusFilter={statusFilter} cloudProviderFilter={cloudProviderFilter} />{" "}
+          <TableToolbar
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
+            setStatusSelection={setStatusSelection}
+            statusSelection={statusSelection}
+            enableStatusSelection={true}
+            setProviderSelections={setProviderSelections}
+            providerSelections={providerSelections}
+          />
+          <ClusterTable
+            statusSelection={statusSelection}
+            providerSelections={providerSelections}
+            searchValue={searchValue}
+          />
         </Panel>
       </PageSection>
     </React.Fragment>

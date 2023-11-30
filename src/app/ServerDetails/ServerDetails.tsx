@@ -26,7 +26,7 @@ import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-ic
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
 import { getInstances, getInstanceByID } from "../services/api";
 import { Link  } from "react-router-dom";
-import { Instance, Instances, Tag } from "@app/types/types";
+import { Instance, InstanceList, Tag } from "@app/types/types";
 import { useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
   labels: Array<Tag>;
@@ -55,7 +55,7 @@ const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
 const ServerDetails: React.FunctionComponent = () => {
   const { instanceID } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
-  const [instanceData, setInstanceData] = useState<Instances>({
+  const [instanceData, setInstanceData] = useState<InstanceList>({
     count: 0,
     instances: []
   });
@@ -65,10 +65,8 @@ const ServerDetails: React.FunctionComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          console.log("Fetching Account Clusters ", instanceID);
           const fetchedInstance = await getInstanceByID(instanceID);
           setInstanceData(fetchedInstance);
-          console.log("Fetched Account Clusters data:", instanceID);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

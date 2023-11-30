@@ -22,12 +22,12 @@ import {
   Spinner,
   LabelGroup,
 } from "@patternfly/react-core";
-import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-icon";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
 import { getAccountByName, getAccountClusters } from "../services/api";
 import { Link  } from "react-router-dom";
-import { AccountData, Cluster } from "@app/types/types";
+import { AccountList, ClusterList } from "@app/types/types";
 import { useLocation  } from "react-router-dom";
+
 interface LabelGroupOverflowProps {
   labels: {
     text: string;
@@ -54,7 +54,10 @@ const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
 );
 
 const AggregateClustersPerAccount: React.FunctionComponent = () => {
-  const [data, setData] = useState<Cluster[] | []>([]);
+  const [data, setData] = useState<ClusterList>({
+    count: 0,
+    clusters: []
+  });
   const [loading, setLoading] = useState(true);
   const { accountName } = useParams();
 
@@ -62,9 +65,7 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          console.log("Fetching data...");
           const fetchedAccountClusters = await getAccountClusters(accountName);
-          console.log("Fetched Account data:", fetchedAccountClusters);
           setData(fetchedAccountClusters);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -76,8 +77,6 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  console.log("Rendered with data:", data);
 
   return (
     <React.Fragment>
@@ -103,7 +102,7 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {data.map((cluster) => (
+            {data.clusters.map((cluster) => (
               <Tr key={cluster.name}>
                 <Td dataLabel={cluster.name}>
                   <Link
@@ -127,7 +126,7 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
 const AccountDetails: React.FunctionComponent = () => {
   const { accountName } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
-  const [accountData, setAccountData] = useState<AccountData>({
+  const [accountData, setAccountData] = useState<AccountList>({
     count: 0,
     accounts: []
   });
@@ -137,10 +136,8 @@ const AccountDetails: React.FunctionComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          console.log("Fetching Account Clusters ", accountName);
           const fetchedAccountClusters = await getAccountByName(accountName);
           setAccountData(fetchedAccountClusters);
-          console.log("Fetched Account Clusters data:", accountData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

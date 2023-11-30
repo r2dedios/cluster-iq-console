@@ -1,8 +1,18 @@
-export type ClusterData = {
-  count: number;
-  clusters: Cluster[];
+// Accounts Types
+export type Account = {
+  id: string;
+  name: string;
+  provider: string;
+  clusterCount: number;
+  clusters: Record<string, Cluster>;
 };
 
+export type AccountList = {
+  count: number;
+  accounts: Account[];
+};
+
+// Cluster Types
 export type Cluster = {
   id: string;
   name: string;
@@ -15,34 +25,12 @@ export type Cluster = {
   instances: Instance[];
 };
 
-export type AccountData = {
+export type ClusterList = {
   count: number;
-  accounts: Account[];
+  clusters: Cluster[];
 };
 
-export type Account = {
-  id: string;
-  name: string;
-  provider: string;
-  clusterCount: number;
-  clusters: Record<string, Cluster>;
-};
-
-export type TagData = {
-  count: number;
-  tags: Tag[];
-}
-
-export type Tag = {
-  key: string;
-  value: string;
-}
-
-export type ClusterPerCP = {
-  count: number;
-  accounts: Account[];
-};
-
+// Instances Types
 export type Instance = {
     id: string;
     name: string;
@@ -54,7 +42,18 @@ export type Instance = {
     tags: Array<Tag>;
 }
 
-export type Instances = {
+export type InstanceList = {
     count: number;
-    instances: Instance[];
+    instances : Instance[];
+}
+
+// Tags Types
+export type Tag = {
+  key: string;
+  value: string;
+}
+
+export type TagList = {
+  count: number;
+  tags: Tag[];
 }
