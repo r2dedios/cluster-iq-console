@@ -208,11 +208,15 @@ const ClusterDetails: React.FunctionComponent = () => {
   }, []);
 
   const filterTagsByKey = (key) => {
-    return tags.tags.filter(tags => tags.key == key)
+    const result = tags.tags.filter(tags => tags.key == key)
+    if(result[0] !== undefined && result[0] != null){
+      return result[0].value
+    }
+    return "unknown"
   }
 
   const ownerTag = filterTagsByKey("Owner");
-  const partnerTag = filterTagsByKey("partner");
+  const partnerTag = filterTagsByKey("Partner");
 
   const handleTabClick = (event, tabIndex) => {
     setActiveTabKey(tabIndex);
@@ -281,7 +285,7 @@ const ClusterDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {cluster.clusters[0].lastScanTimestamp || "unknown"}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
@@ -299,13 +303,13 @@ const ClusterDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Owner</DescriptionListTerm>
             <DescriptionListDescription>
-              {ownerTag[0].value || "unknown"}
+              {ownerTag}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Partner</DescriptionListTerm>
             <DescriptionListDescription>
-              {partnerTag[0].value || "unknown"}
+              {partnerTag}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
