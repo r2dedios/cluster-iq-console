@@ -176,7 +176,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
           </Thead>
           <Tbody>
             {sortedData.map((cluster) => (
-              <Tr key={cluster.name}>
+              <Tr key={cluster.id}>
                 <Td dataLabel={columnNames.id}>
                   <Link
                     to={`/clusters/${cluster.id}`}
