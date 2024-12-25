@@ -27,6 +27,9 @@ import {
   Divider,
   MenuToggle,
   MenuToggleElement,
+  Modal,
+  ModalVariant,
+  Button,
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-table';
 import { getCluster, getClusterInstances, getClusterTags } from '../services/api';
@@ -41,6 +44,8 @@ export const DropdownBasic: React.FunctionComponent = () => {
   const { clusterID } = useParams();
   const [isPowerOnDisabled, setIsPowerOnDisabled] = React.useState(false);
   const [isPowerOffDisabled, setIsPowerOffDisabled] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [modalAction, setModalAction] = React.useState<'Power on' | 'Power off' | null>(null);
 
   useEffect(() => {
     const checkClusterState = async () => {
@@ -51,38 +56,81 @@ export const DropdownBasic: React.FunctionComponent = () => {
     };
 
     checkClusterState();
-  }, []);
+  }, [clusterID]);
 
   const onToggleClick = () => {
     setIsOpen(!isOpen);
   };
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
+    if (value === 0) {
+      setModalAction('Power on');
+    } else if (value === 1) {
+      setModalAction('Power off');
+    }
+    setIsModalOpen(true);
     setIsOpen(false);
   };
 
+  const handleModalToggle = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const handleConfirm = () => {
+    if (modalAction === 'Power on') {
+      // Here we need to add the "Power on" action
+      console.log('Powering on the cluster');
+    } else if (modalAction === 'Power off') {
+      // " "  " " "Power off" action
+      console.log('Powering off the cluster');
+    }
+    setIsModalOpen(false);
+    setModalAction(null);
+  };
+
   return (
-    <Dropdown
-      isOpen={isOpen}
-      onSelect={onSelect}
-      onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
-      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-        <MenuToggle ref={toggleRef} onClick={onToggleClick} isExpanded={isOpen}>
-          Actions
-        </MenuToggle>
+    <>
+      <Dropdown
+        isOpen={isOpen}
+        onSelect={onSelect}
+        onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={onToggleClick} isExpanded={isOpen}>
+            Actions
+          </MenuToggle>
+        )}
+        ouiaId="BasicDropdown"
+        shouldFocusToggleOnSelect
+      >
+        <DropdownList>
+          <DropdownItem value={0} key="power on" isDisabled={isPowerOnDisabled}>
+            Power on
+          </DropdownItem>
+          <DropdownItem value={1} key="power off" isDisabled={isPowerOffDisabled}>
+            Power off
+          </DropdownItem>
+        </DropdownList>
+      </Dropdown>
+
+      {isModalOpen && (
+        <Modal
+          variant={ModalVariant.small}
+          title="Confirmation"
+          isOpen={isModalOpen}
+          onClose={handleModalToggle}
+          actions={[
+            <Button key="confirm" variant="primary" onClick={handleConfirm}>
+              Confirm
+            </Button>,
+            <Button key="cancel" variant="link" onClick={handleModalToggle}>
+              Cancel
+            </Button>,
+          ]}
+        >
+          Are you sure you want to {modalAction?.toLowerCase()} the cluster?
+        </Modal>
       )}
-      ouiaId="BasicDropdown"
-      shouldFocusToggleOnSelect
-    >
-      <DropdownList>
-        <DropdownItem value={0} key="power on" isDisabled={isPowerOnDisabled}>
-          Power on
-        </DropdownItem>
-        <DropdownItem value={1} key="power off" isDisabled={isPowerOffDisabled}>
-          Power off
-        </DropdownItem>
-      </DropdownList>
-    </Dropdown>
+    </>
   );
 };
 
