@@ -6,7 +6,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rm -Rf dist"
   },
   "dependencies": {
     "@patternfly/react-core": "^5.4.11",
