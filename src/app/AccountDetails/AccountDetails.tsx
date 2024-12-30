@@ -178,7 +178,7 @@ const AccountDetails: React.FunctionComponent = () => {
   return (
     <Page>
       {/* Page header */}
-      <PageSection isWidthLimited variant={PageSectionVariants.light}>
+      <PageSection variant={PageSectionVariants.light}>
         <Flex
           spaceItems={{ default: 'spaceItemsMd' }}
           alignItems={{ default: 'alignItemsFlexStart' }}
@@ -195,13 +195,13 @@ const AccountDetails: React.FunctionComponent = () => {
         </Flex>
         {/* Page tabs */}
       </PageSection>
-      <PageSection type="tabs" variant={PageSectionVariants.light} isWidthLimited>
+      <PageSection type="tabs" variant={PageSectionVariants.light}>
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick} usePageInsets id="open-tabs-example-tabs-list">
           <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>} tabContentId={`tabContent${0}`} />
           <Tab eventKey={1} title={<TabTitleText>Clusters</TabTitleText>} tabContentId={`tabContent${1}`} />
         </Tabs>
       </PageSection>
-      <PageSection isWidthLimited variant={PageSectionVariants.light}>
+      <PageSection variant={PageSectionVariants.light}>
         <TabContent key={0} eventKey={0} id={`tabContent${0}`} activeKey={activeTabKey} hidden={0 !== activeTabKey}>
           <TabContentBody>{detailsTabContent}</TabContentBody>
         </TabContent>

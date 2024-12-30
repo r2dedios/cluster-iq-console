@@ -171,7 +171,7 @@ const ServerDetails: React.FunctionComponent = () => {
     <Page>
 
       {/* Page header */}
-      <PageSection isWidthLimited variant={PageSectionVariants.light}>
+      <PageSection variant={PageSectionVariants.light}>
 
         <Flex
           spaceItems={{ default: "spaceItemsMd" }}
@@ -195,7 +195,6 @@ const ServerDetails: React.FunctionComponent = () => {
       <PageSection
         type="tabs"
         variant={PageSectionVariants.light}
-        isWidthLimited
       >
         <Tabs
           activeKey={activeTabKey}
@@ -210,7 +209,7 @@ const ServerDetails: React.FunctionComponent = () => {
           />
         </Tabs>
       </PageSection>
-      <PageSection isWidthLimited variant={PageSectionVariants.light}>
+      <PageSection variant={PageSectionVariants.light}>
         <TabContent
           key={0}
           eventKey={0}
