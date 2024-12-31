@@ -8,38 +8,32 @@ import {
   TextContent,
   Text,
   SearchInput,
-  Label,
-  Spinner,
-} from "@patternfly/react-core";
-import { Table, Thead, Tr, Th, Tbody, Td } from "@patternfly/react-table";
-import React, { useEffect, useState } from "react";
-import { Link, useLocation  } from "react-router-dom";
-import { getAccounts } from "../services/api";
+} from '@patternfly/react-core';
+import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getAccounts } from '../services/api';
+import { AccountsTableItem, AccountsTableProps, AccountsToolbarProps } from './types';
+import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 
-interface IAccounts {
-  name: string;
-  provider: string;
-  clusterCount: number;
-}
-
-const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => void;}> = ({ onSearchChange }) => {
-  const [value, setValue] = React.useState("");
+const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({ value = '', onSearchChange }) => {
+  const [internalValue, setInternalValue] = useState(value);
 
   const onChange = (value: string) => {
-    setValue(value);
+    setInternalValue(value);
     onSearchChange(value);
   };
 
   return (
-    <Toolbar id="table-toolbar">
+    <Toolbar id="accounts-toolbar">
       <ToolbarContent>
         <ToolbarItem variant="search-filter">
           <SearchInput
             aria-label="Search by name..."
             placeholder="Search by name..."
-            value={value}
+            value={internalValue}
             onChange={(_event, value) => onChange(value)}
-            onClear={() => onChange("")}
+            onClear={() => onChange('')}
           />
         </ToolbarItem>
       </ToolbarContent>
@@ -47,24 +41,24 @@ const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => 
   );
 };
 
-const AccountTable: React.FunctionComponent<{ searchValue: string, cloudProviderFilter: string | null }> = ({
-  searchValue,
-  cloudProviderFilter,
-}) => {
+const AccountsTable: React.FunctionComponent<AccountsTableProps> = ({ searchValue }) => {
+  const columnNames = {
+    name: 'Name',
+    cloudProvider: 'Cloud Provider',
+    clusterCount: 'Cluster Count',
+  };
 
-  const [accountData, setAccountData] = useState<IAccounts[] | []>([]);
-  const [filteredData, setFilteredData] = useState<IAccounts[] | []>([]);
+  const [accountData, setAccountData] = useState<AccountsTableItem[]>([]);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
         const fetchedAccounts = await getAccounts();
         setAccountData(fetchedAccounts.accounts);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -73,79 +67,41 @@ const AccountTable: React.FunctionComponent<{ searchValue: string, cloudProvider
     fetchData();
   }, []);
 
-  useEffect(() => {
-    let filtered = accountData.filter((account) =>
-      account.name.toLowerCase().includes(searchValue.toLowerCase())
-    );
+  const filteredData = useMemo(
+    () => accountData.filter((account) => account.name.toLowerCase().includes(searchValue.toLowerCase())),
+    [accountData, searchValue],
+  );
 
-    if (cloudProviderFilter) {
-      console.log(cloudProviderFilter);
-      console.log(accountData);
-      filtered = filtered.filter((account) => account.provider === cloudProviderFilter);
-    }
-
-    setFilteredData(filtered);
-      }, [searchValue, accountData, cloudProviderFilter]);
-
-  const columnNames = {
-    name: "Name",
-    cloudProvider: "Cloud Provider",
-    clusterCount: "Cluster Count",
-  };
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
-    <React.Fragment>
-      {loading ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <Spinner size="xl" />
-        </div>
-      ) : (
-        <Table aria-label="Simple table">
-          <Thead>
-            <Tr>
-              <Th>{columnNames.name}</Th>
-              <Th>{columnNames.cloudProvider}</Th>
-              <Th>{columnNames.clusterCount}</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {filteredData.map((account) => (
-              <Tr key={account.name}>
-                <Td dataLabel={columnNames.name}>
-                  <Link
-                    to={`/accounts/${account.name}`}
-                  >
-                    {account.name}
-                  </Link>
-                </Td>
-                <Td dataLabel={columnNames.cloudProvider}>
-                  {account.provider}
-                </Td>
-                <Td dataLabel={columnNames.clusterCount}>
-                  {account.clusterCount}
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
-    </React.Fragment>
+    <Table aria-label="Accounts table">
+      <Thead>
+        <Tr>
+          <Th>{columnNames.name}</Th>
+          <Th>{columnNames.cloudProvider}</Th>
+          <Th>{columnNames.clusterCount}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {filteredData.map((account) => (
+          <Tr key={account.name}>
+            <Td dataLabel={columnNames.name}>
+              <Link to={`/accounts/${account.name}`}>{account.name}</Link>
+            </Td>
+            <Td dataLabel={columnNames.cloudProvider}>{account.provider}</Td>
+            <Td dataLabel={columnNames.clusterCount}>{account.clusterCount}</Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
   );
 };
 
 const Accounts: React.FunctionComponent = () => {
-  const [searchValue, setSearchValue] = useState<string>("");
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const cloudProviderFilter = queryParams.get('provider');
-
+  const [searchValue, setSearchValue] = useState<string>('');
   return (
     <React.Fragment>
       <PageSection variant={PageSectionVariants.light}>
@@ -155,8 +111,8 @@ const Accounts: React.FunctionComponent = () => {
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
-          <TableToolbar onSearchChange={setSearchValue} />{" "}
-          <AccountTable searchValue={searchValue} cloudProviderFilter={cloudProviderFilter} />{" "}
+          <AccountsToolbar onSearchChange={setSearchValue} />
+          <AccountsTable searchValue={searchValue} />
         </Panel>
       </PageSection>
     </React.Fragment>
