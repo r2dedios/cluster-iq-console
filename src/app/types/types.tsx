@@ -36,12 +36,12 @@ export type Account = {
 export type TagData = {
   count: number;
   tags: Tag[];
-}
+};
 
 export type Tag = {
   key: string;
   value: string;
-}
+};
 
 export type ClusterPerCP = {
   count: number;
@@ -49,21 +49,21 @@ export type ClusterPerCP = {
 };
 
 export type Instance = {
-    id: string;
-    name: string;
-    availabilityZone: string;
-    instanceType: string;
-    status: string;
-    clusterID: string;
-    provider: string;
-    lastScanTimestamp: string;
-    creationTimestamp: string;
-    dailyCost: number;
-    totalCost: number;
-    tags: Array<Tag>;
-}
+  id: string;
+  name: string;
+  availabilityZone: string;
+  instanceType: string;
+  status: string;
+  clusterID: string;
+  provider: string;
+  lastScanTimestamp: string;
+  creationTimestamp: string;
+  dailyCost: number;
+  totalCost: number;
+  tags: Array<Tag>;
+};
 
 export type Instances = {
-    count: number;
-    instances: Instance[];
-}
+  count: number;
+  instances: Instance[];
+};

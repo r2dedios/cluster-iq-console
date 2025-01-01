@@ -68,8 +68,8 @@ const AccountsTable: React.FunctionComponent<AccountsTableProps> = ({ searchValu
   }, []);
 
   const filteredData = useMemo(
-    () => accountData.filter((account) => account.name.toLowerCase().includes(searchValue.toLowerCase())),
-    [accountData, searchValue],
+    () => accountData.filter(account => account.name.toLowerCase().includes(searchValue.toLowerCase())),
+    [accountData, searchValue]
   );
 
   if (loading) {
@@ -86,7 +86,7 @@ const AccountsTable: React.FunctionComponent<AccountsTableProps> = ({ searchValu
         </Tr>
       </Thead>
       <Tbody>
-        {filteredData.map((account) => (
+        {filteredData.map(account => (
           <Tr key={account.name}>
             <Td dataLabel={columnNames.name}>
               <Link to={`/accounts/${account.name}`}>{account.name}</Link>

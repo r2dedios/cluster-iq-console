@@ -68,16 +68,16 @@ const ClusterTable: React.FunctionComponent<{
   }, []);
 
   useEffect(() => {
-    let filtered = clusterData.filter((cluster) => cluster.name.toLowerCase().includes(searchValue.toLowerCase()));
+    let filtered = clusterData.filter(cluster => cluster.name.toLowerCase().includes(searchValue.toLowerCase()));
 
     if (statusFilter) {
-      filtered = filtered.filter((cluster) => cluster.status === statusFilter);
+      filtered = filtered.filter(cluster => cluster.status === statusFilter);
     }
 
     if (cloudProviderFilter) {
       console.log(cloudProviderFilter);
       console.log(clusterData);
-      filtered = filtered.filter((cluster) => cluster.provider === cloudProviderFilter);
+      filtered = filtered.filter(cluster => cluster.provider === cloudProviderFilter);
     }
 
     setFilteredData(filtered);
@@ -170,7 +170,7 @@ const ClusterTable: React.FunctionComponent<{
             </Tr>
           </Thead>
           <Tbody>
-            {sortedData.map((cluster) => (
+            {sortedData.map(cluster => (
               <Tr key={cluster.id}>
                 <Td dataLabel={columnNames.id}>
                   <Link to={`/clusters/${cluster.id}`}>{cluster.id}</Link>

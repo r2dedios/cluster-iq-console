@@ -1,14 +1,14 @@
 export interface AccountsTableItem {
-    name: string;
-    provider: string;
-    clusterCount: number;
+  name: string;
+  provider: string;
+  clusterCount: number;
 }
 
 export interface AccountsTableProps {
-    searchValue: string;
+  searchValue: string;
 }
 
 export interface AccountsToolbarProps {
-    value?: string
-    onSearchChange: (value: string) => void;
+  value?: string;
+  onSearchChange: (value: string) => void;
 }

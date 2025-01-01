@@ -25,7 +25,7 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({ clu
         </Tr>
       </Thead>
       <Tbody>
-        {clusters.map((cluster) => (
+        {clusters.map(cluster => (
           <Tr key={cluster.id}>
             <Td dataLabel={cluster.name}>
               <Link to={`/clusters/${cluster.id}`}>{cluster.id}</Link>

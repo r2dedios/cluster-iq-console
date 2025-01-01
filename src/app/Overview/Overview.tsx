@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardBody,
@@ -15,12 +16,18 @@ import {
   Spinner,
   TextContent,
   Text,
-} from "@patternfly/react-core";
-import CheckCircleIcon from "@patternfly/react-icons/dist/js/icons/check-circle-icon";
-import { OpenshiftIcon, KeyIcon, ClusterIcon, CloudIcon, AwsIcon, GoogleIcon, AzureIcon, ErrorCircleOIcon, WarningTriangleIcon } from "@patternfly/react-icons";
-import { getClusters, getAccounts, getInstances, getAccountClusters } from "../services/api";
+} from '@patternfly/react-core';
+import CheckCircleIcon from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
+import {
+  OpenshiftIcon,
+  AwsIcon,
+  GoogleIcon,
+  AzureIcon,
+  ErrorCircleOIcon,
+  WarningTriangleIcon,
+} from '@patternfly/react-icons';
+import { getClusters, getAccounts, getInstances } from '../services/api';
 import { ClusterData, ClusterPerCP, Instances } from '../types/types';
-
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AggregateStatusCards: React.FunctionComponent = () => {
@@ -28,20 +35,19 @@ const AggregateStatusCards: React.FunctionComponent = () => {
   const [clusterPerCP, setClusterPerCP] = useState<ClusterPerCP | null>(null);
   const [instances, setInstances] = useState<Instances | null>(null);
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedClusters = await getClusters();
         setClusterData(fetchedClusters);
-        
+
         const fetchedAccounts = await getAccounts();
         setClusterPerCP(fetchedAccounts);
 
         const fetchedInstances = await getInstances();
-        setInstances(fetchedInstances)
+        setInstances(fetchedInstances);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -49,22 +55,22 @@ const AggregateStatusCards: React.FunctionComponent = () => {
   }, []);
 
   if (!clusterData || !clusterPerCP || !instances) {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <Spinner aria-label="Loading data" />
-        </div>
-      );
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <Spinner aria-label="Loading data" />
+      </div>
+    );
   }
 
-  const activeClusters = clusterData.clusters.filter(cluster => cluster.status === "Running").length;
-  const inactiveClusters = clusterData.clusters.filter(cluster => cluster.status === "Stopped").length;
-  const unknownStatusClusters = clusterData.clusters.filter(cluster => cluster.status === "Unknown").length;
+  const activeClusters = clusterData.clusters.filter(cluster => cluster.status === 'Running').length;
+  const inactiveClusters = clusterData.clusters.filter(cluster => cluster.status === 'Stopped').length;
+  const unknownStatusClusters = clusterData.clusters.filter(cluster => cluster.status === 'Unknown').length;
 
   const clusterCounts = {};
   clusterPerCP.accounts.forEach(account => {
     const provider = account.provider;
     //const clusterCount = Object.keys(account.clusters).length;
-    const clusterCount = account.clusterCount
+    const clusterCount = account.clusterCount;
     clusterCounts[provider] = (clusterCounts[provider] || 0) + clusterCount;
   });
 
@@ -76,143 +82,121 @@ const AggregateStatusCards: React.FunctionComponent = () => {
   });
 
   // to-do instead of static structure of page content make it dynamic (lets saywe add tomorrow IBM cloud, we dont need to change the FE)
-    const cardData = {
-      clusters: [
-        {
-          title: "Clusters",
-          content: [
-            {
-              icon: (
-                <CheckCircleIcon color="var(--pf-v5-global--success-color--100)" />
-              ),
-              count: activeClusters,
-              ref: "/clusters?status=Running",
-            },
-            {
-              icon: (
-                <ErrorCircleOIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              count: inactiveClusters,
-              ref: "/clusters?status=Stopped",
-            },
-            {
-              icon: (
-                <WarningTriangleIcon color="var(--pf-v5-global--warning-color--100)" />
-              ),
-              count: unknownStatusClusters,
-              ref: "/clusters?status=Unknown",
-            },
-          ],
-          layout: "multiIcon",
-        },
-            {
-          title: "Servers",
-          content: [
-            {
-              count: instances.count,
-              ref: "/servers"
-            },
-          ],
-          layout: "multiIcon",
-        },
-        {
-          title: "Scanners",
-          content: [
-            {
-              count: 1
-            },
-          ],
-          layout: "multiIcon",
-        },
+  const cardData = {
+    clusters: [
+      {
+        title: 'Clusters',
+        content: [
+          {
+            icon: <CheckCircleIcon color="var(--pf-v5-global--success-color--100)" />,
+            count: activeClusters,
+            ref: '/clusters?status=Running',
+          },
+          {
+            icon: <ErrorCircleOIcon color="var(--pf-v5-global--danger-color--100)" />,
+            count: inactiveClusters,
+            ref: '/clusters?status=Stopped',
+          },
+          {
+            icon: <WarningTriangleIcon color="var(--pf-v5-global--warning-color--100)" />,
+            count: unknownStatusClusters,
+            ref: '/clusters?status=Unknown',
+          },
+        ],
+        layout: 'multiIcon',
+      },
+      {
+        title: 'Servers',
+        content: [
+          {
+            count: instances.count,
+            ref: '/servers',
+          },
+        ],
+        layout: 'multiIcon',
+      },
+      {
+        title: 'Scanners',
+        content: [
+          {
+            count: 1,
+          },
+        ],
+        layout: 'multiIcon',
+      },
+    ],
+    clustersPerProvider: [
+      {
+        title: 'AWS',
+        content: [
+          {
+            count: (clusterCounts['AWS'] || 0) + ' Cluster(s)',
+            icon: <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />,
+            ref: '/clusters?provider=AWS',
+          },
+          {
+            count: (accountCounts['AWS'] || 0) + ' Account(s)',
+            icon: <AwsIcon color="var(--pf-v5-global--danger-color--100)" />,
+            ref: '/accounts?provider=AWS',
+          },
+        ],
+        layout: 'multiIcon',
+      },
+      {
+        title: 'GCP Clusters',
+        content: [
+          {
+            count: (clusterCounts['GCP'] || 0) + ' Cluster(s)',
+            icon: <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />,
+            ref: '/clusters?provider=GCP',
+          },
+          {
+            count: (accountCounts['GCP'] || 0) + ' Account(s)',
+            icon: <GoogleIcon color="var(--pf-v5-global--danger-color--100)" />,
+            ref: '/accounts?provider=GCP',
+          },
+        ],
+        layout: 'multiIcon',
+      },
+      {
+        title: 'Azure Clusters',
+        content: [
+          {
+            count: (clusterCounts['Azure'] || 0) + ' Cluster(s)',
+            icon: <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />,
+            ref: '/clusters?provider=Azure',
+          },
+          {
+            count: (accountCounts['Azure'] || 0) + ' Account(s)',
+            icon: <AzureIcon color="var(--pf-v5-global--danger-color--100)" />,
+            ref: '/accounts?provider=Azure',
+          },
+        ],
+        layout: 'multiIcon',
+      },
+    ],
+  };
 
-      ],
-      clustersPerProvider: [
-        {
-          title: "AWS",
-          content: [
-            {
-              count: (clusterCounts["AWS"] || 0) + " Cluster(s)",
-              icon: (
-                <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/clusters?provider=AWS",
-            },
-            {
-              count: (accountCounts["AWS"] || 0) + " Account(s)",
-              icon: (
-                <AwsIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/accounts?provider=AWS",
-            },
-          ],
-          layout: "multiIcon",
-        },
-        {
-          title: "GCP Clusters",
-          content: [
-            {
-              count: (clusterCounts["GCP"] || 0) + " Cluster(s)",
-              icon: (
-                <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/clusters?provider=GCP",
-            },
-            {
-              count: (accountCounts["GCP"] || 0) + " Account(s)",
-              icon: (
-                <GoogleIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/accounts?provider=GCP",
-            },
-          ],
-          layout: "multiIcon",
-        },
-        {
-          title: "Azure Clusters",
-          content: [
-            {
-              count: (clusterCounts["Azure"] || 0) + " Cluster(s)",
-              icon: (
-                <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/clusters?provider=Azure",
-            },
-            {
-              count: (accountCounts["Azure"] || 0) + " Account(s)",
-              icon: (
-                <AzureIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/accounts?provider=Azure",
-            },
-          ],
-          layout: "multiIcon",
-        }
-      ],
-
-
-    };
-
-
-    const renderContent = (title: string, content: any[], layout: string) => {
-    if (layout === "icon") {
+  const renderContent = (title: string, content: any[], layout: string) => {
+    if (layout === 'icon') {
       return content[0].icon;
     }
-    if (layout === "multiIcon") {
+    if (layout === 'multiIcon') {
       return (
-        <Flex display={{ default: "inlineFlex" }}>
+        <Flex display={{ default: 'inlineFlex' }}>
           {content.map(({ icon, count, ref }, index: number) => (
             <React.Fragment key={index}>
-              <Flex spaceItems={{ default: "spaceItemsSm" }}>
+              <Flex spaceItems={{ default: 'spaceItemsSm' }}>
                 <FlexItem>{icon}</FlexItem>
                 <FlexItem>
                   <a href={ref}>{count}</a>
                 </FlexItem>
               </Flex>
-              {content.length > 1 && index < content.length -1 && (
+              {content.length > 1 && index < content.length - 1 && (
                 <Divider
                   key={`${index}_d`}
                   orientation={{
-                    default: "vertical",
+                    default: 'vertical',
                   }}
                 />
               )}
@@ -221,9 +205,9 @@ const AggregateStatusCards: React.FunctionComponent = () => {
         </Flex>
       );
     }
-    if (layout === "withSubtitle") {
+    if (layout === 'withSubtitle') {
       return (
-        <Flex justifyContent={{ default: "justifyContentSpaceAround" }}>
+        <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
           {content.map(({ icon, status, subtitle }, index) => (
             <Flex key={index}>
               <FlexItem>{icon}</FlexItem>
@@ -250,13 +234,13 @@ const AggregateStatusCards: React.FunctionComponent = () => {
             let galleryWidth;
             let cardAlign;
             let titleAlign;
-            if (cardGroup === "withSubtitle") {
-              galleryWidth = "25%";
-              cardAlign = "";
-              titleAlign = "center";
+            if (cardGroup === 'withSubtitle') {
+              galleryWidth = '25%';
+              cardAlign = '';
+              titleAlign = 'center';
             } else {
-              galleryWidth = "30%";
-              cardAlign = "center";
+              galleryWidth = '30%';
+              cardAlign = 'center';
             }
             return (
               <GridItem key={groupIndex}>
@@ -264,25 +248,16 @@ const AggregateStatusCards: React.FunctionComponent = () => {
                   hasGutter
                   style={
                     {
-                      "--pf-v5-l-gallery--GridTemplateColumns--min":
-                        galleryWidth,
+                      '--pf-v5-l-gallery--GridTemplateColumns--min': galleryWidth,
                     } as any
                   }
                 >
-                  {cardData[cardGroup].map(
-                    ({ title, content, layout }, cardIndex) => (
-                      <Card
-                        style={{ textAlign: cardAlign }}
-                        key={`${groupIndex}${cardIndex}`}
-                        component="div"
-                      >
-                        <CardTitle style={{ textAlign: titleAlign }}>
-                          {title}
-                        </CardTitle>
-                        <CardBody>{renderContent(title, content, layout)}</CardBody>
-                      </Card>
-                    )
-                  )}
+                  {cardData[cardGroup].map(({ title, content, layout }, cardIndex) => (
+                    <Card style={{ textAlign: cardAlign }} key={`${groupIndex}${cardIndex}`} component="div">
+                      <CardTitle style={{ textAlign: titleAlign }}>{title}</CardTitle>
+                      <CardBody>{renderContent(title, content, layout)}</CardBody>
+                    </Card>
+                  ))}
                 </Gallery>
               </GridItem>
             );

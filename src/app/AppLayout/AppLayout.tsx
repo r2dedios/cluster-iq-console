@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   Page,
   Masthead,
@@ -11,9 +11,9 @@ import {
   Nav,
   NavItem,
   NavList,
-} from "@patternfly/react-core";
-import BarsIcon from "@patternfly/react-icons/dist/esm/icons/bars-icon";
-import { RedhatIcon } from "@patternfly/react-icons";
+} from '@patternfly/react-core';
+import BarsIcon from '@patternfly/react-icons/dist/esm/icons/bars-icon';
+import { RedhatIcon } from '@patternfly/react-icons';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -41,8 +41,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       </MastheadToggle>
       <MastheadMain>
         <RedhatIcon style={{ color: 'red', fontSize: '2.8em' }} />
-        <MastheadBrand style={{ marginLeft: '10px', color:  'white', fontSize: '2em' }} href="https://github.com/RHEcosystemAppEng/cluster-iq" target="_blank">
-        ClusterIQ
+        <MastheadBrand
+          style={{ marginLeft: '10px', color: 'white', fontSize: '2em' }}
+          href="https://github.com/RHEcosystemAppEng/cluster-iq"
+          target="_blank"
+        >
+          ClusterIQ
         </MastheadBrand>
       </MastheadMain>
     </Masthead>
@@ -72,7 +76,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </PageSidebar>
   );
 
-  const pageId = "primary-app-container";
+  const pageId = 'primary-app-container';
 
   return (
     <Page header={header} sidebar={sidebar} mainContainerId={pageId}>
