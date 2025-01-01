@@ -67,3 +67,10 @@ export type Instances = {
   count: number;
   instances: Instance[];
 };
+
+export enum ClusterStates {
+  Running = 'Running',
+  Stopped = 'Stopped',
+  Terminated = 'Terminated',
+  Unknown = 'Unknown',
+}

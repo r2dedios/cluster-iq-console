@@ -27,7 +27,7 @@ import {
   WarningTriangleIcon,
 } from '@patternfly/react-icons';
 import { getClusters, getAccounts, getInstances } from '../services/api';
-import { ClusterData, ClusterPerCP, Instances } from '../types/types';
+import { ClusterData, ClusterPerCP, ClusterStates, Instances } from '../types/types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AggregateStatusCards: React.FunctionComponent = () => {
@@ -62,9 +62,9 @@ const AggregateStatusCards: React.FunctionComponent = () => {
     );
   }
 
-  const activeClusters = clusterData.clusters.filter(cluster => cluster.status === 'Running').length;
-  const inactiveClusters = clusterData.clusters.filter(cluster => cluster.status === 'Stopped').length;
-  const unknownStatusClusters = clusterData.clusters.filter(cluster => cluster.status === 'Unknown').length;
+  const activeClusters = clusterData.clusters.filter(cluster => cluster.status === ClusterStates.Running).length;
+  const inactiveClusters = clusterData.clusters.filter(cluster => cluster.status === ClusterStates.Stopped).length;
+  const unknownStatusClusters = clusterData.clusters.filter(cluster => cluster.status === ClusterStates.Unknown).length;
 
   const clusterCounts = {};
   clusterPerCP.accounts.forEach(account => {

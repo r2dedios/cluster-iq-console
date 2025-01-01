@@ -33,7 +33,7 @@ import {
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-table';
 import { getCluster, getClusterInstances, getClusterTags } from '../services/api';
-import { ClusterData, Instance, Tag, TagData } from '@app/types/types';
+import { ClusterData, ClusterStates, Instance, Tag, TagData } from '@app/types/types';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LabelGroupOverflowProps {
@@ -50,7 +50,7 @@ export const DropdownBasic: React.FunctionComponent = () => {
   useEffect(() => {
     const checkClusterState = async () => {
       const fetchedCluster = await getCluster(clusterID);
-      const isRunning = fetchedCluster.clusters[0]?.status === 'Running';
+      const isRunning = fetchedCluster.clusters[0]?.status === ClusterStates.Running;
       setIsPowerOnDisabled(isRunning);
       setIsPowerOffDisabled(!isRunning);
     };
