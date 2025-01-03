@@ -48,9 +48,9 @@ local-start-dev: ## Starts the project in development mode
 
 
 # Container based working targets
-clean: ## Removes the container images for the API and the Scanner
+clean: ## Removes the container image for the Console
 	@echo "### [Cleanning Container images] ###"
-	@$(CONTAINER_ENGINE) images | grep $(PROJECT_NAME) | awk '{print $$3}' | xargs $(CONTAINER_ENGINE) rmi -f
+	@$(CONTAINER_ENGINE) images | grep $(CONSOLE_IMAGE) | awk '{print $$3}' | xargs $(CONTAINER_ENGINE) rmi -f
 
 build: ## Builds the Console container image
 	@echo "### [Building Console container image] ###"
