@@ -54,7 +54,7 @@ clean: ## Removes the container image for the Console
 
 build: ## Builds the Console container image
 	@echo "### [Building Console container image] ###"
-	@$(CONTAINER_ENGINE) build -t $(CONSOLE_IMAGE):latest -f ./Containerfile .
+	@$(CONTAINER_ENGINE) build -t $(CONSOLE_IMAGE):latest -f $(DEPLOYMENTS_DIR)/containerfiles/Containerfile .
 	@$(CONTAINER_ENGINE) tag $(CONSOLE_IMAGE):latest $(CONSOLE_IMAGE):$(SHORT_COMMIT_HASH)
 	@echo "Build Successful"
 
