@@ -39,10 +39,12 @@ npm run preview
 
 - [TypeScript Config](./tsconfig.json)
 - [Editor Config](./.editorconfig)
+- [Prettier Config](./.prettierrc.js)
 
 ## Code quality tools
 
 - To keep our code formatting in check, we use [prettier](https://github.com/prettier/prettier)
+- Code formatting and validation is done with [Husky](https://typicode.github.io/husky) and [lint-staged](https://github.com/lint-staged/lint-staged)
 
 ## Getting Started with Vite
 
@@ -70,7 +72,7 @@ See the section about [deployment](https://vite.dev/guide/cli.html#build) for mo
 
 ### `npm run preview`
 
-The coomand will boot up a local static web server that serves the files from `dist` folder.
+The command will boot up a local static web server that serves the files from `dist` folder.
 
 It's an easy way to check if the production build looks OK in your local environment.
 

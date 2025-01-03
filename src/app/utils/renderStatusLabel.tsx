@@ -1,19 +1,17 @@
-import {
-  Label,
-} from "@patternfly/react-core";
-import React from "react";
+import { ClusterStates } from '@app/types/types';
+import { Label } from '@patternfly/react-core';
 
-export function renderStatusLabel (labelText: string | null | undefined) {
-    switch (labelText) {
-      case "Running":
-        return <Label color="green">{labelText}</Label>;
-      case "Stopped":
-        return <Label color="red">{labelText}</Label>;
-      case "Terminated":
-        return <Label color="purple">{labelText}</Label>;
-      case "Unknown":
-        return <Label color="gold">{labelText}</Label>;
-      default:
-        return <Label color="grey">{labelText}</Label>;
-    }
+export function renderStatusLabel(labelText: string | null | undefined) {
+  switch (labelText) {
+    case ClusterStates.Running:
+      return <Label color="green">{labelText}</Label>;
+    case ClusterStates.Stopped:
+      return <Label color="red">{labelText}</Label>;
+    case ClusterStates.Terminated:
+      return <Label color="purple">{labelText}</Label>;
+    case ClusterStates.Unknown:
+      return <Label color="gold">{labelText}</Label>;
+    default:
+      return <Label color="grey">{labelText}</Label>;
   }
+}

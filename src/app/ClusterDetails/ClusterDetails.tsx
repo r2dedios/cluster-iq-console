@@ -33,7 +33,7 @@ import {
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-table';
 import { getCluster, getClusterInstances, getClusterTags } from '../services/api';
-import { ClusterData, Instance, Tag, TagData } from '@app/types/types';
+import { ClusterData, ClusterStates, Instance, Tag, TagData } from '@app/types/types';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LabelGroupOverflowProps {
@@ -50,7 +50,7 @@ export const DropdownBasic: React.FunctionComponent = () => {
   useEffect(() => {
     const checkClusterState = async () => {
       const fetchedCluster = await getCluster(clusterID);
-      const isRunning = fetchedCluster.clusters[0]?.status === 'Running';
+      const isRunning = fetchedCluster.clusters[0]?.status === ClusterStates.Running;
       setIsPowerOnDisabled(isRunning);
       setIsPowerOffDisabled(!isRunning);
     };
@@ -401,7 +401,7 @@ const ClusterDetails: React.FunctionComponent = () => {
 
   return (
     <Page>
-      <PageSection isWidthLimited variant={PageSectionVariants.light}>
+      <PageSection variant={PageSectionVariants.light}>
         <Flex
           spaceItems={{ default: 'spaceItemsMd' }}
           alignItems={{ default: 'alignItemsFlexStart' }}
@@ -423,14 +423,14 @@ const ClusterDetails: React.FunctionComponent = () => {
         </Flex>
         {/* Page tabs */}
       </PageSection>
-      <PageSection type="tabs" variant={PageSectionVariants.light} isWidthLimited>
+      <PageSection type="tabs" variant={PageSectionVariants.light}>
         <Divider />
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick} usePageInsets id="open-tabs-example-tabs-list">
           <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>} tabContentId={`tabContent${0}`} />
           <Tab eventKey={1} title={<TabTitleText>Servers</TabTitleText>} tabContentId={`tabContent${1}`} />
         </Tabs>
       </PageSection>
-      <PageSection isWidthLimited variant={PageSectionVariants.light}>
+      <PageSection variant={PageSectionVariants.light}>
         <TabContent key={0} eventKey={0} id={`tabContent${0}`} activeKey={activeTabKey} hidden={0 !== activeTabKey}>
           <TabContentBody>{detailsTabContent}</TabContentBody>
         </TabContent>
