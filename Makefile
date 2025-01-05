@@ -1,36 +1,86 @@
-IMAGE_TAG := $(shell git rev-parse --short=7 HEAD)
+#
+# ClusterIQ Console Makefile
+################################################################################
+
+# Global Vars
+SHORT_COMMIT_HASH := $(shell git rev-parse --short=7 HEAD)
+
+# Binary vars
 CONTAINER_ENGINE ?= $(shell which podman >/dev/null 2>&1 && echo podman || echo docker)
 K8S_CLI ?= $(shell which oc >/dev/null 2>&1 && echo oc || echo kubectl)
+
+# Container image registy vars
 REGISTRY ?= quay.io
 PROJECT_NAME ?= cluster-iq
 REGISTRY_REPO ?= ecosystem-appeng
+COMPOSE_NETWORK ?= compose_cluster_iq
+
+# Project directories
+DEPLOYMENTS_DIR ?= ./deployments
+
+# Images
 CONSOLE_IMG_NAME ?= $(PROJECT_NAME)-console
 CONSOLE_IMAGE ?= $(REGISTRY)/$(REGISTRY_REPO)/$(CONSOLE_IMG_NAME)
 
-install: ## Install project dependencies
+
+# Standard targets
+all: ## Installs and run the Console on Local
+all: install build-local start-dev
+
+# Local working targets
+local-clean: ## Cleans project built (./dist)
+	@echo "### [Cleanning local building] ###"
+	@npm run clean
+
+local-install: ## Installs project dependencies in local
 	@echo "### [Installing dependencies] ###"
 	@npm install
 
-build-local: ## Build the project locally
+local-build: ## Builds the project locally
 	@echo "### [Building project] ###"
 	@npm run build
 
-build-container: ## Build the project's container image
-	@echo "### [Building project's container image] ###"
-	@$(CONTAINER_ENGINE) build -t $(CONSOLE_IMAGE):latest -f ./Containerfile .
-	@$(CONTAINER_ENGINE) tag $(CONSOLE_IMAGE):latest $(CONSOLE_IMAGE):$(IMAGE_TAG)
-	@echo "Build Successful"
-
-push-container: ## Push the container image to the remote repository
-	@$(CONTAINER_ENGINE) push $(CONSOLE_IMAGE):latest
-	@$(CONTAINER_ENGINE) push $(CONSOLE_IMAGE):$(IMAGE_TAG)
-
-start-dev: export VITE_CIQ_API_URL = http://localhost:8081
-start-dev: ## Start the project in development mode
+local-start-dev: export VITE_CIQ_API_URL = http://localhost:8081
+local-start-dev: ## Starts the project in development mode
 	@echo "### [Starting project DEV MODE] ###"
 	@echo "### [API-URL: $$VITE_CIQ_API_URL] ###"
 	@npm run start
 
+
+# Container based working targets
+clean: ## Removes the container image for the Console
+	@echo "### [Cleanning Container images] ###"
+	@$(CONTAINER_ENGINE) images | grep $(CONSOLE_IMAGE) | awk '{print $$3}' | xargs $(CONTAINER_ENGINE) rmi -f
+
+build: ## Builds the Console container image
+	@echo "### [Building Console container image] ###"
+	@$(CONTAINER_ENGINE) build -t $(CONSOLE_IMAGE):latest -f $(DEPLOYMENTS_DIR)/containerfiles/Containerfile .
+	@$(CONTAINER_ENGINE) tag $(CONSOLE_IMAGE):latest $(CONSOLE_IMAGE):$(SHORT_COMMIT_HASH)
+	@echo "Build Successful"
+
+
+# Development targets
+start-dev: ## Development env based on Docker/Podman Compose tool
+	@echo "### [Starting dev environment] ###"
+	@$(CONTAINER_ENGINE)-compose -f $(DEPLOYMENTS_DIR)/compose/compose-devel.yaml up --build -d
+	@echo "### [Console: http://localhost:8080] ###"
+
+stop-dev: ## Stops the container based development env
+	@echo "### [Stopping dev environment] ###"
+	@$(CONTAINER_ENGINE)-compose -f $(DEPLOYMENTS_DIR)/compose/compose-devel.yaml down
+
+restart-dev: ## Restarts the container based env
+restart-dev: stop-dev start-dev
+
+
+# Tests targets
+test: ## Runs code tests and coverage
+	@echo "### [Running Tests] ###"
+
+
+# Set the default target to "help"
 .DEFAULT_GOAL := help
+# Help
 help: ## Display this help message
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@echo "### [Makefile Help] ###"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\t\033[1;36m%-30s\033[0m %s\n", $$1, $$2}'
