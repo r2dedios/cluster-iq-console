@@ -380,7 +380,7 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
               chips={providerSelections}
               deleteChip={(category, chip) => onProviderMenuSelect(undefined, chip as string)}
               deleteChipGroup={() => setProviderSelections([])}
-              categoryName="Cloud Provider"
+              categoryName="Provider"
               showToolbarItem={activeAttributeMenu === 'Provider'}
             >
               {providerSelect}
@@ -396,7 +396,8 @@ const ClusterTable: React.FunctionComponent<{
   searchValue: string;
   statusFilter: string | null;
   cloudProviderFilter: string | null;
-}> = ({ searchValue, statusFilter, cloudProviderFilter }) => {
+  providerSelections;
+}> = ({ searchValue, statusFilter, cloudProviderFilter, providerSelections }) => {
   const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
   const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
@@ -417,21 +418,25 @@ const ClusterTable: React.FunctionComponent<{
     fetchData();
   }, []);
 
-  useEffect(() => {//filter by account name
-    let filtered = clusterData.filter((cluster) => cluster.accountName.toLowerCase().includes(searchValue.toLowerCase())); 
+  useEffect(() => {
+    let filtered = clusterData.filter((cluster) =>
+      cluster.accountName.toLowerCase().includes(searchValue.toLowerCase())
+    );
 
     if (statusFilter) {
       filtered = filtered.filter((cluster) => cluster.status === statusFilter);
     }
 
+    if (providerSelections.length > 0) {
+      filtered = filtered.filter((cluster) => providerSelections.includes(cluster.provider));
+    }
+
     if (cloudProviderFilter) {
-      console.log(cloudProviderFilter);
-      console.log(clusterData);
       filtered = filtered.filter((cluster) => cluster.provider === cloudProviderFilter);
     }
 
     setFilteredData(filtered);
-  }, [searchValue, clusterData, statusFilter, cloudProviderFilter]);
+  }, [searchValue, clusterData, statusFilter, providerSelections, cloudProviderFilter]);
 
   const columnNames = {
     id: 'ID',
@@ -549,9 +554,8 @@ const Clusters: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = useState<string>('');
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const statusFilter = queryParams.get('status');
-  const cloudProviderFilter = queryParams.get('Cloud Provider')
-  const [statusSelection, setStatusSelection] = useState("");
+  const cloudProviderFilter = queryParams.get('cloudProvider');
+  const [statusSelection, setStatusSelection] = useState('');
   const [providerSelections, setProviderSelections] = useState<string[]>([]);
 
   return (
@@ -563,18 +567,20 @@ const Clusters: React.FunctionComponent = () => {
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
-        <TableToolbar
+          <TableToolbar
             searchValue={searchValue}
             setSearchValue={setSearchValue}
             setStatusSelection={setStatusSelection}
             statusSelection={statusSelection}
             setProviderSelections={setProviderSelections}
-            providerSelections={providerSelections}     />{' '}
+            providerSelections={providerSelections}
+          />
           <ClusterTable
             searchValue={searchValue}
             statusFilter={statusSelection}
             cloudProviderFilter={cloudProviderFilter}
-          />{' '}
+            providerSelections={providerSelections}
+          />
         </Panel>
       </PageSection>
     </React.Fragment>

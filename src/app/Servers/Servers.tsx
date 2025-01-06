@@ -592,6 +592,9 @@ const Servers: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [statusSelection, setStatusSelection] = useState("");
   const [providerSelections, setProviderSelections] = useState<string[]>([]);
+  console.log('Query param cloudProviderFilter:', providerSelections);
+  
+  
 
   return (
     <React.Fragment>

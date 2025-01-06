@@ -237,7 +237,7 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
   }, [isAttributeMenuOpen, attributeMenuRef]);
 
   const onAttributeToggleClick = (ev: React.MouseEvent) => {
-    ev.stopPropagation(); // Stop handleClickOutside from handling
+    ev.stopPropagation();
     setTimeout(() => {
       if (attributeMenuRef.current) {
         const firstElement = attributeMenuRef.current.querySelector('li > button:not(:disabled)');
@@ -327,10 +327,12 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
   );
 };
 
-const AccountTable: React.FunctionComponent<{ searchValue: string; cloudProviderFilter: string | null }> = ({
-  searchValue,
-  cloudProviderFilter,
-}) => {
+const AccountTable: React.FunctionComponent<{
+  searchValue: string;
+  statusFilter: string | null;
+  cloudProviderFilter: string | null;
+  providerSelections;
+}> = ({ searchValue, cloudProviderFilter, providerSelections }) => {
   const [accountData, setAccountData] = useState<IAccounts[] | []>([]);
   const [filteredData, setFilteredData] = useState<IAccounts[] | []>([]);
   const [loading, setLoading] = useState(true);
@@ -353,14 +355,17 @@ const AccountTable: React.FunctionComponent<{ searchValue: string; cloudProvider
 
   useEffect(() => {
     let filtered = accountData.filter((account) => account.name.toLowerCase().includes(searchValue.toLowerCase()));
+
+    if (providerSelections.length > 0) {
+      filtered = filtered.filter((cluster) => providerSelections.includes(cluster.provider));
+    }
+
     if (cloudProviderFilter) {
-      console.log(cloudProviderFilter);
-      console.log(accountData);
-      filtered = filtered.filter((account) => account.provider === cloudProviderFilter);
+      filtered = filtered.filter((cluster) => cluster.provider === cloudProviderFilter);
     }
 
     setFilteredData(filtered);
-  }, [searchValue, accountData, cloudProviderFilter]);
+  }, [searchValue, accountData, providerSelections, cloudProviderFilter]);
 
   const columnNames = {
     name: 'Name',
@@ -409,9 +414,16 @@ const AccountTable: React.FunctionComponent<{ searchValue: string; cloudProvider
 
 const Accounts: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = useState<string>('');
+  const [providerSelections, setProviderSelections] = useState<string[]>([]);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const cloudProviderFilter = queryParams.get('provider');
+  const cloudProviderFilter = queryParams.get('cloudProvider');
+  console.log(queryParams.get('cloudProvider'));
+  console.log(cloudProviderFilter);
+
+  function setStatusSelection(value: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <React.Fragment>
@@ -424,20 +436,19 @@ const Accounts: React.FunctionComponent = () => {
         <Panel>
           <TableToolbar
             onSearchChange={setSearchValue}
-            setSearchValue={function (value: string): void {
-              throw new Error('Function not implemented.');
-            }}
-            searchValue={''}
-            setStatusSelection={function (value: string): void {
-              throw new Error('Function not implemented.');
-            }}
+            setSearchValue={setSearchValue}
+            searchValue={searchValue}
+            setStatusSelection={setStatusSelection}
             statusSelection={''}
-            setProviderSelections={function (value: string[]): void {
-              throw new Error('Function not implemented.');
-            }}
-            providerSelections={[]}
-          />{' '}
-          <AccountTable searchValue={searchValue} cloudProviderFilter={cloudProviderFilter} />{' '}
+            setProviderSelections={setProviderSelections}
+            providerSelections={providerSelections}
+          />
+          <AccountTable
+            searchValue={searchValue}
+            cloudProviderFilter={cloudProviderFilter}
+            providerSelections={providerSelections}
+            statusFilter={null}
+          />
         </Panel>
       </PageSection>
     </React.Fragment>
