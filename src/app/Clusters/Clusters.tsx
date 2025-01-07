@@ -525,7 +525,7 @@ const ClusterTable: React.FunctionComponent<{
             </Tr>
           </Thead>
           <Tbody>
-            {sortedData.map((cluster) => (
+            {sortedData.map(cluster => (
               <Tr key={cluster.id}>
                 <Td dataLabel={columnNames.id}>
                   <Link to={`/clusters/${cluster.id}`}>{cluster.id}</Link>

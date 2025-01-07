@@ -110,7 +110,7 @@ export async function startCluster(clusterID) {
   try {
     const response = await apiClient.post(`clusters/${clusterID}/power_on`);
     console.log('Power on request was sent.');
-    return response.data;
+    return response.data; 
   } catch (error) {
     console.error(`Error starting cluster ${clusterID}:`, error);
     throw error;

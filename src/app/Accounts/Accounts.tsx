@@ -339,11 +339,12 @@ const AccountTable: React.FunctionComponent<{
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
         const fetchedAccounts = await getAccounts();
         setAccountData(fetchedAccounts.accounts);
       } catch (error) {
+        console.error('Error fetching data:', error);
         console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
