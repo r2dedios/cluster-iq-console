@@ -1,56 +1,30 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-import { renderStatusLabel } from 'src/app/utils/renderStatusLabel';
 import {
-  PageSection,
-  PageSectionVariants,
-  Panel,
-  ToolbarItem,
-  Toolbar,
-  ToolbarContent,
-  TextContent,
-  Text,
+  SearchInput,
+  MenuToggle,
   Menu,
   MenuContent,
   MenuList,
   MenuItem,
-  MenuToggle,
-  SearchInput,
-  Spinner,
   Popper,
-  ToolbarFilter,
-  ToolbarGroup,
   Badge,
+  Toolbar,
+  ToolbarContent,
   ToolbarToggleGroup,
+  ToolbarGroup,
+  ToolbarItem,
+  ToolbarFilter,
 } from '@patternfly/react-core';
-import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { getInstances } from '../services/api';
-import { Instances } from '@app/types/types';
 import { FilterIcon } from '@patternfly/react-icons';
+import React from 'react';
+import { ClustersTableToolbarProps } from '../types';
 
-interface ServersTableProps {
-  statusSelection: string;
-  providerSelections: string[];
-  searchValue: string;
-}
-
-interface TableToolbarProps {
-  setSearchValue: (value: string) => void;
-  searchValue: string;
-  setStatusSelection: (value: string) => void;
-  statusSelection: string;
-  setProviderSelections: (value: string[]) => void;
-  providerSelections: string[];
-}
-
-const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
+export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarProps> = ({
   searchValue,
   setSearchValue,
-  setStatusSelection,
   statusSelection,
-  setProviderSelections,
+  setStatusSelection,
   providerSelections,
+  setProviderSelections,
 }) => {
   const onSearchChange = (value: string) => {
     setSearchValue(value);
@@ -59,7 +33,7 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
   // Set up name search input
   const searchInput = (
     <SearchInput
-      placeholder="Filter by server name"
+      placeholder="Filter by account name"
       value={searchValue}
       onChange={(_event, value) => onSearchChange(value)}
       onClear={() => onSearchChange('')}
@@ -100,13 +74,15 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
     setTimeout(() => {
       if (statusMenuRef.current) {
         const firstElement = statusMenuRef.current.querySelector('li > button:not(:disabled)');
-        firstElement && (firstElement as HTMLElement).focus();
+        if (firstElement) {
+          (firstElement as HTMLElement).focus();
+        }
       }
     }, 0);
     setIsStatusMenuOpen(!isStatusMenuOpen);
   };
 
-  function onStatusSelect(event: React.MouseEvent | undefined, itemId: string | number | undefined) {
+  function onStatusSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
     if (typeof itemId === 'undefined') {
       return;
     }
@@ -190,7 +166,9 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
     setTimeout(() => {
       if (providerMenuRef.current) {
         const firstElement = providerMenuRef.current.querySelector('li > button:not(:disabled)');
-        firstElement && (firstElement as HTMLElement).focus();
+        if (firstElement) {
+          (firstElement as HTMLElement).focus();
+        }
       }
     }, 0);
     setIsProviderMenuOpen(!isProviderMenuOpen);
@@ -265,7 +243,7 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
   );
 
   // Set up attribute selector
-  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<'Servers' | 'Status' | 'Provider'>('Servers');
+  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<'Account' | 'Status' | 'Provider'>('Account');
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
@@ -285,7 +263,6 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
       }
     }
   };
-
   const handleAttributeClickOutside = (event: MouseEvent) => {
     if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
       setIsAttributeMenuOpen(false);
@@ -300,13 +277,14 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
       window.removeEventListener('click', handleAttributeClickOutside);
     };
   }, [isAttributeMenuOpen, attributeMenuRef]);
-
   const onAttributeToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation(); // Stop handleClickOutside from handling
     setTimeout(() => {
       if (attributeMenuRef.current) {
         const firstElement = attributeMenuRef.current.querySelector('li > button:not(:disabled)');
-        firstElement && (firstElement as HTMLElement).focus();
+        if (firstElement) {
+          (firstElement as HTMLElement).focus();
+        }
       }
     }, 0);
     setIsAttributeMenuOpen(!isAttributeMenuOpen);
@@ -327,13 +305,13 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
     <Menu
       ref={attributeMenuRef}
       onSelect={(_ev, itemId) => {
-        setActiveAttributeMenu(itemId?.toString() as 'Servers' | 'Status' | 'Provider');
+        setActiveAttributeMenu(itemId?.toString() as 'Account' | 'Status' | 'Provider');
         setIsAttributeMenuOpen(!isAttributeMenuOpen);
       }}
     >
       <MenuContent>
         <MenuList>
-          <MenuItem itemId="Servers">Servers</MenuItem>
+          <MenuItem itemId="Account">Account</MenuItem>
           <MenuItem itemId="Status">Status</MenuItem>
           <MenuItem itemId="Provider">Provider</MenuItem>
         </MenuList>
@@ -371,8 +349,8 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
               chips={searchValue !== '' ? [searchValue] : ([] as string[])}
               deleteChip={() => setSearchValue('')}
               deleteChipGroup={() => setSearchValue('')}
-              categoryName="Name"
-              showToolbarItem={activeAttributeMenu === 'Servers'}
+              categoryName="Account"
+              showToolbarItem={activeAttributeMenu === 'Account'}
             >
               {searchInput}
             </ToolbarFilter>
@@ -401,151 +379,4 @@ const TableToolbar: React.FunctionComponent<TableToolbarProps> = ({
   );
 };
 
-// ServersTable
-
-const ServersTable: React.FunctionComponent<ServersTableProps> = ({
-  statusSelection,
-  providerSelections,
-  searchValue,
-}) => {
-  const [filteredData, setFilteredData] = useState<Instances>({
-    count: 0,
-    instances: [],
-  });
-
-  const [instancesData, setInstancesData] = useState<Instances>({
-    count: 0,
-    instances: [],
-  });
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const fetchedInstances = await getInstances();
-        setInstancesData(fetchedInstances);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    let filtered = instancesData.instances;
-
-    if (statusSelection) {
-      filtered = filtered.filter(instance => instance.status.includes(statusSelection));
-      // console.log("Filtered by status:", filtered);
-    }
-
-    if (providerSelections && providerSelections.length > 0) {
-      filtered = filtered.filter(instance => providerSelections.some(provider => instance.provider === provider));
-      // console.log("Filtered by provider:", filtered);
-    }
-    if (searchValue) {
-      filtered = filtered.filter(instance => instance.name.toLowerCase().includes(searchValue.toLowerCase()));
-      // console.log("Filtered by name:", filtered);
-    }
-
-    setFilteredData({
-      count: filtered.length,
-      instances: filtered,
-    });
-  }, [instancesData.instances, statusSelection, providerSelections, searchValue]);
-
-  const columnNames = {
-    id: 'ID',
-    name: 'Name',
-    status: 'Status',
-    provider: 'Provider',
-    availabilityZone: 'AZ',
-    instanceType: 'Type',
-  };
-
-  return (
-    <React.Fragment>
-      {loading ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}
-        >
-          <Spinner size="xl" />
-        </div>
-      ) : (
-        <Table aria-label="Simple table">
-          <Thead>
-            <Tr>
-              <Th>{columnNames.id}</Th>
-              <Th>{columnNames.name}</Th>
-              <Th>{columnNames.status}</Th>
-              <Th>{columnNames.provider}</Th>
-              <Th>{columnNames.availabilityZone}</Th>
-              <Th>{columnNames.instanceType}</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {filteredData.instances.map(instance => (
-              <Tr key={instance.id}>
-                <Td dataLabel={columnNames.id} width={15}>
-                  <Link to={`/servers/${instance.id}`}>{instance.id}</Link>
-                </Td>
-                <Td dataLabel={columnNames.name} width={30}>
-                  {instance.name}
-                </Td>
-                <Td dataLabel={columnNames.status}>{renderStatusLabel(instance.status)}</Td>
-                <Td dataLabel={columnNames.provider}>{instance.provider}</Td>
-                <Td dataLabel={columnNames.availabilityZone}>{instance.availabilityZone}</Td>
-                <Td dataLabel={columnNames.instanceType}>{instance.instanceType}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
-    </React.Fragment>
-  );
-};
-
-const Servers: React.FunctionComponent = () => {
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [statusSelection, setStatusSelection] = useState('');
-  const [providerSelections, setProviderSelections] = useState<string[]>([]);
-
-  return (
-    <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Servers</Text>
-        </TextContent>
-      </PageSection>
-      <PageSection variant={PageSectionVariants.light} isFilled>
-        <Panel>
-          <TableToolbar
-            searchValue={searchValue}
-            setSearchValue={setSearchValue}
-            setStatusSelection={setStatusSelection}
-            statusSelection={statusSelection}
-            setProviderSelections={setProviderSelections}
-            providerSelections={providerSelections}
-          />
-          <ServersTable
-            statusSelection={statusSelection}
-            providerSelections={providerSelections}
-            searchValue={searchValue}
-          />
-        </Panel>
-      </PageSection>
-    </React.Fragment>
-  );
-};
-
-export default Servers;
+export default ClustersTableToolbar;
