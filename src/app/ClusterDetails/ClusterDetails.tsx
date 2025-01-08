@@ -19,7 +19,6 @@ import {
   Flex,
   FlexItem,
   Page,
-  Spinner,
   LabelGroup,
   Dropdown,
   DropdownItem,
@@ -36,6 +35,7 @@ import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-tabl
 import { getCluster, getClusterInstances, getClusterTags, startCluster, stopCluster } from '../services/api';
 import { ClusterData, ClusterStates, Instance, Tag, TagData } from '@app/types/types';
 import { Link, useLocation } from 'react-router-dom';
+import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 
 interface LabelGroupOverflowProps {
   labels: Array<Tag>;
@@ -141,7 +141,7 @@ export const DropdownBasic: React.FunctionComponent = () => {
 
 const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({ labels }) => (
   <LabelGroup>
-    {labels.map((label) => (
+    {labels.map(label => (
       <Label key={label.key}>
         {label.key}: {label.value}
       </Label>
@@ -224,16 +224,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
   return (
     <React.Fragment>
       {loading ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}
-        >
-          <Spinner size="xl" />
-        </div>
+        <LoadingSpinner />
       ) : (
         <Table aria-label="Simple table">
           <Thead>
@@ -246,7 +237,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {sortedData.map((instance) => (
+            {sortedData.map(instance => (
               <Tr key={instance.id}>
                 <Td dataLabel={instance.id}>
                   <Link to={`/servers/${instance.id}`}>{instance.id}</Link>
@@ -267,7 +258,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
 const ClusterDetails: React.FunctionComponent = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const onToggleClick = () => {
-    setIsOpen((prevState) => !prevState);
+    setIsOpen(prevState => !prevState);
   };
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: PowerAction) => {
     setIsOpen(false);
@@ -303,8 +294,8 @@ const ClusterDetails: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filterTagsByKey = (key) => {
-    const result = tags.tags.filter((tags) => tags.key == key);
+  const filterTagsByKey = key => {
+    const result = tags.tags.filter(tags => tags.key == key);
     if (result[0] !== undefined && result[0] != null) {
       return result[0].value;
     }
@@ -320,16 +311,7 @@ const ClusterDetails: React.FunctionComponent = () => {
   const detailsTabContent = (
     <React.Fragment>
       {loading ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}
-        >
-          <Spinner size="xl" />
-        </div>
+        <LoadingSpinner />
       ) : (
         <Flex direction={{ default: 'column' }}>
           <FlexItem spacer={{ default: 'spacerLg' }}>
