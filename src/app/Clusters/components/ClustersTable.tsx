@@ -1,6 +1,6 @@
 import { renderStatusLabel } from '@app/utils/renderStatusLabel';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import { Cluster } from '@app/types/types';
+import { CloudProvider, Cluster, ClusterStates } from '@app/types/types';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getClusters } from '@app/services/api';
@@ -10,8 +10,8 @@ import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   searchValue,
   statusFilter,
-  cloudProviderFilter,
   providerSelections,
+  archived,
 }) => {
   const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
   const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
@@ -33,23 +33,37 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     fetchData();
   }, []);
 
+  // In useEffect for filtering
   useEffect(() => {
-    let filtered = clusterData.filter(cluster => cluster.accountName.toLowerCase().includes(searchValue.toLowerCase()));
+    let filtered = clusterData;
 
-    if (statusFilter) {
+    // First, apply view-specific filtering
+    if (archived) {
+      filtered = filtered.filter(cluster => {
+        const isTerminated = cluster.status === ClusterStates.Terminated;
+        return isTerminated;
+      });
+    } else {
+      filtered = filtered.filter(cluster => {
+        const isNotTerminated = cluster.status !== ClusterStates.Terminated;
+        return isNotTerminated;
+      });
+    }
+
+    // Then apply other filters
+    filtered = filtered.filter(cluster => cluster.accountName.toLowerCase().includes(searchValue.toLowerCase()));
+
+    // Apply status filter only for active view
+    if (!archived && statusFilter) {
       filtered = filtered.filter(cluster => cluster.status === statusFilter);
     }
 
-    if (providerSelections.length > 0) {
-      filtered = filtered.filter(cluster => providerSelections.includes(cluster.provider));
-    }
-
-    if (cloudProviderFilter) {
-      filtered = filtered.filter(cluster => cluster.provider === cloudProviderFilter);
+    if (providerSelections && providerSelections.length > 0) {
+      filtered = filtered.filter(cluster => providerSelections.includes(cluster.provider as CloudProvider));
     }
 
     setFilteredData(filtered);
-  }, [searchValue, clusterData, statusFilter, providerSelections, cloudProviderFilter]);
+  }, [searchValue, clusterData, statusFilter, providerSelections, archived]);
 
   const columnNames = {
     id: 'ID',

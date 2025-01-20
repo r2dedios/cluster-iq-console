@@ -43,9 +43,9 @@ export const STATUSES = {
     route: '/clusters?status=Unknown',
   },
   terminated: {
-    key: ClusterStates.Unknown,
+    key: ClusterStates.Terminated,
     icon: <ArchiveIcon color={PATTERNFLY_COLORS.disabled} />,
-    route: '/clusters?status=Terminated',
+    route: '/clusters?archived=true',
   },
 } as const;
 

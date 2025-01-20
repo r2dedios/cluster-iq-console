@@ -8,12 +8,10 @@ import {
   PageSidebar,
   PageSidebarBody,
   PageToggleButton,
-  Nav,
-  NavItem,
-  NavList,
 } from '@patternfly/react-core';
 import BarsIcon from '@patternfly/react-icons/dist/esm/icons/bars-icon';
 import { RedhatIcon } from '@patternfly/react-icons';
+import SidebarNavigation from './SidebarNavigation';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -52,27 +50,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </Masthead>
   );
 
-  const PageNav = (
-    <Nav aria-label="Nav">
-      <NavList>
-        <NavItem itemId={0} to="/">
-          Overview
-        </NavItem>
-        <NavItem itemId={1} to="/accounts">
-          Accounts
-        </NavItem>
-        <NavItem itemId={2} to="/clusters">
-          Clusters
-        </NavItem>
-        <NavItem itemId={3} to="/servers">
-          Servers
-        </NavItem>
-      </NavList>
-    </Nav>
-  );
   const sidebar = (
     <PageSidebar isSidebarOpen={isSidebarOpen} id="vertical-sidebar">
-      <PageSidebarBody>{PageNav}</PageSidebarBody>
+      <PageSidebarBody>
+        <SidebarNavigation />
+      </PageSidebarBody>
     </PageSidebar>
   );
 

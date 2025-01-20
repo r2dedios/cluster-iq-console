@@ -1,16 +1,18 @@
+import { ClusterStates, CloudProvider } from '@app/types/types';
+
 export interface ClustersTableToolbarProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
-  statusSelection: string;
-  setStatusSelection: (value: string) => void;
-  providerSelections: string[];
-  setProviderSelections: (value: string[]) => void;
-  onSearchChange: (value: string) => void;
+  statusSelection: ClusterStates | null;
+  setStatusSelection: (value: ClusterStates | null) => void;
+  providerSelections: CloudProvider[] | null;
+  setProviderSelections: (value: CloudProvider[] | null) => void;
+  archived: boolean;
 }
 
 export interface ClustersTableProps {
   searchValue: string;
   statusFilter: string | null;
-  cloudProviderFilter: string | null;
-  providerSelections;
+  providerSelections: CloudProvider[] | null;
+  archived: boolean;
 }
