@@ -17,12 +17,41 @@ interface IAppLayout {
   children: React.ReactNode;
 }
 
+const PF_BREAKPOINT_XL = 1200; // Desktop breakpoint
+
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const isDesktop = () => window.innerWidth >= PF_BREAKPOINT_XL;
+  const previousDesktopState = React.useRef(isDesktop());
+
+  const onResize = React.useCallback(() => {
+    const desktop = isDesktop();
+    if (desktop !== previousDesktopState.current) {
+      // Only close sidebar on viewport change
+      setIsSidebarOpen(false);
+    } else if (desktop) {
+      // In desktop mode, open sidebar by default
+      setIsSidebarOpen(true);
+    }
+    previousDesktopState.current = desktop;
+  }, []);
 
   const onSidebarToggle = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen(prev => !prev);
   };
+
+  React.useEffect(() => {
+    window.addEventListener('resize', onResize);
+
+    // Initial setup for desktop
+    if (isDesktop()) {
+      setIsSidebarOpen(true);
+    }
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [onResize]);
 
   const header = (
     <Masthead>
