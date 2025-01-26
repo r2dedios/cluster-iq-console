@@ -9,33 +9,31 @@ import {
   ModalVariant,
   Button,
 } from '@patternfly/react-core';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { getCluster, startCluster, stopCluster } from '@app/services/api';
+import { startCluster, stopCluster } from '@app/services/api';
 
 export enum PowerAction {
   POWER_ON = 'Power on',
   POWER_OFF = 'Power off',
 }
 
-export const ClusterDetailsDropdown: React.FunctionComponent = () => {
+interface ClusterDetailsDropdownProps {
+  clusterStatus: ClusterStates | null;
+}
+
+export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropdownProps> = ({ clusterStatus }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { clusterID } = useParams();
-  const [isPowerOnDisabled, setIsPowerOnDisabled] = React.useState(false);
-  const [isPowerOffDisabled, setIsPowerOffDisabled] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [modalAction, setModalAction] = React.useState<PowerAction | null>(null);
 
-  useEffect(() => {
-    const checkClusterState = async () => {
-      const fetchedCluster = await getCluster(clusterID);
-      const isRunning = fetchedCluster.clusters[0]?.status === ClusterStates.Running;
-      setIsPowerOnDisabled(isRunning);
-      setIsPowerOffDisabled(!isRunning);
-    };
+  // Disable actions based on cluster status
+  const isPowerOnDisabled =
+    clusterStatus === null || [ClusterStates.Running, ClusterStates.Terminated].includes(clusterStatus);
 
-    checkClusterState();
-  }, [clusterID]);
+  const isPowerOffDisabled =
+    clusterStatus === null || [ClusterStates.Stopped, ClusterStates.Terminated].includes(clusterStatus);
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
     if (value === PowerAction.POWER_ON || value === PowerAction.POWER_OFF) {

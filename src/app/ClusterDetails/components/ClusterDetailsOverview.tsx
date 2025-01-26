@@ -1,5 +1,5 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { TagData, ClusterData } from '@app/types/types';
+import { TagData, ClusterData, ClusterStates } from '@app/types/types';
 import { parseNumberToCurrency, parseScanTimestamp } from '@app/utils/parseFuncs';
 import { renderStatusLabel } from '@app/utils/renderStatusLabel';
 import {
@@ -21,7 +21,7 @@ import {
   TabTitleText,
   TabContent,
 } from '@patternfly/react-core';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClusterDetailsDropdown } from './ClusterDetailsDropdown';
 import { getCluster, getClusterTags } from '@app/services/api';
@@ -40,6 +40,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
     clusters: [],
   });
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,6 +69,8 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
 
   const ownerTag = filterTagsByKey('Owner');
   const partnerTag = filterTagsByKey('Partner');
+  const clusterStatus = cluster?.clusters[0]?.status as ClusterStates | null;
+
   const handleTabClick = (_, tabIndex) => {
     setActiveTabKey(tabIndex);
   };
@@ -144,10 +147,13 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
     </React.Fragment>
   );
 
-  const serversTabContent = (
-    <TabContentBody>
-      <ClusterDetailsInstances />
-    </TabContentBody>
+  const serversTabContent = useMemo(
+    () => (
+      <TabContentBody>
+        <ClusterDetailsInstances />
+      </TabContentBody>
+    ),
+    []
   );
 
   return (
@@ -169,7 +175,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
           </FlexItem>
 
           <FlexItem align={{ default: 'alignRight' }}>
-            <ClusterDetailsDropdown />
+            <ClusterDetailsDropdown clusterStatus={clusterStatus} />
           </FlexItem>
         </Flex>
         {/* Page tabs */}
