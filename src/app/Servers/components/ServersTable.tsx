@@ -6,6 +6,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ServersTableProps } from '../types';
 import { getInstances } from '@app/services/api';
+import { TablePagination } from '@app/components/common/TablesPagination';
+import { getPaginatedSlice } from '@app/utils/tablePagination';
 
 export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   searchValue,
@@ -13,6 +15,10 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   providerSelections,
   archived,
 }) => {
+  // Pagination settings
+  const [page, setPage] = React.useState(1);
+  const [perPage, setPerPage] = React.useState(10);
+
   const [instancesData, setInstancesData] = useState<Instances>({
     count: 0,
     instances: [],
@@ -43,7 +49,6 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
 
   useEffect(() => {
     let filtered = instancesData.instances;
-
     // First, apply view-specific filtering
     if (archived) {
       filtered = filtered.filter(instance => {
@@ -68,12 +73,12 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
     if (providerSelections && providerSelections.length > 0) {
       filtered = filtered.filter(instance => providerSelections.includes(instance.provider as CloudProvider));
     }
-
+    // Filtered data with pagination
     setFilteredData({
       count: filtered.length,
-      instances: filtered,
+      instances: getPaginatedSlice(filtered, page, perPage),
     });
-  }, [searchValue, instancesData.instances, statusSelection, providerSelections, archived]);
+  }, [searchValue, instancesData.instances, statusSelection, providerSelections, archived, page, perPage]);
 
   const columnNames = {
     id: 'ID',
@@ -127,6 +132,13 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
           </Tbody>
         </Table>
       )}
+      <TablePagination
+        itemCount={filteredData.count}
+        page={page}
+        perPage={perPage}
+        onSetPage={setPage}
+        onPerPageSelect={setPerPage}
+      />
     </React.Fragment>
   );
 };
