@@ -85,7 +85,7 @@ export async function getAccountClusters(accountName) {
   }
 }
 
-export async function getClusterInstances(accountName, clusterID) {
+export async function getClusterInstances(clusterID) {
   try {
     const response = await apiClient.get(`clusters/${clusterID}/instances`);
     return response.data.instances;
@@ -110,7 +110,7 @@ export async function startCluster(clusterID) {
   try {
     const response = await apiClient.post(`clusters/${clusterID}/power_on`);
     console.log('Power on request was sent.');
-    return response.data; 
+    return response.data;
   } catch (error) {
     console.error(`Error starting cluster ${clusterID}:`, error);
     throw error;

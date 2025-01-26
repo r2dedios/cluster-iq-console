@@ -1,0 +1,195 @@
+import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
+import { TagData, ClusterData } from '@app/types/types';
+import { parseNumberToCurrency, parseScanTimestamp } from '@app/utils/parseFuncs';
+import { renderStatusLabel } from '@app/utils/renderStatusLabel';
+import {
+  Flex,
+  FlexItem,
+  Title,
+  DescriptionList,
+  DescriptionListGroup,
+  DescriptionListTerm,
+  DescriptionListDescription,
+  TabContentBody,
+  Page,
+  PageSection,
+  PageSectionVariants,
+  Label,
+  Divider,
+  Tabs,
+  Tab,
+  TabTitleText,
+  TabContent,
+} from '@patternfly/react-core';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { ClusterDetailsDropdown } from './ClusterDetailsDropdown';
+import { getCluster, getClusterTags } from '@app/services/api';
+import ClusterDetailsInstances from './ClusterDetailsInstances';
+import { LabelGroupOverflow } from '@app/components/common/LabelGroupOverflow';
+
+const ClusterDetailsOverview: React.FunctionComponent = () => {
+  const { clusterID } = useParams();
+  const [activeTabKey, setActiveTabKey] = React.useState(0);
+  const [tags, setTagData] = useState<TagData>({
+    count: 0,
+    tags: [],
+  });
+  const [cluster, setClusterData] = useState<ClusterData>({
+    count: 0,
+    clusters: [],
+  });
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedCluster = await getCluster(clusterID);
+        setClusterData(fetchedCluster);
+        const fetchedTags = await getClusterTags(clusterID);
+        setTagData(fetchedTags);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const filterTagsByKey = key => {
+    const result = tags.tags.filter(tags => tags.key == key);
+    if (result[0] !== undefined && result[0] != null) {
+      return result[0].value;
+    }
+    return 'unknown';
+  };
+
+  const ownerTag = filterTagsByKey('Owner');
+  const partnerTag = filterTagsByKey('Partner');
+  const handleTabClick = (_, tabIndex) => {
+    setActiveTabKey(tabIndex);
+  };
+
+  const detailsTabContent = (
+    <React.Fragment>
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <Flex direction={{ default: 'column' }}>
+          <FlexItem spacer={{ default: 'spacerLg' }}>
+            <Title headingLevel="h2" size="lg" className="pf-v5-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
+              Cluster details
+            </Title>
+          </FlexItem>
+
+          <FlexItem>
+            <DescriptionList
+              columnModifier={{ lg: '2Col' }}
+              aria-labelledby="open-tabs-example-tabs-list-details-title"
+            >
+              <DescriptionListGroup>
+                <DescriptionListTerm>Name</DescriptionListTerm>
+                <DescriptionListDescription>{clusterID}</DescriptionListDescription>
+                <DescriptionListTerm>Status</DescriptionListTerm>
+                <DescriptionListDescription>{renderStatusLabel(cluster.clusters[0].status)}</DescriptionListDescription>
+              </DescriptionListGroup>
+
+              <DescriptionListGroup>
+                <DescriptionListTerm>Web console</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <a href={cluster.clusters[0].consoleLink} target="_blank" rel="noopener noreferrer">
+                    Console
+                  </a>
+                </DescriptionListDescription>
+                <DescriptionListTerm>Cluster Total Cost (Estimated)</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {parseNumberToCurrency(cluster.clusters[0].totalCost)}
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+
+              <DescriptionListGroup name="Cloud Properties">
+                <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
+                <DescriptionListDescription>{cluster.clusters[0].provider}</DescriptionListDescription>
+                <DescriptionListTerm>Account</DescriptionListTerm>
+                <DescriptionListDescription>{cluster.clusters[0].accountName || 'unknown'}</DescriptionListDescription>
+                <DescriptionListTerm>Region</DescriptionListTerm>
+                <DescriptionListDescription>{cluster.clusters[0].region || 'unknown'}</DescriptionListDescription>
+              </DescriptionListGroup>
+
+              <DescriptionListGroup name="Timestamps">
+                <DescriptionListTerm>Created at</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {parseScanTimestamp(cluster.clusters[0].creationTimestamp)}
+                </DescriptionListDescription>
+                <DescriptionListTerm>Last scanned at</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {parseScanTimestamp(cluster.clusters[0].lastScanTimestamp)}
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+
+              <DescriptionListGroup name="Extra metadata">
+                <DescriptionListTerm>Labels</DescriptionListTerm>
+                <LabelGroupOverflow labels={tags.tags} />
+                <DescriptionListTerm>Partner</DescriptionListTerm>
+                <DescriptionListDescription>{partnerTag}</DescriptionListDescription>
+                <DescriptionListTerm>Owner</DescriptionListTerm>
+                <DescriptionListDescription>{ownerTag}</DescriptionListDescription>
+              </DescriptionListGroup>
+            </DescriptionList>
+          </FlexItem>
+        </Flex>
+      )}
+    </React.Fragment>
+  );
+
+  const serversTabContent = (
+    <TabContentBody>
+      <ClusterDetailsInstances />
+    </TabContentBody>
+  );
+
+  return (
+    <Page>
+      <PageSection variant={PageSectionVariants.light}>
+        <Flex
+          spaceItems={{ default: 'spaceItemsMd' }}
+          alignItems={{ default: 'alignItemsFlexStart' }}
+          flexWrap={{ default: 'nowrap' }}
+        >
+          <FlexItem>
+            <Label color="blue">Cluster</Label>
+          </FlexItem>
+
+          <FlexItem>
+            <Title headingLevel="h1" size="2xl">
+              {clusterID}
+            </Title>
+          </FlexItem>
+
+          <FlexItem align={{ default: 'alignRight' }}>
+            <ClusterDetailsDropdown />
+          </FlexItem>
+        </Flex>
+        {/* Page tabs */}
+      </PageSection>
+      <PageSection type="tabs" variant={PageSectionVariants.light}>
+        <Divider />
+        <Tabs activeKey={activeTabKey} onSelect={handleTabClick} usePageInsets id="open-tabs-example-tabs-list">
+          <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>} tabContentId={`tabContent${0}`} />
+          <Tab eventKey={1} title={<TabTitleText>Servers</TabTitleText>} tabContentId={`tabContent${1}`} />
+        </Tabs>
+      </PageSection>
+      <PageSection variant={PageSectionVariants.light}>
+        <TabContent key={0} eventKey={0} id={`tabContent${0}`} activeKey={activeTabKey} hidden={0 !== activeTabKey}>
+          <TabContentBody>{detailsTabContent}</TabContentBody>
+        </TabContent>
+        <TabContent key={1} eventKey={1} id={`tabContent${1}`} activeKey={activeTabKey} hidden={1 !== activeTabKey}>
+          <TabContentBody>{serversTabContent}</TabContentBody>
+        </TabContent>
+      </PageSection>
+    </Page>
+  );
+};
+export default ClusterDetailsOverview;
