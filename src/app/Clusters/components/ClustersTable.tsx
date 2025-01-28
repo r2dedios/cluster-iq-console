@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { getClusters } from '@app/services/api';
 import { ClustersTableProps } from '../types';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
+import { getPaginatedSlice } from '@app/utils/tablePagination';
+import { TablePagination } from '@app/components/common/TablesPagination';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   searchValue,
@@ -13,6 +15,11 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   providerSelections,
   archived,
 }) => {
+  // Pagination settings
+  const [page, setPage] = React.useState(1);
+  const [perPage, setPerPage] = React.useState(10);
+  const [filteredCount, setFilteredCount] = useState(0);
+
   const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
   const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
@@ -61,9 +68,9 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     if (providerSelections && providerSelections.length > 0) {
       filtered = filtered.filter(cluster => providerSelections.includes(cluster.provider as CloudProvider));
     }
-
-    setFilteredData(filtered);
-  }, [searchValue, clusterData, statusFilter, providerSelections, archived]);
+    setFilteredCount(filtered.length);
+    setFilteredData(getPaginatedSlice(filtered, page, perPage));
+  }, [searchValue, clusterData, statusFilter, providerSelections, archived, page, perPage]);
 
   const columnNames = {
     id: 'ID',
@@ -164,6 +171,13 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
           </Tbody>
         </Table>
       )}
+      <TablePagination
+        itemCount={filteredCount}
+        page={page}
+        perPage={perPage}
+        onSetPage={setPage}
+        onPerPageSelect={setPerPage}
+      />
     </React.Fragment>
   );
 };
