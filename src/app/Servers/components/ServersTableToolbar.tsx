@@ -16,17 +16,17 @@ import {
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
-import { ClustersTableToolbarProps } from '../types';
-import debounce from 'lodash.debounce';
+import { ServersTableToolbarProps } from '../types';
 import { CloudProvider, ClusterStates } from '@app/types/types';
+import debounce from 'lodash.debounce';
 
-export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarProps> = ({
+export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarProps> = ({
   searchValue,
   setSearchValue,
-  statusSelection,
   setStatusSelection,
-  providerSelections,
   setProviderSelections,
+  providerSelections,
+  statusSelection,
   archived,
 }) => {
   const debouncedSearch = React.useMemo(() => debounce(setSearchValue, 300), [setSearchValue]);
@@ -40,19 +40,18 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
   // Set up name search input
   const searchInput = (
     <SearchInput
-      placeholder="Filter by account name"
+      placeholder="Filter by server name"
       value={searchValue}
       onChange={(_event, value) => debouncedSearch(value)}
       onClear={() => debouncedSearch('')}
     />
   );
 
-  // Set up status filter (only for active view)
+  // Set up name input
   const [isStatusMenuOpen, setIsStatusMenuOpen] = React.useState<boolean>(false);
   const statusToggleRef = React.useRef<HTMLButtonElement>(null);
   const statusMenuRef = React.useRef<HTMLDivElement>(null);
   const statusContainerRef = React.useRef<HTMLDivElement>(null);
-
   const handleStatusMenuKeys = (event: KeyboardEvent) => {
     if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
       if (event.key === 'Escape' || event.key === 'Tab') {
@@ -90,7 +89,7 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     setIsStatusMenuOpen(!isStatusMenuOpen);
   };
 
-  function onStatusSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
+  function onStatusSelect(event: React.MouseEvent | undefined, itemId: string | number | undefined) {
     if (typeof itemId === 'undefined') {
       return;
     }
@@ -114,7 +113,6 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     </MenuToggle>
   );
 
-  // Status menu only shows allowed states for active view
   const statusMenu = (
     <Menu ref={statusMenuRef} id="attribute-search-status-menu" onSelect={onStatusSelect} selected={statusSelection}>
       <MenuContent>
@@ -140,7 +138,7 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     </div>
   );
 
-  // Provider filter setup
+  // Set up provider input
   const [isProviderMenuOpen, setIsProviderMenuOpen] = React.useState<boolean>(false);
   const providerToggleRef = React.useRef<HTMLButtonElement>(null);
   const providerMenuRef = React.useRef<HTMLDivElement>(null);
@@ -257,8 +255,8 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     </div>
   );
 
-  // Attribute selector setup
-  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<'Account' | 'Status' | 'Provider'>('Account');
+  // Set up attribute selector
+  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<'Servers' | 'Status' | 'Provider'>('Servers');
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
@@ -317,19 +315,18 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
       {activeAttributeMenu}
     </MenuToggle>
   );
-
-  // Only show Status option in attribute menu for active view
   const attributeMenu = (
+    // eslint-disable-next-line no-console
     <Menu
       ref={attributeMenuRef}
       onSelect={(_ev, itemId) => {
-        setActiveAttributeMenu(itemId?.toString() as 'Account' | 'Status' | 'Provider');
+        setActiveAttributeMenu(itemId?.toString() as 'Servers' | 'Status' | 'Provider');
         setIsAttributeMenuOpen(!isAttributeMenuOpen);
       }}
     >
       <MenuContent>
         <MenuList>
-          <MenuItem itemId="Account">Account</MenuItem>
+          <MenuItem itemId="Servers">Servers</MenuItem>
           {!archived && <MenuItem itemId="Status">Status</MenuItem>}
           <MenuItem itemId="Provider">Provider</MenuItem>
         </MenuList>
@@ -367,8 +364,8 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
               chips={searchValue !== '' ? [searchValue] : ([] as string[])}
               deleteChip={() => setSearchValue('')}
               deleteChipGroup={() => setSearchValue('')}
-              categoryName="Account"
-              showToolbarItem={activeAttributeMenu === 'Account'}
+              categoryName="Name"
+              showToolbarItem={activeAttributeMenu === 'Servers'}
             >
               {searchInput}
             </ToolbarFilter>
@@ -399,4 +396,4 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
   );
 };
 
-export default ClustersTableToolbar;
+export default ServersTableToolbar;

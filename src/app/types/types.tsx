@@ -74,3 +74,9 @@ export enum ClusterStates {
   Terminated = 'Terminated',
   Unknown = 'Unknown',
 }
+
+export enum CloudProvider {
+  AWS = 'AWS',
+  GCP = 'GCP',
+  Azure = 'Azure',
+}

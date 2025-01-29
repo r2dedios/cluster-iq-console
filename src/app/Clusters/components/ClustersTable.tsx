@@ -1,18 +1,25 @@
 import { renderStatusLabel } from '@app/utils/renderStatusLabel';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import { Cluster } from '@app/types/types';
+import { CloudProvider, Cluster, ClusterStates } from '@app/types/types';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getClusters } from '@app/services/api';
 import { ClustersTableProps } from '../types';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
+import { getPaginatedSlice } from '@app/utils/tablePagination';
+import { TablePagination } from '@app/components/common/TablesPagination';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   searchValue,
   statusFilter,
-  cloudProviderFilter,
   providerSelections,
+  archived,
 }) => {
+  // Pagination settings
+  const [page, setPage] = React.useState(1);
+  const [perPage, setPerPage] = React.useState(10);
+  const [filteredCount, setFilteredCount] = useState(0);
+
   const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
   const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
@@ -33,23 +40,37 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     fetchData();
   }, []);
 
+  // In useEffect for filtering
   useEffect(() => {
-    let filtered = clusterData.filter(cluster => cluster.accountName.toLowerCase().includes(searchValue.toLowerCase()));
+    let filtered = clusterData;
 
-    if (statusFilter) {
+    // First, apply view-specific filtering
+    if (archived) {
+      filtered = filtered.filter(cluster => {
+        const isTerminated = cluster.status === ClusterStates.Terminated;
+        return isTerminated;
+      });
+    } else {
+      filtered = filtered.filter(cluster => {
+        const isNotTerminated = cluster.status !== ClusterStates.Terminated;
+        return isNotTerminated;
+      });
+    }
+
+    // Then apply other filters
+    filtered = filtered.filter(cluster => cluster.accountName.toLowerCase().includes(searchValue.toLowerCase()));
+
+    // Apply status filter only for active view
+    if (!archived && statusFilter) {
       filtered = filtered.filter(cluster => cluster.status === statusFilter);
     }
 
-    if (providerSelections.length > 0) {
-      filtered = filtered.filter(cluster => providerSelections.includes(cluster.provider));
+    if (providerSelections && providerSelections.length > 0) {
+      filtered = filtered.filter(cluster => providerSelections.includes(cluster.provider as CloudProvider));
     }
-
-    if (cloudProviderFilter) {
-      filtered = filtered.filter(cluster => cluster.provider === cloudProviderFilter);
-    }
-
-    setFilteredData(filtered);
-  }, [searchValue, clusterData, statusFilter, providerSelections, cloudProviderFilter]);
+    setFilteredCount(filtered.length);
+    setFilteredData(getPaginatedSlice(filtered, page, perPage));
+  }, [searchValue, clusterData, statusFilter, providerSelections, archived, page, perPage]);
 
   const columnNames = {
     id: 'ID',
@@ -150,6 +171,13 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
           </Tbody>
         </Table>
       )}
+      <TablePagination
+        itemCount={filteredCount}
+        page={page}
+        perPage={perPage}
+        onSetPage={setPage}
+        onPerPageSelect={setPerPage}
+      />
     </React.Fragment>
   );
 };

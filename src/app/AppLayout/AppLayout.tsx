@@ -8,23 +8,50 @@ import {
   PageSidebar,
   PageSidebarBody,
   PageToggleButton,
-  Nav,
-  NavItem,
-  NavList,
 } from '@patternfly/react-core';
 import BarsIcon from '@patternfly/react-icons/dist/esm/icons/bars-icon';
 import { RedhatIcon } from '@patternfly/react-icons';
+import SidebarNavigation from './SidebarNavigation';
 
 interface IAppLayout {
   children: React.ReactNode;
 }
 
+const PF_BREAKPOINT_XL = 1200; // Desktop breakpoint
+
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const isDesktop = () => window.innerWidth >= PF_BREAKPOINT_XL;
+  const previousDesktopState = React.useRef(isDesktop());
+
+  const onResize = React.useCallback(() => {
+    const desktop = isDesktop();
+    if (desktop !== previousDesktopState.current) {
+      // Only close sidebar on viewport change
+      setIsSidebarOpen(false);
+    } else if (desktop) {
+      // In desktop mode, open sidebar by default
+      setIsSidebarOpen(true);
+    }
+    previousDesktopState.current = desktop;
+  }, []);
 
   const onSidebarToggle = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen(prev => !prev);
   };
+
+  React.useEffect(() => {
+    window.addEventListener('resize', onResize);
+
+    // Initial setup for desktop
+    if (isDesktop()) {
+      setIsSidebarOpen(true);
+    }
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [onResize]);
 
   const header = (
     <Masthead>
@@ -52,27 +79,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </Masthead>
   );
 
-  const PageNav = (
-    <Nav aria-label="Nav">
-      <NavList>
-        <NavItem itemId={0} to="/">
-          Overview
-        </NavItem>
-        <NavItem itemId={1} to="/accounts">
-          Accounts
-        </NavItem>
-        <NavItem itemId={2} to="/clusters">
-          Clusters
-        </NavItem>
-        <NavItem itemId={3} to="/servers">
-          Servers
-        </NavItem>
-      </NavList>
-    </Nav>
-  );
   const sidebar = (
     <PageSidebar isSidebarOpen={isSidebarOpen} id="vertical-sidebar">
-      <PageSidebarBody>{PageNav}</PageSidebarBody>
+      <PageSidebarBody>
+        <SidebarNavigation />
+      </PageSidebarBody>
     </PageSidebar>
   );
 
