@@ -5,21 +5,27 @@ import {
   MastheadToggle,
   MastheadMain,
   MastheadBrand,
+  MastheadContent,
   PageSidebar,
   PageSidebarBody,
   PageToggleButton,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
 } from '@patternfly/react-core';
 import BarsIcon from '@patternfly/react-icons/dist/esm/icons/bars-icon';
 import { RedhatIcon } from '@patternfly/react-icons';
 import SidebarNavigation from './SidebarNavigation';
+import { useUser } from '../Contexts/UserContext';
 
 interface IAppLayout {
   children: React.ReactNode;
 }
 
-const PF_BREAKPOINT_XL = 1200; // Desktop breakpoint
+const PF_BREAKPOINT_XL = 1200;
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
+  const { userEmail } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const isDesktop = () => window.innerWidth >= PF_BREAKPOINT_XL;
   const previousDesktopState = React.useRef(isDesktop());
@@ -27,10 +33,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const onResize = React.useCallback(() => {
     const desktop = isDesktop();
     if (desktop !== previousDesktopState.current) {
-      // Only close sidebar on viewport change
       setIsSidebarOpen(false);
     } else if (desktop) {
-      // In desktop mode, open sidebar by default
       setIsSidebarOpen(true);
     }
     previousDesktopState.current = desktop;
@@ -42,16 +46,29 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   React.useEffect(() => {
     window.addEventListener('resize', onResize);
-
-    // Initial setup for desktop
     if (isDesktop()) {
       setIsSidebarOpen(true);
     }
-
     return () => {
       window.removeEventListener('resize', onResize);
     };
   }, [onResize]);
+
+  const headerToolbar = (
+    <Toolbar id="toolbar" isFullHeight isStatic style={{ width: '100%' }}>
+      <ToolbarContent style={{ width: '100%' }}>
+        <ToolbarItem style={{ marginLeft: 'auto' }}>
+          <span style={{
+            color: 'white',
+            padding: '0 24px',
+            fontWeight: 'normal'
+          }}>
+            {userEmail || 'User'}
+          </span>
+        </ToolbarItem>
+      </ToolbarContent>
+    </Toolbar>
+  );
 
   const header = (
     <Masthead>
@@ -76,6 +93,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           ClusterIQ
         </MastheadBrand>
       </MastheadMain>
+      <MastheadContent style={{ width: '100%' }}>{headerToolbar}</MastheadContent>
     </Masthead>
   );
 

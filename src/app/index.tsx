@@ -10,8 +10,8 @@ import ServerDetails from './ServerDetails/ServerDetails';
 import Servers from './Servers/Servers';
 import Accounts from './Accounts/Accounts';
 import { NuqsAdapter } from 'nuqs/adapters/react';
+import { UserProvider } from './Contexts/UserContext';
 
-// Debug wrapper for routes
 const RouteDebugWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
@@ -42,11 +42,13 @@ const AppRoutes = (): React.ReactElement => (
 
 const App: React.FunctionComponent = () => (
   <Router>
-    <NuqsAdapter>
-      <AppLayout>
-        <AppRoutes />
-      </AppLayout>
-    </NuqsAdapter>
+    <UserProvider>
+      <NuqsAdapter>
+        <AppLayout>
+          <AppRoutes />
+        </AppLayout>
+      </NuqsAdapter>
+    </UserProvider>
   </Router>
 );
 
