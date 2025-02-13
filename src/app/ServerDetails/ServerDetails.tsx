@@ -117,7 +117,7 @@ const ServerDetails: React.FunctionComponent = () => {
                 <LabelGroupOverflow labels={instanceData.instances[0].tags} />
                 <DescriptionListTerm>Last scanned at</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseScanTimestamp(instanceData.instances[0].creationTimestamp)}
+                  {parseScanTimestamp(instanceData.instances[0].lastScanTimestamp)}
                 </DescriptionListDescription>
                 <DescriptionListTerm>Created at</DescriptionListTerm>
                 <DescriptionListDescription>
