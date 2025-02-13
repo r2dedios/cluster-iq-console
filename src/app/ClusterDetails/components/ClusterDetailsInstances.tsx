@@ -1,6 +1,6 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { Instance } from '@app/types/types';
-import { renderStatusLabel } from '@app/utils/renderStatusLabel';
+import { renderStatusLabel } from '@app/utils/renderUtils';
 import { getClusterInstances } from '@app/services/api';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';

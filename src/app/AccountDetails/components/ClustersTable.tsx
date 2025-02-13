@@ -1,4 +1,4 @@
-import { renderStatusLabel } from '@app/utils/renderStatusLabel';
+import { renderStatusLabel } from '@app/utils/renderUtils';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React from 'react';
 import { Link } from 'react-router-dom';

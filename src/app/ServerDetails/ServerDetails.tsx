@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { renderStatusLabel } from 'src/app/utils/renderStatusLabel';
+import { renderStatusLabel } from '@app/utils/renderUtils';
 import { parseScanTimestamp, parseNumberToCurrency } from 'src/app/utils/parseFuncs';
 import { useParams } from 'react-router-dom';
 import {
