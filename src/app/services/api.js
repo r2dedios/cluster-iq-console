@@ -106,9 +106,13 @@ export async function getClusterTags(clusterID) {
 }
 
 // Start a cluster
-export async function startCluster(clusterID) {
+export async function startCluster(clusterID, userEmail, description) {
   try {
-    const response = await apiClient.post(`clusters/${clusterID}/power_on`);
+    const response = await apiClient.post(`clusters/${clusterID}/power_on`, {
+      triggered_by: userEmail || 'unknown',
+      description: description || null,
+    });
+
     console.log('Power on request was sent.');
     return response.data;
   } catch (error) {
@@ -118,13 +122,38 @@ export async function startCluster(clusterID) {
 }
 
 // Stop a cluster
-export async function stopCluster(clusterID) {
+export async function stopCluster(clusterID, userEmail, description) {
   try {
-    const response = await apiClient.post(`clusters/${clusterID}/power_off`);
+    const response = await apiClient.post(`clusters/${clusterID}/power_off`, {
+      triggered_by: userEmail || 'unknown',
+      description: description || null,
+    });
+
     console.log('Power off request was sent.');
     return response.data;
   } catch (error) {
     console.error(`Error stopping cluster ${clusterID}:`, error);
+    throw error;
+  }
+}
+// Fetch cluster specific events
+export async function getClusterEvents(clusterID) {
+  try {
+    const response = await apiClient.get(`clusters/${clusterID}/events`);
+    return response.data.events;
+  } catch (error) {
+    console.log('Failed to fetch cluster events');
+    throw error;
+  }
+}
+
+// Fetch system-wide events
+export async function getSystemEvents() {
+  try {
+    const response = await apiClient.get(`/events`);
+    return response.data.events;
+  } catch (error) {
+    console.log('Failed to fetch system-wide events');
     throw error;
   }
 }
