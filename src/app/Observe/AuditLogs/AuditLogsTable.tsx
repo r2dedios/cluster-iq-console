@@ -9,7 +9,7 @@ import { EmptyState, EmptyStateHeader, EmptyStateIcon } from '@patternfly/react-
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { getPaginatedSlice } from '@app/utils/tablePagination';
 import { SearchIcon } from '@patternfly/react-icons';
-import { AuditLogsTableProps } from '../types';
+import { AuditLogsTableProps } from './types';
 import { Link } from 'react-router-dom';
 
 const columnNames = {

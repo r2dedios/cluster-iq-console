@@ -16,7 +16,7 @@ import {
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
-import { AuditLogsTableToolbarProps } from '../types';
+import { AuditLogsTableToolbarProps } from './types';
 import debounce from 'lodash.debounce';
 import { CloudProvider, ClusterActions, ResultStatus } from '@app/types/types';
 

@@ -111,3 +111,10 @@ export enum ResultStatus {
   Failed = 'Failed',
   Warning = 'Warning',
 }
+
+export enum ScheduledActionStatus {
+  Success = 'Success',
+  Failed = 'Failed',
+  Pending = 'Pending',
+  Unknown = 'Unknown',
+}

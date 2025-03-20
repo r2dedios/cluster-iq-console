@@ -12,6 +12,7 @@ import Servers from './Servers/Servers';
 import Accounts from './Accounts/Accounts';
 import { NuqsAdapter } from 'nuqs/adapters/react';
 import { UserProvider } from './Contexts/UserContext';
+import Scheduler from './Observe/Scheduler/Scheduler';
 
 const RouteDebugWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -38,6 +39,7 @@ const AppRoutes = (): React.ReactElement => (
       <Route path="servers" element={<Servers />} />
       <Route path="servers/:instanceID" element={<ServerDetails />} />
       <Route path="observe/audit-logs" element={<AuditLogs />} />
+      <Route path="observe/scheduler" element={<Scheduler />} />
     </Routes>
   </RouteDebugWrapper>
 );
