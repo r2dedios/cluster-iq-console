@@ -13,43 +13,36 @@ import {
   Text,
 } from '@patternfly/react-core';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { ClusterStates } from '@app/types/types';
 import { generateCards } from './components/CardData';
 import { CloudProvider } from './types';
 import { renderContent } from './components/CardRenderer';
 import { useDashboardData } from './hooks/useDashboardData';
 
 const AggregateStatusCards: React.FunctionComponent = () => {
-  const { clusterData, clusterPerCP, instances } = useDashboardData();
+  const { inventoryData } = useDashboardData();
 
-  if (!clusterData || !clusterPerCP || !instances) {
+  if (!inventoryData) {
     return <LoadingSpinner />;
   }
 
   const dashboardState = {
     clustersByStatus: {
-      running: clusterData.clusters.filter(cluster => cluster.status === ClusterStates.Running).length,
-      stopped: clusterData.clusters.filter(cluster => cluster.status === ClusterStates.Stopped).length,
-      unknown: clusterData.clusters.filter(cluster => cluster.status === ClusterStates.Unknown).length,
-      terminated: clusterData.clusters.filter(cluster => cluster.status === ClusterStates.Terminated).length,
+      running: inventoryData?.clusters?.running || 0,
+      stopped: inventoryData?.clusters?.stopped || 0,
+      unknown: inventoryData?.clusters?.unknown || 0,
+      terminated: inventoryData?.clusters?.archived || 0,
     },
-    clustersByProvider: clusterPerCP.accounts.reduce(
-      (acc, account) => {
-        const provider = account.provider as CloudProvider;
-        acc[provider] = (acc[provider] || 0) + account.clusterCount;
-        return acc;
-      },
-      {} as Record<CloudProvider, number>
-    ),
-    accountsByProvider: clusterPerCP.accounts.reduce(
-      (acc, account) => {
-        const provider = account.provider as CloudProvider;
-        acc[provider] = (acc[provider] || 0) + 1;
-        return acc;
-      },
-      {} as Record<CloudProvider, number>
-    ),
-    instances: instances.count,
+    clustersByProvider: {
+      [CloudProvider.AWS]: inventoryData.providers.aws?.cluster_count || 0,
+      [CloudProvider.GCP]: inventoryData.providers.gcp?.cluster_count || 0,
+      [CloudProvider.AZURE]: inventoryData.providers.azure?.cluster_count || 0,
+    },
+    accountsByProvider: {
+      [CloudProvider.AWS]: inventoryData.providers.aws?.account_count || 0,
+      [CloudProvider.GCP]: inventoryData.providers.gcp?.account_count || 0,
+      [CloudProvider.AZURE]: inventoryData.providers.azure?.account_count || 0,
+    },
+    instances: inventoryData.instances.count,
   };
 
   const cardData = generateCards(dashboardState);

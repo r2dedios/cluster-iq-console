@@ -233,3 +233,14 @@ export async function getScheduledActions() {
     throw error;
   }
 }
+
+// Fetch the inventory overview
+export async function getInventoryOverview() {
+  try {
+    const response = await apiClient.get(`/overview`);
+    return response.data;
+  } catch (error) {
+    console.log('Failed to fetch inventory overview');
+    throw error;
+  }
+}

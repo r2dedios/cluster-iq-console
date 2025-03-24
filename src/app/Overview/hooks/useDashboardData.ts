@@ -1,44 +1,42 @@
 import { useState, useEffect } from 'react';
-import { getClusters, getAccounts, getInstances } from '@app/services/api';
-import { ClusterData, ClusterPerCP, Instances } from '@app/types/types';
+import { getInventoryOverview } from '@app/services/api';
+
+interface ProviderDetail {
+  account_count: number;
+  cluster_count: number;
+}
+
+interface InventoryData {
+  clusters: {
+    running: number;
+    stopped: number;
+    unknown: number;
+    archived: number;
+  };
+  instances: {
+    count: number;
+  };
+  providers: {
+    aws: ProviderDetail;
+    gcp: ProviderDetail;
+    azure: ProviderDetail;
+  };
+}
 
 export const useDashboardData = () => {
-  const [clusterData, setClusterData] = useState<ClusterData | null>(null);
-  const [clusterPerCP, setClusterPerCP] = useState<ClusterPerCP | null>(null);
-  const [instances, setInstances] = useState<Instances | null>(null);
+  const [inventoryData, setInventoryData] = useState<InventoryData | undefined>();
 
   useEffect(() => {
-    const fetchClusters = async () => {
+    const inventoryOverview = async () => {
       try {
-        const data = await getClusters();
-        setClusterData(data);
+        const data = await getInventoryOverview();
+        setInventoryData(data);
       } catch {
-        console.error('Failed to fetch clusters.');
+        console.error('Failed to fetch inventory data.');
       }
     };
-
-    const fetchAccounts = async () => {
-      try {
-        const data = await getAccounts();
-        setClusterPerCP(data);
-      } catch {
-        console.error('Failed to fetch accounts.');
-      }
-    };
-
-    const fetchInstances = async () => {
-      try {
-        const data = await getInstances();
-        setInstances(data);
-      } catch {
-        console.error('Failed to fetch instances.');
-      }
-    };
-    // Trigger all requests in parallel (avoid waterfall)
-    fetchClusters();
-    fetchAccounts();
-    fetchInstances();
+    inventoryOverview();
   }, []);
 
-  return { clusterData, clusterPerCP, instances };
+  return { inventoryData };
 };
