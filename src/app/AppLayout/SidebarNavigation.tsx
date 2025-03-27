@@ -1,4 +1,4 @@
-import { Nav, NavList, NavItem, NavExpandable } from '@patternfly/react-core';
+import { Nav, NavExpandable, NavItem, NavList } from '@patternfly/react-core';
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -52,6 +52,14 @@ const SidebarNavigation: React.FunctionComponent = () => {
             isActive={location.pathname === '/servers' && location.search === '?archived=true'}
           >
             <NavLink to="/servers?archived=true">History</NavLink>
+          </NavItem>
+        </NavExpandable>
+        <NavExpandable title={'Observe'} groupId={'observe-group'} isExpanded={location.pathname.startsWith('/observe')}>
+          <NavItem groupId={'observe-group'} itemId="audit-logs" isActive={location.pathname === '/observe' && !location.search}>
+            <NavLink to="/observe/audit-logs" end> Audit logs</NavLink>
+          </NavItem>
+          <NavItem groupId={'observe-group'} itemId="scheduler" isActive={location.pathname === '/observe' && !location.search}>
+            <NavLink to="/observe/scheduler" end> Scheduler </NavLink>
           </NavItem>
         </NavExpandable>
       </NavList>

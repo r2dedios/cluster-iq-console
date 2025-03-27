@@ -1,7 +1,7 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TagData, ClusterData, ClusterStates } from '@app/types/types';
 import { parseNumberToCurrency, parseScanTimestamp } from '@app/utils/parseFuncs';
-import { renderStatusLabel } from '@app/utils/renderStatusLabel';
+import { renderStatusLabel } from '@app/utils/renderUtils';
 import {
   Flex,
   FlexItem,
@@ -24,6 +24,7 @@ import {
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClusterDetailsDropdown } from './ClusterDetailsDropdown';
+import { ClusterDetailsEvents } from './ClusterDetailsEvents';
 import { getCluster, getClusterTags } from '@app/services/api';
 import ClusterDetailsInstances from './ClusterDetailsInstances';
 import { LabelGroupOverflow } from '@app/components/common/LabelGroupOverflow';
@@ -156,6 +157,15 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
     []
   );
 
+  const eventsTabContent = useMemo(
+    () => (
+      <TabContentBody>
+        <ClusterDetailsEvents />
+      </TabContentBody>
+    ),
+    []
+  );
+
   return (
     <Page>
       <PageSection variant={PageSectionVariants.light}>
@@ -185,6 +195,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick} usePageInsets id="open-tabs-example-tabs-list">
           <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>} tabContentId={`tabContent${0}`} />
           <Tab eventKey={1} title={<TabTitleText>Servers</TabTitleText>} tabContentId={`tabContent${1}`} />
+          <Tab eventKey={2} title={<TabTitleText>Events</TabTitleText>} tabContentId={`tabContent${2}`} />
         </Tabs>
       </PageSection>
       <PageSection variant={PageSectionVariants.light}>
@@ -193,6 +204,9 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
         </TabContent>
         <TabContent key={1} eventKey={1} id={`tabContent${1}`} activeKey={activeTabKey} hidden={1 !== activeTabKey}>
           <TabContentBody>{serversTabContent}</TabContentBody>
+        </TabContent>
+        <TabContent key={2} eventKey={2} id={`tabContent${2}`} activeKey={activeTabKey} hidden={2 !== activeTabKey}>
+          <TabContentBody>{eventsTabContent}</TabContentBody>
         </TabContent>
       </PageSection>
     </Page>

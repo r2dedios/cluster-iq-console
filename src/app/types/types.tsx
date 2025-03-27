@@ -68,6 +68,26 @@ export type Instances = {
   instances: Instance[];
 };
 
+export type AuditEvent = {
+  id: number;
+  action_name: string;
+  account_id?: string;
+  provider?: string;
+  event_timestamp: string;
+  description?: string;
+  resource_id: string;
+  resource_type: string;
+  result: string;
+  // Should be typed?
+  severity: string;
+  triggered_by: string;
+};
+
+export type AuditEvents = {
+  count: number;
+  events: AuditEvent[];
+};
+
 export enum ClusterStates {
   Running = 'Running',
   Stopped = 'Stopped',
@@ -79,4 +99,22 @@ export enum CloudProvider {
   AWS = 'AWS',
   GCP = 'GCP',
   Azure = 'Azure',
+}
+
+export enum ClusterActions {
+  PowerOn = 'PowerOn',
+  PowerOff = 'PowerOff',
+}
+
+export enum ResultStatus {
+  Success = 'Success',
+  Failed = 'Failed',
+  Warning = 'Warning',
+}
+
+export enum ScheduledActionStatus {
+  Success = 'Success',
+  Failed = 'Failed',
+  Pending = 'Pending',
+  Unknown = 'Unknown',
 }

@@ -7,11 +7,13 @@ import Clusters from './Clusters/Clusters';
 import ClusterDetails from './ClusterDetails/ClusterDetails';
 import AccountDetails from './AccountDetails/AccountDetails';
 import ServerDetails from './ServerDetails/ServerDetails';
+import AuditLogs from '@app/Observe/AuditLogs/AuditLogs';
 import Servers from './Servers/Servers';
 import Accounts from './Accounts/Accounts';
 import { NuqsAdapter } from 'nuqs/adapters/react';
+import { UserProvider } from './Contexts/UserContext';
+import Scheduler from './Observe/Scheduler/Scheduler';
 
-// Debug wrapper for routes
 const RouteDebugWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
@@ -36,17 +38,21 @@ const AppRoutes = (): React.ReactElement => (
       <Route path="clusters/:clusterID" element={<ClusterDetails />} />
       <Route path="servers" element={<Servers />} />
       <Route path="servers/:instanceID" element={<ServerDetails />} />
+      <Route path="observe/audit-logs" element={<AuditLogs />} />
+      <Route path="observe/scheduler" element={<Scheduler />} />
     </Routes>
   </RouteDebugWrapper>
 );
 
 const App: React.FunctionComponent = () => (
   <Router>
-    <NuqsAdapter>
-      <AppLayout>
-        <AppRoutes />
-      </AppLayout>
-    </NuqsAdapter>
+    <UserProvider>
+      <NuqsAdapter>
+        <AppLayout>
+          <AppRoutes />
+        </AppLayout>
+      </NuqsAdapter>
+    </UserProvider>
   </Router>
 );
 

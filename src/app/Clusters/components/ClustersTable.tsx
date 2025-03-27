@@ -1,4 +1,4 @@
-import { renderStatusLabel } from '@app/utils/renderStatusLabel';
+import { renderStatusLabel } from '@app/utils/renderUtils';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { CloudProvider, Cluster, ClusterStates } from '@app/types/types';
 import React, { useState, useEffect } from 'react';

@@ -1,5 +1,5 @@
 import { CloudProvider, ClusterStates, Instances } from '@app/types/types';
-import { renderStatusLabel } from '@app/utils/renderStatusLabel';
+import { renderStatusLabel } from '@app/utils/renderUtils';
 import { Spinner } from '@patternfly/react-core';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';

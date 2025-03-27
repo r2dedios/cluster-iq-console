@@ -2,8 +2,21 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// Custom plugin to inject headers
+const injectHeaders = () => ({
+  name: 'inject-headers',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      // Simulate authenticated user
+      res.setHeader('gap-auth', 'dev@cluster-iq.io');
+      next();
+    });
+  },
+});
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), injectHeaders()],
+
   resolve: {
     alias: {
       '@app': path.resolve(__dirname, 'src/app'),
@@ -29,7 +42,7 @@ export default defineConfig({
       '/api': {
         target: process.env.VITE_CIQ_API_URL || 'http://localhost:8081',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api/v1'),
+        rewrite: path => path.replace(/^\/api/, '/api/v1'),
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
             console.log('proxy error', err);

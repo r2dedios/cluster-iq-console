@@ -1,13 +1,26 @@
-import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { Cluster } from '@app/types/types';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import {
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+  Switch,
+  EmptyState,
+  EmptyStateIcon,
+  Title,
+  EmptyStateBody,
+  EmptyStateVariant,
+} from '@patternfly/react-core';
+import { CubesIcon } from '@patternfly/react-icons';
+import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { ClustersTable } from './ClustersTable';
 import { getAccountClusters } from '@app/services/api';
 import { debug } from '@app/utils/debugLogs';
+import { Cluster } from '@app/types/types';
 
 export const AccountClusters: React.FunctionComponent = () => {
-  const [data, setData] = useState<Cluster[] | []>([]);
+  const [clusters, setClusters] = useState<Cluster[] | []>([]);
+  const [showTerminated, setShowTerminated] = useState(false);
   const [loading, setLoading] = useState(true);
   const { accountName } = useParams();
 
@@ -17,7 +30,7 @@ export const AccountClusters: React.FunctionComponent = () => {
         debug('Fetching data...');
         const fetchedAccountClusters = await getAccountClusters(accountName);
         debug('Fetched Account data:', fetchedAccountClusters);
-        setData(fetchedAccountClusters);
+        setClusters(fetchedAccountClusters);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -28,7 +41,54 @@ export const AccountClusters: React.FunctionComponent = () => {
     fetchData();
   }, [accountName]);
 
-  debug('Rendered with data:', data);
+  // Filter terminated clusters
+  const displayClusters = showTerminated ? clusters : clusters.filter(cluster => cluster.status !== 'Terminated');
 
-  return <React.Fragment>{loading ? <LoadingSpinner /> : <ClustersTable clusters={data} />}</React.Fragment>;
+  const handleToggleChange = (_event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
+    setShowTerminated(checked);
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <>
+      <Toolbar>
+        <ToolbarContent>
+          <ToolbarItem>
+            <Switch
+              id="show-terminated-clusters"
+              label="Show terminated clusters"
+              labelOff="Show terminated clusters"
+              isChecked={showTerminated}
+              onChange={handleToggleChange}
+            />
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
+
+      {displayClusters.length === 0 ? (
+        <EmptyState variant={EmptyStateVariant.sm}>
+          <EmptyStateIcon icon={CubesIcon} />
+          <Title headingLevel="h4" size="md">
+            No clusters found
+          </Title>
+          <EmptyStateBody>
+            {!showTerminated ? (
+              <>
+                There are no active clusters.
+                <br />
+                Toggle 'Show terminated clusters' to view all clusters.
+              </>
+            ) : (
+              'No clusters found for this account.'
+            )}
+          </EmptyStateBody>
+        </EmptyState>
+      ) : (
+        <ClustersTable clusters={displayClusters} />
+      )}
+    </>
+  );
 };
