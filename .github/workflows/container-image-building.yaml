@@ -15,7 +15,6 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    needs: golangci
     permissions:
       contents: read
       packages: write
@@ -93,7 +92,7 @@ jobs:
             --build-arg VERSION=${{ needs.setup.outputs.GIT_TAG }} \
             --build-arg COMMIT=${{ needs.setup.outputs.SHA_COMMIT }} \
             -t quay.io/${{ secrets.QUAY_ORG_NAME }}/cluster-iq-console:${{ needs.setup.outputs.SHA_COMMIT }} \
-            -f ./deployments/containerfiles/Containerfile-console .
+            -f ./deployments/containerfiles/Containerfile .
 
       - name: Pushing Hash based image
         run: |
