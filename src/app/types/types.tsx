@@ -15,6 +15,9 @@ export type Cluster = {
   creationTimestamp: string;
   lastScanTimestamp: string;
   totalCost: number;
+  last15DaysCost: number;
+  LastMonthCost: number;
+  currentMonthSoFarCost: number;
   instances: Instance[];
 };
 

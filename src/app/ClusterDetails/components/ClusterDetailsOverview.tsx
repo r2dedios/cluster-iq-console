@@ -93,24 +93,22 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
               columnModifier={{ lg: '2Col' }}
               aria-labelledby="open-tabs-example-tabs-list-details-title"
             >
-              <DescriptionListGroup>
+              <DescriptionListGroup name="Basic Info">
                 <DescriptionListTerm>Name</DescriptionListTerm>
                 <DescriptionListDescription>{clusterID}</DescriptionListDescription>
                 <DescriptionListTerm>Status</DescriptionListTerm>
                 <DescriptionListDescription>{renderStatusLabel(cluster.clusters[0].status)}</DescriptionListDescription>
               </DescriptionListGroup>
 
-              <DescriptionListGroup>
+              <DescriptionListGroup name="Cluster links">
                 <DescriptionListTerm>Web console</DescriptionListTerm>
                 <DescriptionListDescription>
                   <a href={cluster.clusters[0].consoleLink} target="_blank" rel="noopener noreferrer">
                     Console
                   </a>
                 </DescriptionListDescription>
-                <DescriptionListTerm>Cluster Total Cost (Estimated)</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {parseNumberToCurrency(cluster.clusters[0].totalCost)}
-                </DescriptionListDescription>
+                <DescriptionListTerm>Number of nodes</DescriptionListTerm>
+                <DescriptionListDescription>{String(cluster.clusters[0].instanceCount)}</DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup name="Cloud Properties">
@@ -140,6 +138,25 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
                 <DescriptionListDescription>{partnerTag}</DescriptionListDescription>
                 <DescriptionListTerm>Owner</DescriptionListTerm>
                 <DescriptionListDescription>{ownerTag}</DescriptionListDescription>
+              </DescriptionListGroup>
+
+              <DescriptionListGroup name="Costs">
+                <DescriptionListTerm>Cluster Total Cost (Estimated since the cluster is being scanned)</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {parseNumberToCurrency(cluster.clusters[0].totalCost)}
+                </DescriptionListDescription>
+                <DescriptionListTerm>Cluster Total (Current month so far)</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {parseNumberToCurrency(cluster.clusters[0].currentMonthSoFarCost)}
+                </DescriptionListDescription>
+                <DescriptionListTerm>Cluster Total (Last 15 days)</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {parseNumberToCurrency(cluster.clusters[0].last15DaysCost)}
+                </DescriptionListDescription>
+                <DescriptionListTerm>Cluster Total (Last Month)</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {parseNumberToCurrency(cluster.clusters[0].last15DaysCost)}
+                </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
           </FlexItem>
