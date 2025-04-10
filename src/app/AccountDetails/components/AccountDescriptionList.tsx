@@ -17,6 +17,8 @@ export const AccountDescriptionList: React.FunctionComponent<AccountDescriptionL
         <DescriptionListDescription>{account.name}</DescriptionListDescription>
         <DescriptionListTerm>Account ID</DescriptionListTerm>
         <DescriptionListDescription>{account.id}</DescriptionListDescription>
+        <DescriptionListTerm>Clusters count</DescriptionListTerm>
+        <DescriptionListDescription>{account.clusterCount}</DescriptionListDescription>
       </DescriptionListGroup>
       <DescriptionListGroup>
         <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
