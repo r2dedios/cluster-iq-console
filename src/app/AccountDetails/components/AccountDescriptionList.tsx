@@ -1,5 +1,6 @@
 import { parseNumberToCurrency, parseScanTimestamp } from '@app/utils/parseFuncs';
 import {
+  Divider,
   DescriptionList,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -17,19 +18,24 @@ export const AccountDescriptionList: React.FunctionComponent<AccountDescriptionL
         <DescriptionListDescription>{account.name}</DescriptionListDescription>
         <DescriptionListTerm>Account ID</DescriptionListTerm>
         <DescriptionListDescription>{account.id}</DescriptionListDescription>
-      </DescriptionListGroup>
-      <DescriptionListGroup>
         <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
         <DescriptionListDescription>{account.provider}</DescriptionListDescription>
-        <DescriptionListTerm>Account Total Cost (Estimated)</DescriptionListTerm>
-        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
-      </DescriptionListGroup>
-      <DescriptionListGroup></DescriptionListGroup>
-      <DescriptionListGroup>
         <DescriptionListTerm>Last scanned at</DescriptionListTerm>
         <DescriptionListDescription>{parseScanTimestamp(account.lastScanTimestamp)}</DescriptionListDescription>
       </DescriptionListGroup>
-      <DescriptionListGroup></DescriptionListGroup>
+
+      <DescriptionListGroup>
+        <DescriptionListTerm>Total Cost (Estimated since the account is being scanned) </DescriptionListTerm>
+        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
+        <DescriptionListTerm>Last 15 days cost</DescriptionListTerm>
+        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
+        <DescriptionListTerm>Current month (so far) cost</DescriptionListTerm>
+        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
+        <DescriptionListTerm>Last month cost</DescriptionListTerm>
+        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
+      </DescriptionListGroup>
+
     </DescriptionList>
   );
+
 };
