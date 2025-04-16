@@ -33,6 +33,9 @@ export type Account = {
   clusterCount: number;
   lastScanTimestamp: string;
   totalCost: number;
+  last15DaysCost: number;
+  LastMonthCost: number;
+  currentMonthSoFarCost: number;
   clusters: Record<string, Cluster>;
 };
 
