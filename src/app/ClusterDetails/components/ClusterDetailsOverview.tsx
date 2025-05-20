@@ -155,7 +155,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
                 </DescriptionListDescription>
                 <DescriptionListTerm>Cluster Total (Last Month)</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseNumberToCurrency(cluster.clusters[0].last15DaysCost)}
+                  {parseNumberToCurrency(cluster.clusters[0].lastMonthCost)}
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>

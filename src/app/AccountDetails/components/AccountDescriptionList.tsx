@@ -27,11 +27,11 @@ export const AccountDescriptionList: React.FunctionComponent<AccountDescriptionL
         <DescriptionListTerm>Total Cost (Estimated since the account is being scanned) </DescriptionListTerm>
         <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
         <DescriptionListTerm>Last 15 days cost</DescriptionListTerm>
-        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
+        <DescriptionListDescription>{parseNumberToCurrency(account.last15DaysCost)}</DescriptionListDescription>
         <DescriptionListTerm>Current month (so far) cost</DescriptionListTerm>
-        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
+        <DescriptionListDescription>{parseNumberToCurrency(account.currentMonthSoFarCost)}</DescriptionListDescription>
         <DescriptionListTerm>Last month cost</DescriptionListTerm>
-        <DescriptionListDescription>{parseNumberToCurrency(account.totalCost)}</DescriptionListDescription>
+        <DescriptionListDescription>{parseNumberToCurrency(account.lastMonthCost)}</DescriptionListDescription>
       </DescriptionListGroup>
 
       <DescriptionListGroup></DescriptionListGroup>
