@@ -17,6 +17,7 @@ import BarsIcon from '@patternfly/react-icons/dist/esm/icons/bars-icon';
 import { RedhatIcon } from '@patternfly/react-icons';
 import SidebarNavigation from './SidebarNavigation';
 import { useUser } from '../Contexts/UserContext';
+import { NavLink } from 'react-router-dom';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -58,11 +59,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <Toolbar id="toolbar" isFullHeight isStatic style={{ width: '100%' }}>
       <ToolbarContent style={{ width: '100%' }}>
         <ToolbarItem style={{ marginLeft: 'auto' }}>
-          <span style={{
-            color: 'white',
-            padding: '0 24px',
-            fontWeight: 'normal'
-          }}>
+          <span
+            style={{
+              color: 'white',
+              padding: '0 24px',
+              fontWeight: 'normal',
+            }}
+          >
             {userEmail || 'User'}
           </span>
         </ToolbarItem>
@@ -85,12 +88,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       </MastheadToggle>
       <MastheadMain>
         <RedhatIcon style={{ color: 'red', fontSize: '2.8em' }} />
-        <MastheadBrand
-          style={{ marginLeft: '10px', color: 'white', fontSize: '2em' }}
-          href="https://github.com/RHEcosystemAppEng/cluster-iq"
-          target="_blank"
-        >
-          ClusterIQ
+        <MastheadBrand style={{ marginLeft: '10px', color: 'white', fontSize: '2em' }}>
+          <NavLink to="/" style={{ color: 'white', textDecoration: 'none' }}>
+            ClusterIQ
+          </NavLink>
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent style={{ width: '100%' }}>{headerToolbar}</MastheadContent>
