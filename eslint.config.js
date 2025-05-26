@@ -18,6 +18,7 @@ export default [
       parser: typescriptParser,
       globals: {
         ...globals.browser,
+        __APP_VERSION__: 'readonly',
       },
     },
     plugins: {

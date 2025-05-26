@@ -12,13 +12,19 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
+  Dropdown,
+  DropdownItem,
+  MenuToggle,
+  ToolbarGroup,
+  DropdownList,
 } from '@patternfly/react-core';
 import BarsIcon from '@patternfly/react-icons/dist/esm/icons/bars-icon';
-import { RedhatIcon } from '@patternfly/react-icons';
+import { QuestionCircleIcon, RedhatIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
 import SidebarNavigation from './SidebarNavigation';
 import { useUser } from '../Contexts/UserContext';
 import { NavLink } from 'react-router-dom';
-
+import AboutModalComponent from './AboutModal';
+import { REPOSITORY_URL } from '@app/constants';
 interface IAppLayout {
   children: React.ReactNode;
 }
@@ -28,8 +34,41 @@ const PF_BREAKPOINT_XL = 1200;
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const { userEmail } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isHelpMenuOpen, setIsHelpMenuOpen] = React.useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = React.useState(false);
   const isDesktop = () => window.innerWidth >= PF_BREAKPOINT_XL;
   const previousDesktopState = React.useRef(isDesktop());
+
+  const defaultHelpLinks = [
+    {
+      label: 'Documentation',
+      onClick: () => window.open(REPOSITORY_URL, '_blank'),
+      isExternal: true,
+    },
+    {
+      label: 'About',
+      onClick: () => setIsAboutModalOpen(true),
+    },
+  ];
+
+  const helpDropdownItems = defaultHelpLinks.map(link => {
+    const content = (
+      <>
+        {link.label}
+        {link.isExternal && (
+          <span style={{ marginLeft: 'var(--pf-v5-global--spacer--sm)', verticalAlign: 'middle' }}>
+            {' '}
+            <ExternalLinkAltIcon />
+          </span>
+        )}
+      </>
+    );
+    return (
+      <DropdownItem key={link.label} onClick={link.onClick} component="button">
+        {content}
+      </DropdownItem>
+    );
+  });
 
   const onResize = React.useCallback(() => {
     const desktop = isDesktop();
@@ -58,17 +97,42 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const headerToolbar = (
     <Toolbar id="toolbar" isFullHeight isStatic style={{ width: '100%' }}>
       <ToolbarContent style={{ width: '100%' }}>
-        <ToolbarItem style={{ marginLeft: 'auto' }}>
-          <span
-            style={{
-              color: 'white',
-              padding: '0 24px',
-              fontWeight: 'normal',
-            }}
-          >
-            {userEmail || 'User'}
-          </span>
-        </ToolbarItem>
+        <ToolbarGroup align={{ default: 'alignRight' }} spaceItems={{ default: 'spaceItemsMd' }}>
+          <ToolbarItem>
+            <Dropdown
+              isOpen={isHelpMenuOpen}
+              onOpenChange={setIsHelpMenuOpen}
+              onSelect={() => setIsHelpMenuOpen(false)}
+              popperProps={{
+                position: 'right',
+              }}
+              toggle={toggleRef => (
+                <MenuToggle
+                  ref={toggleRef}
+                  aria-label="Help dropdown"
+                  variant="plain"
+                  onClick={() => setIsHelpMenuOpen(!isHelpMenuOpen)}
+                  isExpanded={isHelpMenuOpen}
+                >
+                  <QuestionCircleIcon />
+                </MenuToggle>
+              )}
+            >
+              <DropdownList>{helpDropdownItems}</DropdownList>
+            </Dropdown>
+          </ToolbarItem>
+          <ToolbarItem>
+            <span
+              style={{
+                color: 'white',
+                padding: '0 24px',
+                fontWeight: 'normal',
+              }}
+            >
+              {userEmail || 'User'}
+            </span>
+          </ToolbarItem>
+        </ToolbarGroup>
       </ToolbarContent>
     </Toolbar>
   );
@@ -109,9 +173,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const pageId = 'primary-app-container';
 
   return (
-    <Page header={header} sidebar={sidebar} mainContainerId={pageId}>
-      {children}
-    </Page>
+    <>
+      <Page header={header} sidebar={sidebar} mainContainerId={pageId}>
+        {children}
+      </Page>
+      <AboutModalComponent isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)}></AboutModalComponent>
+    </>
   );
 };
 

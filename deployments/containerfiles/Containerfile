@@ -17,7 +17,8 @@ RUN npm ci
 COPY index.html .
 COPY vite.config.ts .
 COPY src/ ./src/
-
+ARG VERSION="Unknown"
+ENV VITE_APP_VERSION=${VERSION}
 RUN npm run build
 
 # Reference: https://catalog.redhat.com/software/containers/ubi9/nginx-124/657b066b6c1bc124a1d7ff39
