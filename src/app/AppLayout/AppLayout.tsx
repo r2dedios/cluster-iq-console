@@ -32,10 +32,11 @@ interface IAppLayout {
 const PF_BREAKPOINT_XL = 1200;
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const { userEmail } = useUser();
+  const { userEmail, setUserEmail } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isHelpMenuOpen, setIsHelpMenuOpen] = React.useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = React.useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = React.useState(false);
   const isDesktop = () => window.innerWidth >= PF_BREAKPOINT_XL;
   const previousDesktopState = React.useRef(isDesktop());
 
@@ -69,6 +70,25 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       </DropdownItem>
     );
   });
+  // Reference https://github.com/openshift/oauth-proxy?tab=readme-ov-file#endpoint-documentation
+  const handleLogout = () => {
+    setUserEmail(null);
+    window.location.href = '/oauth/sign_in';
+  };
+
+  const onUserDropdownToggle = () => {
+    setIsUserDropdownOpen(prev => !prev);
+  };
+
+  const onUserDropdownSelect = () => {
+    setIsUserDropdownOpen(false);
+  };
+
+  const userDropdownItems = [
+    <DropdownItem key="logout" onClick={handleLogout}>
+      Log out
+    </DropdownItem>,
+  ];
 
   const onResize = React.useCallback(() => {
     const desktop = isDesktop();
@@ -122,15 +142,28 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             </Dropdown>
           </ToolbarItem>
           <ToolbarItem>
-            <span
-              style={{
-                color: 'white',
-                padding: '0 24px',
-                fontWeight: 'normal',
-              }}
+            <Dropdown
+              isOpen={isUserDropdownOpen}
+              onOpenChange={setIsUserDropdownOpen}
+              onSelect={onUserDropdownSelect}
+              toggle={toggleRef => (
+                <MenuToggle
+                  ref={toggleRef}
+                  aria-label="User menu"
+                  variant="plainText"
+                  onClick={onUserDropdownToggle}
+                  style={{
+                    color: 'white',
+                    padding: '0 24px',
+                    fontWeight: 'normal',
+                  }}
+                >
+                  {userEmail || 'User'}
+                </MenuToggle>
+              )}
             >
-              {userEmail || 'User'}
-            </span>
+              <DropdownList>{userDropdownItems}</DropdownList>
+            </Dropdown>
           </ToolbarItem>
         </ToolbarGroup>
       </ToolbarContent>
