@@ -14,7 +14,7 @@ export enum CloudProvider {
 
 export interface CardContentItem {
   icon?: React.ReactNode;
-  count: string | number;
+  value: string | number;
   ref?: string;
 }
 
@@ -29,4 +29,5 @@ export interface DashboardState {
   clustersByProvider: Record<CloudProvider, number>;
   accountsByProvider: Record<CloudProvider, number>;
   instances: number;
+  lastScanTimestamp?: string;
 }

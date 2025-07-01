@@ -43,6 +43,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       [CloudProvider.AZURE]: inventoryData.providers.azure?.account_count || 0,
     },
     instances: inventoryData.instances.count,
+    lastScanTimestamp: inventoryData.scanner?.last_scan_timestamp,
   };
 
   const cardData = generateCards(dashboardState);
