@@ -5,6 +5,7 @@ import ClustersTableToolbar from './components/ClustersTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, parseAsBoolean, useQueryStates } from 'nuqs';
 import { CloudProvider, ClusterStates } from '@app/types/types';
 import { useLocation } from 'react-router-dom';
+import { FilterCategory } from './types';
 
 const filterParams = {
   status: {
@@ -12,13 +13,14 @@ const filterParams = {
     defaultValue: null as ClusterStates | null,
   },
   provider: parseAsArrayOf(parseAsStringEnum<CloudProvider>(Object.values(CloudProvider))).withDefault([]),
-  accountName: parseAsString.withDefault(''),
+  search: parseAsString.withDefault(''),
+  filterCategory: parseAsStringEnum<FilterCategory>(['accountName', 'clusterName']).withDefault('clusterName'),
   archived: parseAsBoolean.withDefault(false),
 };
 
 const Clusters: React.FunctionComponent = () => {
   const location = useLocation();
-  const [{ status, provider, accountName, archived }, setQuery] = useQueryStates(filterParams);
+  const [{ status, provider, search, filterCategory, archived }, setQuery] = useQueryStates(filterParams);
 
   // React to URL changes
   React.useEffect(() => {
@@ -44,8 +46,10 @@ const Clusters: React.FunctionComponent = () => {
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
           <ClustersTableToolbar
-            searchValue={accountName}
-            setSearchValue={value => setQuery({ accountName: value })}
+            filterCategory={filterCategory}
+            setFilterCategory={value => setQuery({ filterCategory: value })}
+            filterValue={search}
+            setFilterValue={value => setQuery({ search: value })}
             statusSelection={status}
             setStatusSelection={value => setQuery({ status: value })}
             providerSelections={provider}
@@ -53,7 +57,8 @@ const Clusters: React.FunctionComponent = () => {
             archived={archived}
           />
           <ClustersTable
-            searchValue={accountName}
+            filterCategory={filterCategory}
+            filterValue={search}
             statusFilter={status}
             providerSelections={provider}
             archived={archived}
