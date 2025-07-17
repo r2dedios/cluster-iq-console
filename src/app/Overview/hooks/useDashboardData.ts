@@ -21,6 +21,9 @@ interface InventoryData {
     gcp: ProviderDetail;
     azure: ProviderDetail;
   };
+  scanner?: {
+    last_scan_timestamp: string;
+  };
 }
 
 export const useDashboardData = () => {

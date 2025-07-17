@@ -10,7 +10,8 @@ import { getPaginatedSlice } from '@app/utils/tablePagination';
 import { TablePagination } from '@app/components/common/TablesPagination';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
-  searchValue,
+  filterCategory,
+  filterValue,
   statusFilter,
   providerSelections,
   archived,
@@ -19,7 +20,6 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(10);
   const [filteredCount, setFilteredCount] = useState(0);
-
   const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
   const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +58,12 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     }
 
     // Then apply other filters
-    filtered = filtered.filter(cluster => cluster.accountName.toLowerCase().includes(searchValue.toLowerCase()));
+    if (filterValue) {
+      filtered = filtered.filter(cluster => {
+        const targetField = filterCategory === 'clusterName' ? cluster.name : cluster.accountName;
+        return targetField.toLowerCase().includes(filterValue.toLowerCase());
+      });
+    }
 
     // Apply status filter only for active view
     if (!archived && statusFilter) {
@@ -70,7 +75,7 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     }
     setFilteredCount(filtered.length);
     setFilteredData(getPaginatedSlice(filtered, page, perPage));
-  }, [searchValue, clusterData, statusFilter, providerSelections, archived, page, perPage]);
+  }, [filterValue, filterCategory, clusterData, statusFilter, providerSelections, archived, page, perPage]);
 
   const columnNames = {
     id: 'ID',

@@ -16,7 +16,9 @@ const injectHeaders = () => ({
 
 export default defineConfig({
   plugins: [react(), injectHeaders()],
-
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION || 'Development')
+  },
   resolve: {
     alias: {
       '@app': path.resolve(__dirname, 'src/app'),

@@ -16,7 +16,7 @@
     "@patternfly/react-styles": "^5.4.1",
     "@patternfly/react-table": "^5.4.12",
     "@types/react": "^19.0.1",
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "date-fns": "^4.1.0",
     "lodash.debounce": "4.0.8",
     "luxon": "^3.5.0",
@@ -43,7 +43,10 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.3.0",
     "prettier": "^3.4.2",
-    "vite": "^6.0.3"
+    "vite": "^6.3.5"
+  },
+  "overrides": {
+    "@babel/helpers": "7.26.10"
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [
