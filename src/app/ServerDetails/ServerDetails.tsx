@@ -62,7 +62,6 @@ const ServerDetails: React.FunctionComponent = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTabClick = (event, tabIndex) => {

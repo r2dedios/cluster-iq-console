@@ -57,7 +57,6 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filterTagsByKey = key => {
@@ -141,7 +140,9 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
               </DescriptionListGroup>
 
               <DescriptionListGroup name="Costs">
-                <DescriptionListTerm>Cluster Total Cost (Estimated since the cluster is being scanned)</DescriptionListTerm>
+                <DescriptionListTerm>
+                  Cluster Total Cost (Estimated since the cluster is being scanned)
+                </DescriptionListTerm>
                 <DescriptionListDescription>
                   {parseNumberToCurrency(cluster.clusters[0].totalCost)}
                 </DescriptionListDescription>

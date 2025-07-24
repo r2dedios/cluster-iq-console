@@ -57,7 +57,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       </PageSection>
       <PageSection>
         <Grid hasGutter>
-          {Object.entries(cardData).map(([_group, cards], groupIndex) => (
+          {Object.entries(cardData).map(([, cards], groupIndex) => (
             <GridItem key={groupIndex}>
               <Gallery
                 hasGutter

@@ -79,7 +79,7 @@ export const AccountClusters: React.FunctionComponent = () => {
               <>
                 There are no active clusters.
                 <br />
-                Toggle 'Show terminated clusters' to view all clusters.
+                Toggle &apos;Show terminated clusters&apos; to view all clusters.
               </>
             ) : (
               'No clusters found for this account.'

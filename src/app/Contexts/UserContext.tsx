@@ -19,17 +19,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const email = response.headers.get('gap-auth');
         if (email) {
           setUserEmail(email);
-          console.log("User email:", email);
+          console.log('User email:', email);
         }
       })
-      .catch(error => console.error("Error fetching headers:", error));
+      .catch(error => console.error('Error fetching headers:', error));
   }, []);
 
-  return (
-    <UserContext.Provider value={{ userEmail, setUserEmail }}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ userEmail, setUserEmail }}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => {

@@ -1,4 +1,5 @@
 import { ClusterStates } from '@app/types/types';
+import React from 'react';
 import {
   CheckCircleIcon,
   ErrorCircleOIcon,

@@ -195,7 +195,8 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                   <FormHelperText>
                     <HelperText>
                       <HelperTextItem>
-                        Format: minute hour day-of-month month day-of-week (e.g., '0 0 * * *' for daily at midnight)
+                        Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
+                        midnight)
                       </HelperTextItem>
                     </HelperText>
                   </FormHelperText>

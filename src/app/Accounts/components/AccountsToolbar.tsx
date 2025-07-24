@@ -238,7 +238,6 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
     </MenuToggle>
   );
   const attributeMenu = (
-    // eslint-disable-next-line no-console
     <Menu
       ref={attributeMenuRef}
       onSelect={(_ev, itemId) => {

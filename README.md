@@ -1,6 +1,10 @@
 # ClusterIQ Console
 
-ClusterIQ Console provides a web-based user interface for the [ClusterIQ](https://github.com/RHEcosystemAppEng/cluster-iq) project.
+![Version](https://img.shields.io/badge/version-0.4.2-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+
+---
+
+ClusterIQ Console provides a Web UI for the [ClusterIQ](https://github.com/RHEcosystemAppEng/cluster-iq) project.
 
 ## Deployment
 

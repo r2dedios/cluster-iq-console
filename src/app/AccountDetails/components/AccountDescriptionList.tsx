@@ -41,5 +41,4 @@ export const AccountDescriptionList: React.FunctionComponent<AccountDescriptionL
       </DescriptionListGroup>
     </DescriptionList>
   );
-
 };

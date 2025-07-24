@@ -54,12 +54,30 @@ const SidebarNavigation: React.FunctionComponent = () => {
             <NavLink to="/servers?archived=true">History</NavLink>
           </NavItem>
         </NavExpandable>
-        <NavExpandable title={'Observe'} groupId={'observe-group'} isExpanded={location.pathname.startsWith('/observe')}>
-          <NavItem groupId={'observe-group'} itemId="audit-logs" isActive={location.pathname === '/observe' && !location.search}>
-            <NavLink to="/observe/audit-logs" end> Audit logs</NavLink>
+        <NavExpandable
+          title={'Observe'}
+          groupId={'observe-group'}
+          isExpanded={location.pathname.startsWith('/observe')}
+        >
+          <NavItem
+            groupId={'observe-group'}
+            itemId="audit-logs"
+            isActive={location.pathname === '/observe' && !location.search}
+          >
+            <NavLink to="/observe/audit-logs" end>
+              {' '}
+              Audit logs
+            </NavLink>
           </NavItem>
-          <NavItem groupId={'observe-group'} itemId="scheduler" isActive={location.pathname === '/observe' && !location.search}>
-            <NavLink to="/observe/scheduler" end> Scheduler </NavLink>
+          <NavItem
+            groupId={'observe-group'}
+            itemId="scheduler"
+            isActive={location.pathname === '/observe' && !location.search}
+          >
+            <NavLink to="/observe/scheduler" end>
+              {' '}
+              Scheduler{' '}
+            </NavLink>
           </NavItem>
         </NavExpandable>
       </NavList>

@@ -1,4 +1,5 @@
 import { ClusterStates, ResultStatus } from '@app/types/types';
+import React from 'react';
 import { Label } from '@patternfly/react-core';
 import { InfoCircleIcon, ExclamationTriangleIcon, ExclamationCircleIcon, UnknownIcon } from '@patternfly/react-icons';
 
