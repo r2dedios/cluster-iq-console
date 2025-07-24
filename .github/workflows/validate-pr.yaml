@@ -1,0 +1,26 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+
+jobs:
+  golangci:
+    name: Go code format check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Code Prettier
+        run: |
+          make ts-prettier
+
+      - name: Code Linter
+        run: |
+          make ts-eslint
+
+      - name: Typescript type check
+        run: |
+          make ts-tsc

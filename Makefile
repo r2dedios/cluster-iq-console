@@ -72,10 +72,21 @@ stop-dev: ## Stops the container based development env
 restart-dev: ## Restarts the container based env
 restart-dev: stop-dev start-dev
 
+ts-prettier:
+	@echo "### [Running Prettier] ###"
+	@npx prettier --log-level=warn --check ./src
+
+ts-eslint:
+	@echo "### [Running EsLinter] ###"
+	@npx eslint ./src
+
+ts-tsc:
+	@echo "### [Running TSC test] ###"
+	@npx tsc --noEmit
 
 # Tests targets
-test: ## Runs code tests and coverage
-	@echo "### [Running Tests] ###"
+ts-test: ## Runs code tests and coverage
+ts-test: ts-prettier ts-eslint ts-tsc
 
 
 # Set the default target to "help"

@@ -1,9 +1,13 @@
-name: Cluster IQ Container image building
+name: Container image building
 
 on:
   push:
     tags:
-      - v[0-9]*.[0-9]*.[0-9]*
+      - 'v*.*.*'
+
+  pull_request:
+    branches:
+      - main
 
 jobs:
   setup:
@@ -51,6 +55,8 @@ jobs:
           GIT_TAG=$(git tag --points-at HEAD | head -n 1)
           if [[ -n "$GIT_TAG" ]]; then
             echo "Detected Git Tag: $GIT_TAG"
+          else
+            GIT_TAG="$SHA_COMMIT"
           fi
           echo "GIT_TAG=$GIT_TAG" >> $GITHUB_OUTPUT
 
@@ -58,6 +64,7 @@ jobs:
           echo "  * SHA_COMMIT: ${SHA_COMMIT}"
           echo "  * BRANCH_NAME: ${BRANCH_NAME}"
           echo "  * GIT TAG: ${GIT_TAG}"
+
           if [[ $LATEST_TAG == "latest" ]]; then
             echo "  * Including 'latest' tag"
           fi
