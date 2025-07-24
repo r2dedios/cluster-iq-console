@@ -16,8 +16,12 @@ export const generateCards = (state: DashboardState): Record<string, CardDefinit
       layout: CardLayout.MULTI_ICON,
     },
     {
-      title: 'Servers',
-      content: [{ value: state.instances, ref: '/servers' }],
+      title: 'Instances',
+      content: Object.entries(STATUSES).map(([key, status]) => ({
+        icon: status.icon,
+        value: state.instancesByStatus[key] || 0,
+        ref: status.route,
+      })),
       layout: CardLayout.MULTI_ICON,
     },
     {
