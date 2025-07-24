@@ -1,22 +1,18 @@
 ---
 name: ClusterIQ Console Feature request
-about: Suggest an idea for the ClusterIQ Console
-title: '[FEAT-REQ] - <FEATURE DESC>'
-labels: 'feature-request'
+about: Suggest an idea of a new feature for the ClusterIQ Console
+title: '<FEATURE_DESCRIPTION>'
+labels: 'enhancement'
 assignees: ''
 ---
 
-## Is your feature request related to a problem? Please describe.
+## Feature description
 
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+A clear and concise description of what the feature is
 
 ## Describe the solution you'd like
 
 A clear and concise description of what you want to happen.
-
-## Describe alternatives you've considered
-
-A clear and concise description of any alternative solutions or features you've considered.
 
 ## Additional context
 

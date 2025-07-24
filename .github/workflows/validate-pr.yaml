@@ -4,8 +4,8 @@ on:
   pull_request:
 
 jobs:
-  golangci:
-    name: Go code format check
+  code-review:
+    name: Code format and style check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
