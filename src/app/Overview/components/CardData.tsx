@@ -3,7 +3,7 @@ import { CLOUD_PROVIDERS, STATUSES } from '../constants';
 
 export const generateCards = (state: DashboardState): Record<string, CardDefinition[]> => {
   const scannerContent = state.lastScanTimestamp
-    ? `Last scan: ${new Date(state.lastScanTimestamp).toLocaleString()}`
+    ? `${new Date(state.lastScanTimestamp).toLocaleString()}`
     : 'No scan data available';
   const statusCards = [
     {
@@ -25,7 +25,7 @@ export const generateCards = (state: DashboardState): Record<string, CardDefinit
       layout: CardLayout.MULTI_ICON,
     },
     {
-      title: 'Scanners',
+      title: 'Last Scan Timestamp',
       content: [{ value: scannerContent }],
       layout: CardLayout.MULTI_ICON,
     },
