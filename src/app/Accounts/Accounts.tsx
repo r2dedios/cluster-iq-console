@@ -1,9 +1,9 @@
 import { PageSection, PageSectionVariants, Panel, TextContent, Text } from '@patternfly/react-core';
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import AccountsToolbar from './components/AccountsToolbar';
 import AccountsTable from './components/AccountsTable';
 
+import { useLocation } from 'react-router-dom';
 const Accounts: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [providerSelections, setProviderSelections] = useState<string[]>([]);
