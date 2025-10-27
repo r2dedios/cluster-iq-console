@@ -162,6 +162,20 @@ export async function getSystemEvents() {
   }
 }
 
+// Fetch the 10 most recent system events
+export async function getRecentEvents() {
+  try {
+    console.log('Making API call to /events?page=1&page_size=10');
+    const response = await apiClient.get('/events?page=1&page_size=10');
+    console.log('API response:', response.data);
+    return response.data.items || [];
+  } catch (error) {
+    console.error('Failed to fetch recent events:', error);
+    console.error('Error details:', error.response?.data);
+    throw error;
+  }
+}
+
 // Create a scheduled action
 export async function createScheduledAction(actionData) {
   console.log('Sending to API:', JSON.stringify(actionData, null, 2));
