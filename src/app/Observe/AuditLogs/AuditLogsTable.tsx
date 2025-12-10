@@ -135,7 +135,7 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
                 <Link
                   to={
                     event.resource_type === 'instance'
-                      ? `/servers/${event.resource_id}`
+                      ? `/instances/${event.resource_id}`
                       : `/clusters/${event.resource_id}`
                   }
                 >

@@ -118,7 +118,7 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
             {filteredData.instances.map(instance => (
               <Tr key={instance.id}>
                 <Td dataLabel={columnNames.id} width={15}>
-                  <Link to={`/servers/${instance.id}`}>{instance.id}</Link>
+                  <Link to={`/instances/${instance.id}`}>{instance.id}</Link>
                 </Td>
                 <Td dataLabel={columnNames.name} width={30}>
                   {instance.name}

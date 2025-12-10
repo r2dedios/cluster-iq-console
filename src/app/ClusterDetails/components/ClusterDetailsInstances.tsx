@@ -96,7 +96,7 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
             {sortedData.map(instance => (
               <Tr key={instance.id}>
                 <Td dataLabel={instance.id}>
-                  <Link to={`/servers/${instance.id}`}>{instance.id}</Link>
+                  <Link to={`/instances/${instance.id}`}>{instance.id}</Link>
                 </Td>
                 <Td>{instance.name}</Td>
                 <Td>{instance.instanceType}</Td>
