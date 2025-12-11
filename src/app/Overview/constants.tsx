@@ -3,7 +3,6 @@ import React from 'react';
 import {
   CheckCircleIcon,
   ErrorCircleOIcon,
-  WarningTriangleIcon,
   OpenshiftIcon,
   AwsIcon,
   GoogleIcon,
@@ -40,15 +39,10 @@ export const STATUSES = {
     icon: <ErrorCircleOIcon color={PATTERNFLY_COLORS.danger} />,
     route: '/clusters?status=Stopped',
   },
-  unknown: {
-    key: ClusterStates.Unknown,
-    icon: <WarningTriangleIcon color={PATTERNFLY_COLORS.warning} />,
-    route: '/clusters?status=Unknown',
-  },
   terminated: {
     key: ClusterStates.Terminated,
     icon: <ArchiveIcon color={PATTERNFLY_COLORS.disabled} />,
-    route: '/clusters?archived=true',
+    route: '/clusters?status=Terminated',
   },
 } as const;
 

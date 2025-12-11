@@ -27,7 +27,6 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
   setProviderSelections,
   providerSelections,
   statusSelection,
-  archived,
 }) => {
   const debouncedSearch = React.useMemo(() => debounce(setSearchValue, 300), [setSearchValue]);
 
@@ -117,15 +116,15 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
     <Menu ref={statusMenuRef} id="attribute-search-status-menu" onSelect={onStatusSelect} selected={statusSelection}>
       <MenuContent>
         <MenuList>
-          <MenuItem itemId={ClusterStates.Unknown}>{ClusterStates.Unknown}</MenuItem>
           <MenuItem itemId={ClusterStates.Running}>{ClusterStates.Running}</MenuItem>
           <MenuItem itemId={ClusterStates.Stopped}>{ClusterStates.Stopped}</MenuItem>
+          <MenuItem itemId={ClusterStates.Terminated}>{ClusterStates.Terminated}</MenuItem>
         </MenuList>
       </MenuContent>
     </Menu>
   );
 
-  const statusSelect = archived ? null : (
+  const statusSelect = (
     <div ref={statusContainerRef}>
       <Popper
         trigger={statusToggle}
@@ -326,7 +325,7 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
       <MenuContent>
         <MenuList>
           <MenuItem itemId="Servers">Servers</MenuItem>
-          {!archived && <MenuItem itemId="Status">Status</MenuItem>}
+          <MenuItem itemId="Status">Status</MenuItem>
           <MenuItem itemId="Provider">Provider</MenuItem>
         </MenuList>
       </MenuContent>
@@ -368,17 +367,15 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
             >
               {searchInput}
             </ToolbarFilter>
-            {!archived && (
-              <ToolbarFilter
-                chips={statusSelection ? [statusSelection] : []}
-                deleteChip={() => setStatusSelection(null)}
-                deleteChipGroup={() => setStatusSelection(null)}
-                categoryName="Status"
-                showToolbarItem={activeAttributeMenu === 'Status'}
-              >
-                {statusSelect}
-              </ToolbarFilter>
-            )}
+            <ToolbarFilter
+              chips={statusSelection ? [statusSelection] : []}
+              deleteChip={() => setStatusSelection(null)}
+              deleteChipGroup={() => setStatusSelection(null)}
+              categoryName="Status"
+              showToolbarItem={activeAttributeMenu === 'Status'}
+            >
+              {statusSelect}
+            </ToolbarFilter>
             <ToolbarFilter
               chips={providerSelections || []}
               deleteChip={(category, chip) => onProviderMenuSelect(undefined, chip as string)}

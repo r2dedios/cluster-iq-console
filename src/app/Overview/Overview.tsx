@@ -31,7 +31,6 @@ const AggregateStatusCards: React.FunctionComponent = () => {
     clustersByStatus: {
       running: inventoryData?.clusters?.running || 0,
       stopped: inventoryData?.clusters?.stopped || 0,
-      unknown: inventoryData?.clusters?.unknown || 0,
       terminated: inventoryData?.clusters?.archived || 0,
     },
     instancesByStatus: {
