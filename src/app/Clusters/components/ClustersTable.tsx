@@ -1,81 +1,71 @@
 import { renderStatusLabel } from '@app/utils/renderUtils';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import { CloudProvider, Cluster, ClusterStates } from '@app/types/types';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getClusters } from '@app/services/api';
+import { api, ClusterResponseApi } from '@api';
 import { ClustersTableProps } from '../types';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { getPaginatedSlice } from '@app/utils/tablePagination';
 import { TablePagination } from '@app/components/common/TablesPagination';
+import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
+import { fetchAllPages } from '@app/utils/fetchAllPages';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   filterCategory,
   filterValue,
   statusFilter,
   providerSelections,
-  archived,
 }) => {
-  // Pagination settings
-  const [page, setPage] = React.useState(1);
-  const [perPage, setPerPage] = React.useState(10);
-  const [filteredCount, setFilteredCount] = useState(0);
-  const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
-  const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [allClusters, setAllClusters] = useState<ClusterResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(0);
+  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const fetchedClusters = await getClusters();
-        setClusterData(fetchedClusters.clusters);
+        const allItems = await fetchAllPages(async (page, pageSize) => {
+          const { data } = await api.clusters.clustersList({ page, page_size: pageSize });
+          return { items: data.items || [], count: data.count || 0 };
+        });
+        setAllClusters(allItems);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching clusters:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  // In useEffect for filtering
-  useEffect(() => {
-    let filtered = clusterData;
+  let processed = allClusters;
 
-    // First, apply view-specific filtering
-    if (archived) {
-      filtered = filtered.filter(cluster => {
-        const isTerminated = cluster.status === ClusterStates.Terminated;
-        return isTerminated;
-      });
-    } else {
-      filtered = filtered.filter(cluster => {
-        const isNotTerminated = cluster.status !== ClusterStates.Terminated;
-        return isNotTerminated;
-      });
-    }
+  if (filterValue) {
+    const searchField = filterCategory === 'clusterName' ? 'clusterName' : 'accountId';
+    processed = searchItems(processed, filterValue, [searchField]);
+  }
 
-    // Then apply other filters
-    if (filterValue) {
-      filtered = filtered.filter(cluster => {
-        const targetField = filterCategory === 'clusterName' ? cluster.name : cluster.accountName;
-        return targetField.toLowerCase().includes(filterValue.toLowerCase());
-      });
-    }
+  processed = filterByStatus(processed, statusFilter);
+  processed = filterByProvider(processed, providerSelections);
 
-    // Apply status filter only for active view
-    if (!archived && statusFilter) {
-      filtered = filtered.filter(cluster => cluster.status === statusFilter);
-    }
+  if (activeSortIndex !== undefined && activeSortDirection) {
+    const sortFields: (keyof ClusterResponseApi)[] = [
+      'clusterId',
+      'clusterName',
+      'status',
+      'accountId',
+      'provider',
+      'region',
+      'instanceCount',
+      'consoleLink',
+    ];
+    processed = sortItems(processed, sortFields[activeSortIndex], activeSortDirection);
+  }
 
-    if (providerSelections && providerSelections.length > 0) {
-      filtered = filtered.filter(cluster => providerSelections.includes(cluster.provider as CloudProvider));
-    }
-    setFilteredCount(filtered.length);
-    setFilteredData(getPaginatedSlice(filtered, page, perPage));
-  }, [filterValue, filterCategory, clusterData, statusFilter, providerSelections, archived, page, perPage]);
+  const paginated = paginateItems(processed, page, perPage);
 
   const columnNames = {
     id: 'ID',
@@ -88,45 +78,11 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     console: 'Web console',
   };
 
-  //### Sorting ###
-  // Index of the currently active column
-  const [activeSortIndex, setActiveSortIndex] = React.useState<number | undefined>(0);
-  // sort direction of the currently active column
-  const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
-  // sort dropdown expansion
-  const getSortableRowValues = (cluster: Cluster): (string | number | null)[] => {
-    const { id, name, status, accountName, provider, region, instanceCount, consoleLink } = cluster;
-    return [id, name, status, accountName, provider, region, instanceCount, consoleLink];
-  };
-
-  // Note that we perform the sort as part of the component's render logic and not in onSort.
-  // We shouldn't store the list of data in state because we don't want to have to sync that with props.
-  let sortedData = filteredData;
-  if (typeof activeSortIndex === 'number' && activeSortIndex !== null) {
-    sortedData = filteredData.sort((a, b) => {
-      const aValue = getSortableRowValues(a)[activeSortIndex];
-      const bValue = getSortableRowValues(b)[activeSortIndex];
-      if (typeof aValue === 'number') {
-        // Numeric sort
-        if (activeSortDirection === 'asc') {
-          return (aValue as number) - (bValue as number);
-        }
-        return (bValue as number) - (aValue as number);
-      } else {
-        // String sort
-        if (activeSortDirection === 'asc') {
-          return (aValue as string).localeCompare(bValue as string);
-        }
-        return (bValue as string).localeCompare(aValue as string);
-      }
-    });
-  }
-
   const getSortParams = (columnIndex: number): ThProps['sort'] => ({
     sortBy: {
       index: activeSortIndex,
       direction: activeSortDirection,
-      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
+      defaultDirection: 'asc',
     },
     onSort: (_event, index, direction) => {
       setActiveSortIndex(index);
@@ -134,14 +90,13 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     },
     columnIndex,
   });
-  //### --- ###
 
   return (
     <React.Fragment>
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <Table aria-label="Sortable table">
+        <Table aria-label="Clusters table">
           <Thead>
             <Tr>
               <Th sort={getSortParams(0)}>{columnNames.id}</Th>
@@ -155,14 +110,14 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
             </Tr>
           </Thead>
           <Tbody>
-            {sortedData.map(cluster => (
-              <Tr key={cluster.id}>
+            {paginated.map(cluster => (
+              <Tr key={cluster.clusterId}>
                 <Td dataLabel={columnNames.id}>
-                  <Link to={`/clusters/${cluster.id}`}>{cluster.id}</Link>
+                  <Link to={`/clusters/${cluster.clusterId}`}>{cluster.clusterId}</Link>
                 </Td>
-                <Td dataLabel={columnNames.name}>{cluster.name}</Td>
+                <Td dataLabel={columnNames.name}>{cluster.clusterName}</Td>
                 <Td dataLabel={columnNames.status}>{renderStatusLabel(cluster.status)}</Td>
-                <Td dataLabel={columnNames.account}>{cluster.accountName}</Td>
+                <Td dataLabel={columnNames.account}>{cluster.accountId}</Td>
                 <Td dataLabel={columnNames.cloudProvider}>{cluster.provider}</Td>
                 <Td dataLabel={columnNames.region}>{cluster.region}</Td>
                 <Td dataLabel={columnNames.nodes}>{cluster.instanceCount}</Td>
@@ -177,7 +132,7 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
         </Table>
       )}
       <TablePagination
-        itemCount={filteredCount}
+        itemCount={processed.length}
         page={page}
         perPage={perPage}
         onSetPage={setPage}

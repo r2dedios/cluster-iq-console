@@ -1,84 +1,48 @@
-import { CloudProvider, ClusterStates, Instances } from '@app/types/types';
 import { renderStatusLabel } from '@app/utils/renderUtils';
 import { Spinner } from '@patternfly/react-core';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ServersTableProps } from '../types';
-import { getInstances } from '@app/services/api';
+import { api, InstanceResponseApi } from '@api';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { getPaginatedSlice } from '@app/utils/tablePagination';
+import { searchItems, filterByStatus, filterByProvider, paginateItems } from '@app/utils/tableFilters';
+import { fetchAllPages } from '@app/utils/fetchAllPages';
 
 export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   searchValue,
   statusSelection,
   providerSelections,
-  archived,
 }) => {
-  // Pagination settings
-  const [page, setPage] = React.useState(1);
-  const [perPage, setPerPage] = React.useState(10);
-
-  const [instancesData, setInstancesData] = useState<Instances>({
-    count: 0,
-    instances: [],
-  });
-
-  const [filteredData, setFilteredData] = useState<Instances>({
-    count: 0,
-    instances: [],
-  });
-
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [allInstances, setAllInstances] = useState<InstanceResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const fetchedInstances = await getInstances();
-        setInstancesData(fetchedInstances);
+        const allItems = await fetchAllPages(async (page, pageSize) => {
+          const { data } = await api.instances.instancesList({ page, page_size: pageSize });
+          return { items: data.items || [], count: data.count || 0 };
+        });
+        setAllInstances(allItems);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching instances:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  useEffect(() => {
-    let filtered = instancesData.instances;
-    // First, apply view-specific filtering
-    if (archived) {
-      filtered = filtered.filter(instance => {
-        const isTerminated = instance.status === ClusterStates.Terminated;
-        return isTerminated;
-      });
-    } else {
-      filtered = filtered.filter(instance => {
-        const isNotTerminated = instance.status !== ClusterStates.Terminated;
-        return isNotTerminated;
-      });
-    }
+  let filtered = allInstances;
+  filtered = searchItems(filtered, searchValue, ['instanceName']);
+  filtered = filterByStatus(filtered, statusSelection);
+  filtered = filterByProvider(filtered, providerSelections);
 
-    // Then apply other filters
-    filtered = filtered.filter(instance => instance.name.toLowerCase().includes(searchValue.toLowerCase()));
-
-    // Apply status filter only for active view
-    if (!archived && statusSelection) {
-      filtered = filtered.filter(instance => instance.status === statusSelection);
-    }
-
-    if (providerSelections && providerSelections.length > 0) {
-      filtered = filtered.filter(instance => providerSelections.includes(instance.provider as CloudProvider));
-    }
-    // Filtered data with pagination
-    setFilteredData({
-      count: filtered.length,
-      instances: getPaginatedSlice(filtered, page, perPage),
-    });
-  }, [searchValue, instancesData.instances, statusSelection, providerSelections, archived, page, perPage]);
+  const paginated = paginateItems(filtered, page, perPage);
 
   const columnNames = {
     id: 'ID',
@@ -103,7 +67,7 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
           <Spinner size="xl" />
         </div>
       ) : (
-        <Table aria-label="Simple table">
+        <Table aria-label="Servers table">
           <Thead>
             <Tr>
               <Th>{columnNames.id}</Th>
@@ -115,13 +79,13 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
             </Tr>
           </Thead>
           <Tbody>
-            {filteredData.instances.map(instance => (
-              <Tr key={instance.id}>
+            {paginated.map(instance => (
+              <Tr key={instance.instanceId}>
                 <Td dataLabel={columnNames.id} width={15}>
-                  <Link to={`/instances/${instance.id}`}>{instance.id}</Link>
+                  <Link to={`/servers/${instance.instanceId}`}>{instance.instanceId}</Link>
                 </Td>
                 <Td dataLabel={columnNames.name} width={30}>
-                  {instance.name}
+                  {instance.instanceName}
                 </Td>
                 <Td dataLabel={columnNames.status}>{renderStatusLabel(instance.status)}</Td>
                 <Td dataLabel={columnNames.provider}>{instance.provider}</Td>
@@ -133,7 +97,7 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
         </Table>
       )}
       <TablePagination
-        itemCount={filteredData.count}
+        itemCount={filtered.length}
         page={page}
         perPage={perPage}
         onSetPage={setPage}
