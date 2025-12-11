@@ -12,7 +12,7 @@ import {
   TextInput,
 } from '@patternfly/react-core';
 import React from 'react';
-import { PowerAction } from './ClusterDetailsDropdown';
+import { ActionOperations, ActionTypes } from './ClusterDetailsDropdown';
 import DateTimePicker from './DateTimePicker';
 import { CronAction, ScheduledAction } from './types';
 import { useParams } from 'react-router-dom';
@@ -25,13 +25,15 @@ type PowerManagementData = ScheduledAction | CronAction;
 interface ModalPowerManagementProps {
   isOpen: boolean;
   onClose: () => void;
-  action: PowerAction | null;
+  actionOperation: ActionOperations | null;
+  actionType: ActionTypes | null;
 }
 
 export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementProps> = ({
   isOpen,
   onClose,
-  action,
+  actionOperation,
+  actionType,
 }) => {
   const { clusterID } = useParams();
   const { userEmail } = useUser();
@@ -41,10 +43,14 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   const [scheduleType, setScheduleType] = React.useState<'scheduled_action' | 'cron_action'>('scheduled_action');
   const [scheduledDateTime, setScheduledDateTime] = React.useState('');
   const [cronExpression, setCronExpression] = React.useState('');
+  const [action, setAction] = React.useState('');
+
+  const isInstantAction = actionType === ActionTypes.INSTANT_ACTION;
+  const isScheduleAction = actionType === ActionTypes.SCHEDULED_ACTION;
 
   // Reset local state when modal closes
   React.useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || !actionType) {
       setShowDescriptionField(false);
       setDescription('');
       setShowSchedule(false);
@@ -54,70 +60,120 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     }
   }, [isOpen]);
 
-  const handleConfirm = async () => {
-    // Immediate action
-    const finalDescription = showDescriptionField ? description : 'Routine maintenance';
-
-    if (!showSchedule) {
-      if (action === PowerAction.POWER_ON) {
-        startCluster(clusterID, userEmail, finalDescription);
-        debug('Powering on the cluster');
-      } else if (action === PowerAction.POWER_OFF) {
-        debug('Powering off the cluster');
-        stopCluster(clusterID, userEmail, finalDescription);
-      }
-    } else {
-      // Scheduled or Cron Action
-      let powerActionRequest: PowerManagementData;
-      if (scheduleType === 'scheduled_action') {
-        if (!scheduledDateTime) {
-          console.error('Scheduled DateTime is required');
-        }
-        powerActionRequest = {
-          type: 'scheduled_action',
-          time: scheduledDateTime,
-          operation: action === PowerAction.POWER_ON ? 'PowerOnCluster' : 'PowerOffCluster',
-          target: { clusterID },
-          enabled: true,
-          status: 'Pending',
-        };
-      } else {
-        if (!cronExpression.trim()) {
-          console.error('Cron expression is empty');
-          return;
-        }
-
-        powerActionRequest = {
-          type: 'cron_action',
-          cronExp: cronExpression.trim(),
-          operation: action === PowerAction.POWER_ON ? 'PowerOnCluster' : 'PowerOffCluster',
-          target: { clusterID },
-          enabled: true,
-          status: 'Pending',
-        };
-      }
-      // The backend expects an array
-      const requestPayload = [powerActionRequest];
-
-      try {
-        await createScheduledAction(requestPayload);
-        debug('Scheduled action created:', requestPayload);
-      } catch (error) {
-        console.error('Failed to schedule action:', error);
-      }
+  const handleConfirmPower = async () => {
+    // Ensure clusterID is not undefined before performing any action
+    if (!clusterID) {
+      console.error('ClusterID is undefined. Cannot perform power action');
+      return;
     }
+
+    // Use a static description for direct power actions
+    const finalDescription = 'Routine maintenance';
+
+    if (actionOperation === ActionOperations.POWER_ON) {
+      debug('Powering on the cluster');
+      startCluster(clusterID, userEmail, finalDescription);
+    } else if (actionOperation === ActionOperations.POWER_OFF) {
+      debug('Powering off the cluster');
+      stopCluster(clusterID, userEmail, finalDescription);
+    }
+
     onClose();
   };
 
-  return (
-    <div>
+  const handleConfirmSchedule = async () => {
+    // Ensure clusterID is not undefined before performing any action
+    if (!clusterID) {
+      console.error('ClusterID is undefined. Cannot perform scheduled action');
+      return;
+    }
+
+    const finalDescription = showDescriptionField ? description : 'Routine maintenance';
+
+    // Scheduled or Cron Action
+    let powerActionRequest: PowerManagementData;
+    if (scheduleType === 'scheduled_action') {
+      if (!scheduledDateTime) {
+        console.error('Scheduled DateTime is required');
+        return;
+      }
+      powerActionRequest = {
+        type: 'scheduled_action',
+        time: scheduledDateTime,
+        operation: action === ActionOperations.POWER_ON ? 'PowerOnCluster' : 'PowerOffCluster',
+        target: { clusterID },
+        enabled: true,
+        status: 'Pending',
+        description: finalDescription,
+      } as ScheduledAction;
+    } else {
+      if (!cronExpression.trim()) {
+        console.error('Cron expression is empty');
+        return;
+      }
+
+      powerActionRequest = {
+        type: 'cron_action',
+        cronExp: cronExpression.trim(),
+        operation: action === ActionOperations.POWER_ON ? 'PowerOnCluster' : 'PowerOffCluster',
+        target: { clusterID },
+        enabled: true,
+        status: 'Pending',
+        description: finalDescription,
+      } as CronAction;
+    }
+
+    const requestPayload = [powerActionRequest];
+
+    try {
+      await createScheduledAction(requestPayload);
+      debug('Scheduled action created:', requestPayload);
+    } catch (error) {
+      console.error('Failed to schedule action:', error);
+    }
+
+    onClose();
+  };
+
+  // Do not render anything if there is no action
+  if (!isOpen || !actionType) {
+    return null;
+  }
+
+  // Confirmation modal for direct POWER_ON / POWER_OFF
+  if (isInstantAction && !isScheduleAction) {
+    return (
       <Modal
         variant={ModalVariant.small}
-        title="Confirmation"
+        title="Confirm Power On/Off Action"
         isOpen={isOpen}
         onClose={onClose}
         actions={[
-          <Button key="confirm" variant="primary" onClick={handleConfirm}>
+          <Button key="confirm" variant="primary" onClick={handleConfirmPower}>
+            Yes
+          </Button>,
+          <Button key="cancel" variant="link" onClick={onClose}>
+            No
+          </Button>,
+        ]}
+        appendTo={document.body}
+      >
+        {/* Simple confirmation message */}
+        Are you sure you want to {actionOperation} the cluster: {clusterID}?
+      </Modal>
+    );
+  }
+
+  // Scheduling modal for Schedule action
+  if (isScheduleAction) {
+    return (
+      <Modal
+        variant={ModalVariant.small}
+        title="Power management"
+        isOpen={isOpen}
+        onClose={onClose}
+        actions={[
+          <Button key="confirm" variant="primary" onClick={handleConfirmSchedule}>
             Confirm
           </Button>,
           <Button key="cancel" variant="link" onClick={onClose}>
@@ -127,7 +183,24 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
         appendTo={document.body}
       >
         <Stack hasGutter>
-          <StackItem>Are you sure you want to {action?.toLowerCase()} the cluster?</StackItem>
+          <StackItem>Configure the power management options for this cluster.</StackItem>
+
+          {/* Action selection */}
+          <StackItem>
+            <Radio
+              id="action-power-on"
+              name="action"
+              label="Power On"
+              onChange={() => setAction(ActionOperations.POWER_ON)}
+            />
+            <Radio
+              id="action-power-off"
+              name="action"
+              label="Power Off"
+              onChange={() => setAction(ActionOperations.POWER_OFF)}
+            />
+          </StackItem>
+
           {/* Reason management */}
           <StackItem>
             <Checkbox
@@ -149,6 +222,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
               />
             </StackItem>
           )}
+
           {/* Schedule management */}
           <StackItem>
             <Checkbox
@@ -206,6 +280,9 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
           )}
         </Stack>
       </Modal>
-    </div>
-  );
+    );
+  }
+
+  // Fallback: do not render if action does not match any known case
+  return null;
 };
