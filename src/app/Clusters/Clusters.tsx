@@ -5,7 +5,6 @@ import ClustersTableToolbar from './components/ClustersTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, parseAsBoolean, useQueryStates } from 'nuqs';
 import { CloudProvider, ClusterStates } from '@app/types/types';
 import { useLocation } from 'react-router-dom';
-import { FilterCategory } from './types';
 
 const filterParams = {
   status: {
@@ -13,14 +12,14 @@ const filterParams = {
     defaultValue: null as ClusterStates | null,
   },
   provider: parseAsArrayOf(parseAsStringEnum<CloudProvider>(Object.values(CloudProvider))).withDefault([]),
-  search: parseAsString.withDefault(''),
-  filterCategory: parseAsStringEnum<FilterCategory>(['accountName', 'clusterName']).withDefault('clusterName'),
+  clusterName: parseAsString.withDefault(''),
+  accountName: parseAsString.withDefault(''),
   archived: parseAsBoolean.withDefault(false),
 };
 
 const Clusters: React.FunctionComponent = () => {
   const location = useLocation();
-  const [{ status, provider, search, filterCategory, archived }, setQuery] = useQueryStates(filterParams);
+  const [{ status, provider, clusterName, accountName, archived }, setQuery] = useQueryStates(filterParams);
 
   // React to URL changes
   React.useEffect(() => {
@@ -46,10 +45,10 @@ const Clusters: React.FunctionComponent = () => {
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
           <ClustersTableToolbar
-            filterCategory={filterCategory}
-            setFilterCategory={value => setQuery({ filterCategory: value })}
-            filterValue={search}
-            setFilterValue={value => setQuery({ search: value })}
+            clusterNameSearch={clusterName}
+            setClusterNameSearch={value => setQuery({ clusterName: value })}
+            accountNameSearch={accountName}
+            setAccountNameSearch={value => setQuery({ accountName: value })}
             statusSelection={status}
             setStatusSelection={value => setQuery({ status: value })}
             providerSelections={provider}
@@ -57,8 +56,8 @@ const Clusters: React.FunctionComponent = () => {
             archived={archived}
           />
           <ClustersTable
-            filterCategory={filterCategory}
-            filterValue={search}
+            clusterNameSearch={clusterName}
+            accountNameSearch={accountName}
             statusFilter={status}
             providerSelections={provider}
             archived={archived}

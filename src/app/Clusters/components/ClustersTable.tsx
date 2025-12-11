@@ -10,8 +10,8 @@ import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems
 import { fetchAllPages } from '@app/utils/fetchAllPages';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
-  filterCategory,
-  filterValue,
+  clusterNameSearch,
+  accountNameSearch,
   statusFilter,
   providerSelections,
 }) => {
@@ -43,9 +43,12 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
 
   let processed = allClusters;
 
-  if (filterValue) {
-    const searchField = filterCategory === 'clusterName' ? 'clusterName' : 'accountId';
-    processed = searchItems(processed, filterValue, [searchField]);
+  if (clusterNameSearch) {
+    processed = searchItems(processed, clusterNameSearch, ['clusterName']);
+  }
+
+  if (accountNameSearch) {
+    processed = searchItems(processed, accountNameSearch, ['accountId']);
   }
 
   processed = filterByStatus(processed, statusFilter);

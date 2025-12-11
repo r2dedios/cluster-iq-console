@@ -16,36 +16,49 @@ import {
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
-import { ClustersTableToolbarProps, FilterCategory } from '../types';
+import { ClustersTableToolbarProps } from '../types';
 import debounce from 'lodash.debounce';
 import { CloudProvider, ClusterStates } from '@app/types/types';
 
 export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarProps> = ({
-  filterCategory,
-  setFilterCategory,
-  filterValue,
-  setFilterValue,
+  clusterNameSearch,
+  setClusterNameSearch,
+  accountNameSearch,
+  setAccountNameSearch,
   statusSelection,
   setStatusSelection,
   providerSelections,
   setProviderSelections,
 }) => {
-  const debouncedSearch = React.useMemo(() => debounce(setFilterValue, 300), [setFilterValue]);
+  const debouncedClusterSearch = React.useMemo(() => debounce(setClusterNameSearch, 300), [setClusterNameSearch]);
+  const debouncedAccountSearch = React.useMemo(() => debounce(setAccountNameSearch, 300), [setAccountNameSearch]);
+
   React.useEffect(() => {
     return () => {
-      debouncedSearch.cancel();
+      debouncedClusterSearch.cancel();
+      debouncedAccountSearch.cancel();
     };
-  }, [debouncedSearch]);
+  }, [debouncedClusterSearch, debouncedAccountSearch]);
 
-  const categoryName = filterCategory === 'clusterName' ? 'Cluster Name' : 'Account Name';
+  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<
+    'Cluster Name' | 'Account Name' | 'Status' | 'Provider'
+  >('Cluster Name');
 
-  // Set up name search input
-  const searchInput = (
+  const clusterNameInput = (
     <SearchInput
-      placeholder={`Filter by ${categoryName.toLowerCase()}`}
-      value={filterValue}
-      onChange={(_event, value) => debouncedSearch(value)}
-      onClear={() => debouncedSearch('')}
+      placeholder="Filter by cluster name"
+      value={clusterNameSearch}
+      onChange={(_event, value) => debouncedClusterSearch(value)}
+      onClear={() => debouncedClusterSearch('')}
+    />
+  );
+
+  const accountNameInput = (
+    <SearchInput
+      placeholder="Filter by account name"
+      value={accountNameSearch}
+      onChange={(_event, value) => debouncedAccountSearch(value)}
+      onClear={() => debouncedAccountSearch('')}
     />
   );
 
@@ -258,10 +271,6 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     </div>
   );
 
-  // Attribute selector setup
-  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<FilterCategory | 'Status' | 'Provider'>(
-    'clusterName'
-  );
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
@@ -309,14 +318,13 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     }, 0);
     setIsAttributeMenuOpen(!isAttributeMenuOpen);
   };
+
   const onAttributeSelect = (_ev: React.MouseEvent | undefined, itemId: string | number | undefined) => {
-    const selected = itemId as FilterCategory | 'Status' | 'Provider';
+    const selected = itemId as 'Cluster Name' | 'Account Name' | 'Status' | 'Provider';
     setActiveAttributeMenu(selected);
-    if (selected === 'clusterName' || selected === 'accountName') {
-      setFilterCategory(selected);
-    }
     setIsAttributeMenuOpen(!isAttributeMenuOpen);
   };
+
   const attributeToggle = (
     <MenuToggle
       ref={attributeToggleRef}
@@ -324,11 +332,7 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
       isExpanded={isAttributeMenuOpen}
       icon={<FilterIcon />}
     >
-      {activeAttributeMenu === 'clusterName'
-        ? 'Cluster Name'
-        : activeAttributeMenu === 'accountName'
-          ? 'Account Name'
-          : activeAttributeMenu}
+      {activeAttributeMenu}
     </MenuToggle>
   );
 
@@ -336,8 +340,8 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     <Menu ref={attributeMenuRef} onSelect={onAttributeSelect}>
       <MenuContent>
         <MenuList>
-          <MenuItem itemId="clusterName">Cluster Name</MenuItem>
-          <MenuItem itemId="accountName">Account Name</MenuItem>
+          <MenuItem itemId="Cluster Name">Cluster Name</MenuItem>
+          <MenuItem itemId="Account Name">Account Name</MenuItem>
           <MenuItem itemId="Status">Status</MenuItem>
           <MenuItem itemId="Provider">Provider</MenuItem>
         </MenuList>
@@ -362,9 +366,11 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     <Toolbar
       id="attribute-search-filter-toolbar"
       clearAllFilters={() => {
-        setFilterValue('');
+        setClusterNameSearch('');
+        setAccountNameSearch('');
         setStatusSelection(null);
         setProviderSelections(null);
+        setActiveAttributeMenu('Cluster Name');
       }}
     >
       <ToolbarContent>
@@ -372,13 +378,22 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
           <ToolbarGroup variant="filter-group">
             <ToolbarItem>{attributeDropdown}</ToolbarItem>
             <ToolbarFilter
-              chips={filterValue !== '' ? [filterValue] : ([] as string[])}
-              deleteChip={() => setFilterValue('')}
-              deleteChipGroup={() => setFilterValue('')}
-              categoryName={categoryName}
-              showToolbarItem={activeAttributeMenu === 'accountName' || activeAttributeMenu === 'clusterName'}
+              chips={clusterNameSearch !== '' ? [clusterNameSearch] : ([] as string[])}
+              deleteChip={() => setClusterNameSearch('')}
+              deleteChipGroup={() => setClusterNameSearch('')}
+              categoryName="Cluster Name"
+              showToolbarItem={activeAttributeMenu === 'Cluster Name'}
             >
-              {searchInput}
+              {clusterNameInput}
+            </ToolbarFilter>
+            <ToolbarFilter
+              chips={accountNameSearch !== '' ? [accountNameSearch] : ([] as string[])}
+              deleteChip={() => setAccountNameSearch('')}
+              deleteChipGroup={() => setAccountNameSearch('')}
+              categoryName="Account Name"
+              showToolbarItem={activeAttributeMenu === 'Account Name'}
+            >
+              {accountNameInput}
             </ToolbarFilter>
             <ToolbarFilter
               chips={statusSelection ? [statusSelection] : []}
