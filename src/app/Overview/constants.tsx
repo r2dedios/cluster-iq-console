@@ -9,6 +9,8 @@ import {
   GoogleIcon,
   AzureIcon,
   ArchiveIcon,
+  DatabaseIcon,
+  RegistryIcon,
 } from '@patternfly/react-icons';
 import { CloudProvider } from './types';
 
@@ -69,4 +71,9 @@ export const CLOUD_PROVIDERS = {
     icon: CLUSTER_ICON,
     providerIcon: PROVIDER_ICONS[CloudProvider.AZURE],
   },
+} as const;
+
+export const TOTAL_COUNT_ICONS = {
+  clusters: <DatabaseIcon color={PATTERNFLY_COLORS.disabled} />,
+  instances: <RegistryIcon color={PATTERNFLY_COLORS.disabled} />,
 } as const;

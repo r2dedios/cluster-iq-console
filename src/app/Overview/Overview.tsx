@@ -35,10 +35,9 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       terminated: inventoryData?.clusters?.archived || 0,
     },
     instancesByStatus: {
-      running: 0, // Not available in current API
-      stopped: 0, // Not available in current API
-      unknown: 0, // Not available in current API
-      terminated: 0, // Not available in current API
+      running: inventoryData?.instances?.running || 0,
+      stopped: inventoryData?.instances?.stopped || 0,
+      terminated: inventoryData?.instances?.archived || 0,
     },
     clustersByProvider: {
       [CloudProvider.AWS]: inventoryData.providers.aws?.cluster_count || 0,
@@ -50,7 +49,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       [CloudProvider.GCP]: inventoryData.providers.gcp?.account_count || 0,
       [CloudProvider.AZURE]: inventoryData.providers.azure?.account_count || 0,
     },
-    instances: inventoryData.instances.count,
+    instances: (inventoryData?.instances?.running || 0) + (inventoryData?.instances?.stopped || 0),
     lastScanTimestamp: inventoryData.scanner?.last_scan_timestamp,
   };
 
@@ -83,7 +82,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
                     ) : cards[0].customComponent ? (
                       cards[0].customComponent
                     ) : (
-                      renderContent(cards[0].content, cards[0].layout)
+                      renderContent(cards[0].content, cards[0].layout, cards[0].totalCount)
                     )}
                   </CardBody>
                 </Card>
@@ -100,7 +99,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
                   {cards.map((card, cardIndex) => (
                     <Card style={{ textAlign: 'center' }} key={`${groupIndex}${cardIndex}`} component="div">
                       <CardTitle>{card.title}</CardTitle>
-                      <CardBody>{renderContent(card.content, card.layout)}</CardBody>
+                      <CardBody>{renderContent(card.content, card.layout, card.totalCount)}</CardBody>
                     </Card>
                   ))}
                 </Gallery>

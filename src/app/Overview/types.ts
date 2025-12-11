@@ -18,11 +18,18 @@ export interface CardContentItem {
   ref?: string;
 }
 
+export interface CardTotalCount {
+  icon: React.ReactNode;
+  value: number;
+  label: string;
+}
+
 export interface CardDefinition {
   title: string;
   content: CardContentItem[];
   layout: CardLayout;
   customComponent?: React.ReactNode;
+  totalCount?: CardTotalCount;
 }
 
 export interface DashboardState {

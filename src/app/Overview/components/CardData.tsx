@@ -1,5 +1,5 @@
 import { CardDefinition, CardLayout, DashboardState } from '../types';
-import { CLOUD_PROVIDERS, STATUSES } from '../constants';
+import { CLOUD_PROVIDERS, STATUSES, TOTAL_COUNT_ICONS } from '../constants';
 import { Event } from '@app/types/events';
 import { ActivityTable } from './ActivityTable';
 import React from 'react';
@@ -8,6 +8,9 @@ export const generateCards = (state: DashboardState, events: Event[] = []): Reco
   const scannerContent = state.lastScanTimestamp
     ? `${new Date(state.lastScanTimestamp).toLocaleString()}`
     : 'No scan data available';
+  const totalClusters = (state.clustersByStatus.running || 0) + (state.clustersByStatus.stopped || 0);
+  const totalInstances = state.instances || 0;
+
   const statusCards = [
     {
       title: 'Clusters',
@@ -17,6 +20,11 @@ export const generateCards = (state: DashboardState, events: Event[] = []): Reco
         ref: status.route,
       })),
       layout: CardLayout.MULTI_ICON,
+      totalCount: {
+        icon: TOTAL_COUNT_ICONS.clusters,
+        value: totalClusters,
+        label: 'Total',
+      },
     },
     {
       title: 'Instances',
@@ -26,6 +34,11 @@ export const generateCards = (state: DashboardState, events: Event[] = []): Reco
         ref: status.route,
       })),
       layout: CardLayout.MULTI_ICON,
+      totalCount: {
+        icon: TOTAL_COUNT_ICONS.instances,
+        value: totalInstances,
+        label: 'Total',
+      },
     },
     {
       title: 'Last Scan Timestamp',

@@ -14,7 +14,9 @@ interface InventoryData {
     archived: number;
   };
   instances: {
-    count: number;
+    running: number;
+    stopped: number;
+    archived: number;
   };
   providers: {
     aws: ProviderDetail;
