@@ -1,12 +1,13 @@
+import React from 'react';
 import { CardDefinition, CardLayout, DashboardState } from '../types';
 import { CLOUD_PROVIDERS, STATUSES, TOTAL_COUNT_ICONS } from '../constants';
 import { Event } from '@app/types/events';
 import { ActivityTable } from './ActivityTable';
-import React from 'react';
 
 export const generateCards = (state: DashboardState, events: Event[] = []): Record<string, CardDefinition[]> => {
-  const scannerContent = state.lastScanTimestamp
-    ? `${new Date(state.lastScanTimestamp).toLocaleString()}`
+  const isValidTimestamp = state.lastScanTimestamp && state.lastScanTimestamp !== '0001-01-01T00:00:00Z';
+  const scannerContent = isValidTimestamp
+    ? `${new Date(state.lastScanTimestamp!).toLocaleString()}`
     : 'No scan data available';
   const totalClusters = (state.clustersByStatus.running || 0) + (state.clustersByStatus.stopped || 0);
   const totalInstances = state.instances || 0;

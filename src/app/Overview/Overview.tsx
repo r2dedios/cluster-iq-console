@@ -39,17 +39,17 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       terminated: inventoryData?.instances?.archived || 0,
     },
     clustersByProvider: {
-      [CloudProvider.AWS]: inventoryData.providers.aws?.cluster_count || 0,
-      [CloudProvider.GCP]: inventoryData.providers.gcp?.cluster_count || 0,
-      [CloudProvider.AZURE]: inventoryData.providers.azure?.cluster_count || 0,
+      [CloudProvider.AWS]: inventoryData.providers?.aws?.clusterCount || 0,
+      [CloudProvider.GCP]: inventoryData.providers?.gcp?.clusterCount || 0,
+      [CloudProvider.AZURE]: inventoryData.providers?.azure?.clusterCount || 0,
     },
     accountsByProvider: {
-      [CloudProvider.AWS]: inventoryData.providers.aws?.account_count || 0,
-      [CloudProvider.GCP]: inventoryData.providers.gcp?.account_count || 0,
-      [CloudProvider.AZURE]: inventoryData.providers.azure?.account_count || 0,
+      [CloudProvider.AWS]: inventoryData.providers?.aws?.accountCount || 0,
+      [CloudProvider.GCP]: inventoryData.providers?.gcp?.accountCount || 0,
+      [CloudProvider.AZURE]: inventoryData.providers?.azure?.accountCount || 0,
     },
     instances: (inventoryData?.instances?.running || 0) + (inventoryData?.instances?.stopped || 0),
-    lastScanTimestamp: inventoryData.scanner?.last_scan_timestamp,
+    lastScanTimestamp: inventoryData?.scanner?.lastScanTimestamp,
   };
 
   const cardData = generateCards(dashboardState, events);
