@@ -17,6 +17,8 @@ import {
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { AccountsToolbarProps } from '../types';
+import { CloudProvider } from '@app/types/types';
+import debounce from 'lodash.debounce';
 
 export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
   searchValue,
@@ -24,49 +26,23 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
   providerSelections,
   setProviderSelections,
 }) => {
-  const onSearchChange = (value: string) => {
-    setSearchValue(value);
-  };
+  const debouncedSearch = React.useMemo(() => debounce(setSearchValue, 300), [setSearchValue]);
 
-  // Set up name search input
+  React.useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
   const searchInput = (
     <SearchInput
       placeholder="Filter by account name"
       value={searchValue}
-      onChange={(_event, value) => onSearchChange(value)}
-      onClear={() => onSearchChange('')}
+      onChange={(_event, value) => debouncedSearch(value)}
+      onClear={() => debouncedSearch('')}
     />
   );
 
-  // Set up name input
-  const [isStatusMenuOpen, setIsStatusMenuOpen] = React.useState<boolean>(false);
-  const statusToggleRef = React.useRef<HTMLButtonElement>(null);
-  const statusMenuRef = React.useRef<HTMLDivElement>(null);
-  const handleStatusMenuKeys = (event: KeyboardEvent) => {
-    if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsStatusMenuOpen(!isStatusMenuOpen);
-        statusToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleStatusClickOutside = (event: MouseEvent) => {
-    if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
-      setIsStatusMenuOpen(false);
-    }
-  };
-
-  React.useEffect(() => {
-    window.addEventListener('keydown', handleStatusMenuKeys);
-    window.addEventListener('click', handleStatusClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleStatusMenuKeys);
-      window.removeEventListener('click', handleStatusClickOutside);
-    };
-  }, [isStatusMenuOpen, statusMenuRef]);
-
-  // Set up provider input
   const [isProviderMenuOpen, setIsProviderMenuOpen] = React.useState<boolean>(false);
   const providerToggleRef = React.useRef<HTMLButtonElement>(null);
   const providerMenuRef = React.useRef<HTMLDivElement>(null);
@@ -114,12 +90,13 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
       return;
     }
 
-    const itemStr = itemId.toString();
-
+    const provider = itemId as CloudProvider;
     setProviderSelections(
-      providerSelections.includes(itemStr)
-        ? providerSelections.filter(selection => selection !== itemStr)
-        : [itemStr, ...providerSelections]
+      providerSelections && providerSelections.includes(provider)
+        ? providerSelections.filter(selection => selection !== provider)
+        : provider
+          ? [provider, ...(providerSelections || [])]
+          : []
     );
   }
 
@@ -128,9 +105,10 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
       ref={providerToggleRef}
       onClick={onProviderMenuToggleClick}
       isExpanded={isProviderMenuOpen}
-      {...(providerSelections.length > 0 && {
-        badge: <Badge isRead>{providerSelections.length}</Badge>,
-      })}
+      {...(providerSelections &&
+        providerSelections.length > 0 && {
+          badge: <Badge isRead>{providerSelections.length}</Badge>,
+        })}
       style={
         {
           width: '200px',
@@ -150,13 +128,17 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
     >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={providerSelections.includes('AWS')} itemId="AWS">
+          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.AWS)} itemId={CloudProvider.AWS}>
             AWS
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={providerSelections.includes('GCP')} itemId="GCP">
+          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.GCP)} itemId={CloudProvider.GCP}>
             Google Cloud
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={providerSelections.includes('Azure')} itemId="Azure">
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(CloudProvider.Azure)}
+            itemId={CloudProvider.Azure}
+          >
             Azure
           </MenuItem>
         </MenuList>
@@ -290,8 +272,8 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
             </ToolbarFilter>
 
             <ToolbarFilter
-              chips={providerSelections}
-              deleteChip={(category, chip) => onProviderMenuSelect(undefined, chip as string)}
+              chips={providerSelections || []}
+              deleteChip={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
               deleteChipGroup={() => setProviderSelections([])}
               categoryName="Provider"
               showToolbarItem={activeAttributeMenu === 'Provider'}

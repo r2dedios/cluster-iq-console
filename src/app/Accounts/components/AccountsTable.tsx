@@ -7,9 +7,11 @@ import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByProvider, paginateItems } from '@app/utils/tableFilters';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
 
+import { CloudProvider } from '@app/types/types';
+
 export const AccountsTable: React.FunctionComponent<{
   searchValue: string;
-  providerSelections: string[] | null;
+  providerSelections: CloudProvider[] | null;
 }> = ({ searchValue, providerSelections }) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);

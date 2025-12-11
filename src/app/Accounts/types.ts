@@ -1,20 +1,8 @@
-export interface AccountsTableItem {
-  clusterCount: number;
-  name: string;
-  provider: string;
-}
-
-export interface AccountsTableProps {
-  cloudProviderFilter: string | null;
-  providerSelections;
-  searchValue: string;
-  statusFilter: string | null;
-}
+import { CloudProvider } from '@app/types/types';
 
 export interface AccountsToolbarProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
-  providerSelections: string[];
-  setProviderSelections: (value: string[]) => void;
-  onSearchChange: (value: string) => void;
+  providerSelections: CloudProvider[] | null;
+  setProviderSelections: (value: CloudProvider[] | null) => void;
 }
