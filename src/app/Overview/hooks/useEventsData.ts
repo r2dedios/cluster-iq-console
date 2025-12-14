@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getRecentEvents } from '@app/services/api';
+import { api } from '@api';
 import { Event } from '@app/types/events';
 
 export const useEventsData = () => {
@@ -13,9 +13,9 @@ export const useEventsData = () => {
         setLoading(true);
         setError(null);
         console.log('Fetching recent events...');
-        const data = await getRecentEvents();
+        const { data } = await api.events.eventsList({ page: 1, page_size: 10 });
         console.log('Events data received:', data);
-        setEvents(data);
+        setEvents(data.items || []);
       } catch (err) {
         setError('Failed to fetch events');
         console.error('Error fetching events:', err);

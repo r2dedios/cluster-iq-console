@@ -18,7 +18,7 @@ import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { ClustersTableToolbarProps } from '../types';
 import debounce from 'lodash.debounce';
-import { CloudProvider, ClusterStates } from '@app/types/types';
+import { ResourceStatusApi, ProviderApi } from '@api';
 
 export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarProps> = ({
   clusterNameSearch,
@@ -110,7 +110,7 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
       return;
     }
 
-    setStatusSelection(itemId as ClusterStates);
+    setStatusSelection(itemId as ResourceStatusApi);
     setIsStatusMenuOpen(!isStatusMenuOpen);
   }
 
@@ -133,9 +133,9 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     <Menu ref={statusMenuRef} id="attribute-search-status-menu" onSelect={onStatusSelect} selected={statusSelection}>
       <MenuContent>
         <MenuList>
-          <MenuItem itemId={ClusterStates.Running}>{ClusterStates.Running}</MenuItem>
-          <MenuItem itemId={ClusterStates.Stopped}>{ClusterStates.Stopped}</MenuItem>
-          <MenuItem itemId={ClusterStates.Terminated}>{ClusterStates.Terminated}</MenuItem>
+          <MenuItem itemId={ResourceStatusApi.Running}>{ResourceStatusApi.Running}</MenuItem>
+          <MenuItem itemId={ResourceStatusApi.Stopped}>{ResourceStatusApi.Stopped}</MenuItem>
+          <MenuItem itemId={ResourceStatusApi.Terminated}>{ResourceStatusApi.Terminated}</MenuItem>
         </MenuList>
       </MenuContent>
     </Menu>
@@ -240,16 +240,24 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
     >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.AWS)} itemId={CloudProvider.AWS}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.AWSProvider)}
+            itemId={ProviderApi.AWSProvider}
+          >
             AWS
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.GCP)} itemId={CloudProvider.GCP}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.GCPProvider)}
+            itemId={ProviderApi.GCPProvider}
+          >
             Google Cloud
           </MenuItem>
           <MenuItem
             hasCheckbox
-            isSelected={providerSelections?.includes(CloudProvider.Azure)}
-            itemId={CloudProvider.Azure}
+            isSelected={providerSelections?.includes(ProviderApi.AzureProvider)}
+            itemId={ProviderApi.AzureProvider}
           >
             Azure
           </MenuItem>

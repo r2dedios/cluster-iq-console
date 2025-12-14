@@ -1,13 +1,13 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { AuditEvent, CloudProvider, ClusterActions, ResultStatus } from '@app/types/types';
-import { getSystemEvents } from '@app/services/api';
+import { ClusterActions, ResultStatus } from '@app/types/types';
+import { api, SystemEventResponseApi } from '@api';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React, { useEffect, useState } from 'react';
 import { getResultIcon } from '@app/utils/renderUtils';
 import { useTableSort } from '@app/hooks/useTableSort.tsx';
 import { EmptyState, EmptyStateHeader, EmptyStateIcon } from '@patternfly/react-core';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { getPaginatedSlice } from '@app/utils/tablePagination';
+import { paginateItems } from '@app/utils/tableFilters';
 import { SearchIcon } from '@patternfly/react-icons';
 import { AuditLogsTableProps } from './types';
 import { Link } from 'react-router-dom';
@@ -41,15 +41,15 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   const [perPage, setPerPage] = React.useState(10);
   const [filteredCount, setFilteredCount] = useState(0);
 
-  const [data, setData] = useState<AuditEvent[]>([]);
+  const [data, setData] = useState<SystemEventResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState<AuditEvent[]>([]);
+  const [filteredData, setFilteredData] = useState<SystemEventResponseApi[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const systemEvents = await getSystemEvents();
-        setData(systemEvents);
+        const { data: systemEvents } = await api.events.eventsList();
+        setData(systemEvents.items || []);
       } catch (error) {
         console.error('Error fetching system wide events:', error);
       } finally {
@@ -65,15 +65,15 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
     let filtered = data;
 
     if (accountName) {
-      filtered = filtered.filter(event => event.account_id?.toLowerCase().includes(accountName.toLowerCase()));
+      filtered = filtered.filter(event => event.accountId?.toLowerCase().includes(accountName.toLowerCase()));
     }
 
     if (action?.length) {
-      filtered = filtered.filter(event => action.includes(event.action_name as ClusterActions));
+      filtered = filtered.filter(event => action.includes(event.action as ClusterActions));
     }
 
     if (provider?.length) {
-      filtered = filtered.filter(event => provider.includes(event.provider as CloudProvider));
+      filtered = filtered.filter(event => event.provider && provider.some(p => p === event.provider));
     }
 
     if (result?.length) {
@@ -81,29 +81,33 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
     }
 
     if (triggered_by) {
-      filtered = filtered.filter(event => event.triggered_by?.toLowerCase().includes(triggered_by.toLowerCase()));
+      filtered = filtered.filter(event => event.triggeredBy?.toLowerCase().includes(triggered_by.toLowerCase()));
     }
 
     setFilteredCount(filtered.length);
-    setFilteredData(getPaginatedSlice(filtered, page, perPage));
+    setFilteredData(paginateItems(filtered, page, perPage));
   }, [data, accountName, action, provider, result, triggered_by, page, perPage]);
 
-  const getSortableRowValues = (event: AuditEvent): (string | number | null)[] => {
-    const { action_name, result, resource_id, account_id, provider, triggered_by, description, event_timestamp } =
-      event;
+  const getSortableRowValues = (event: SystemEventResponseApi): (string | number | null)[] => {
+    const { action, result, resourceId, accountId, provider, triggeredBy, description, timestamp } = event;
     return [
-      action_name,
-      result,
-      resource_id,
-      account_id ?? null,
+      action ?? null,
+      result ?? null,
+      resourceId ?? null,
+      accountId ?? null,
       provider ?? null,
-      triggered_by,
+      triggeredBy ?? null,
       description ?? null,
-      event_timestamp,
+      timestamp ?? null,
     ];
   };
 
-  const { sortedData, getSortParams } = useTableSort<AuditEvent>(filteredData, getSortableRowValues, 7, 'desc');
+  const { sortedData, getSortParams } = useTableSort<SystemEventResponseApi>(
+    filteredData,
+    getSortableRowValues,
+    7,
+    'desc'
+  );
 
   if (loading) return <LoadingSpinner />;
   if (filteredCount === 0) return <EmptyStateNoFound />;
@@ -126,27 +130,27 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
         <Tbody>
           {sortedData.map(event => (
             <Tr key={event.id}>
-              <Td>{event.action_name}</Td>
+              <Td>{event.action}</Td>
               <Td>
                 {getResultIcon(event.result as ResultStatus)} {event.result}
               </Td>
               {/*TODO. Hardcoded, adjust later if needed*/}
-              <Td dataLabel={event.resource_id}>
+              <Td dataLabel={event.resourceId}>
                 <Link
                   to={
-                    event.resource_type === 'instance'
-                      ? `/instances/${event.resource_id}`
-                      : `/clusters/${event.resource_id}`
+                    event.resourceType === 'instance'
+                      ? `/instances/${event.resourceId}`
+                      : `/clusters/${event.resourceId}`
                   }
                 >
-                  {event.resource_id}
+                  {event.resourceId}
                 </Link>
               </Td>
-              <Td>{event.account_id}</Td>
+              <Td>{event.accountId}</Td>
               <Td>{event.provider}</Td>
-              <Td>{event.triggered_by}</Td>
+              <Td>{event.triggeredBy}</Td>
               <Td>{event.description}</Td>
-              <Td>{event.event_timestamp}</Td>
+              <Td>{event.timestamp}</Td>
             </Tr>
           ))}
         </Tbody>

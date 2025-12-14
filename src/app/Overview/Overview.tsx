@@ -14,7 +14,7 @@ import {
 } from '@patternfly/react-core';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { generateCards } from './components/CardData';
-import { CloudProvider } from './types';
+import { ProviderApi } from '@api';
 import { renderContent } from './components/CardRenderer';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useEventsData } from './hooks/useEventsData';
@@ -39,14 +39,14 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       terminated: inventoryData?.instances?.archived || 0,
     },
     clustersByProvider: {
-      [CloudProvider.AWS]: inventoryData.providers?.aws?.clusterCount || 0,
-      [CloudProvider.GCP]: inventoryData.providers?.gcp?.clusterCount || 0,
-      [CloudProvider.AZURE]: inventoryData.providers?.azure?.clusterCount || 0,
+      [ProviderApi.AWSProvider]: inventoryData.providers?.aws?.clusterCount || 0,
+      [ProviderApi.GCPProvider]: inventoryData.providers?.gcp?.clusterCount || 0,
+      [ProviderApi.AzureProvider]: inventoryData.providers?.azure?.clusterCount || 0,
     },
     accountsByProvider: {
-      [CloudProvider.AWS]: inventoryData.providers?.aws?.accountCount || 0,
-      [CloudProvider.GCP]: inventoryData.providers?.gcp?.accountCount || 0,
-      [CloudProvider.AZURE]: inventoryData.providers?.azure?.accountCount || 0,
+      [ProviderApi.AWSProvider]: inventoryData.providers?.aws?.accountCount || 0,
+      [ProviderApi.GCPProvider]: inventoryData.providers?.gcp?.accountCount || 0,
+      [ProviderApi.AzureProvider]: inventoryData.providers?.azure?.accountCount || 0,
     },
     instances: (inventoryData?.instances?.running || 0) + (inventoryData?.instances?.stopped || 0),
     lastScanTimestamp: inventoryData?.scanner?.lastScanTimestamp,

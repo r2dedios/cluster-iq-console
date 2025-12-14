@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Page } from '@patternfly/react-core';
-import { getAccountByName } from '@app/services/api';
-import { AccountData } from '@app/types/types';
+import { api, AccountResponseApi } from '@api';
 import AccountsHeader from './components/AccountHeader';
 import AccountsTabs from './components/AccountTabs';
 import { AccountDetailsContent } from './components/AccountDetailsContent';
@@ -11,18 +10,15 @@ import { AccountClusters } from './components/AccountClusters';
 
 const AccountDetails: React.FunctionComponent = () => {
   const { accountName } = useParams() as { accountName: string };
-  const [accountData, setAccountData] = useState<AccountData>({
-    count: 0,
-    accounts: [],
-  });
+  const [accountData, setAccountData] = useState<AccountResponseApi | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
         debug('Fetching Account Clusters ', accountName);
-        const fetchedAccountClusters = await getAccountByName(accountName);
-        setAccountData(fetchedAccountClusters);
-        debug('Fetched Account Clusters data:', fetchedAccountClusters);
+        const { data: fetchedAccount } = await api.accounts.accountsDetail(accountName);
+        setAccountData(fetchedAccount);
+        debug('Fetched Account Clusters data:', fetchedAccount);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {

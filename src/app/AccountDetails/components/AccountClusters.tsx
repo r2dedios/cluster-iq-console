@@ -14,12 +14,11 @@ import {
 import { CubesIcon } from '@patternfly/react-icons';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { ClustersTable } from './ClustersTable';
-import { getAccountClusters } from '@app/services/api';
+import { api, ClusterResponseApi } from '@api';
 import { debug } from '@app/utils/debugLogs';
-import { Cluster } from '@app/types/types';
 
 export const AccountClusters: React.FunctionComponent = () => {
-  const [clusters, setClusters] = useState<Cluster[] | []>([]);
+  const [clusters, setClusters] = useState<ClusterResponseApi[]>([]);
   const [showTerminated, setShowTerminated] = useState(false);
   const [loading, setLoading] = useState(true);
   const { accountName } = useParams();
@@ -28,9 +27,9 @@ export const AccountClusters: React.FunctionComponent = () => {
     const fetchData = async () => {
       try {
         debug('Fetching data...');
-        const fetchedAccountClusters = await getAccountClusters(accountName);
-        debug('Fetched Account data:', fetchedAccountClusters);
-        setClusters(fetchedAccountClusters);
+        const { data } = await api.accounts.clustersList(accountName);
+        debug('Fetched Account data:', data);
+        setClusters(data.items || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {

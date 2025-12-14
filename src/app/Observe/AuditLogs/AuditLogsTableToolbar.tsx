@@ -18,7 +18,7 @@ import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { AuditLogsTableToolbarProps } from './types';
 import debounce from 'lodash.debounce';
-import { CloudProvider, ClusterActions, ResultStatus } from '@app/types/types';
+import { ClusterActions, ResultStatus } from '@app/types/types';
 
 type AttributeMenuOption = 'Account' | 'Provider' | 'Action' | 'Result' | 'TriggeredBy';
 
@@ -151,16 +151,24 @@ export const AuditLogsTableToolbar: React.FunctionComponent<AuditLogsTableToolba
     >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.AWS)} itemId={CloudProvider.AWS}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.AWSProvider)}
+            itemId={ProviderApi.AWSProvider}
+          >
             AWS
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.GCP)} itemId={CloudProvider.GCP}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.GCPProvider)}
+            itemId={ProviderApi.GCPProvider}
+          >
             Google Cloud
           </MenuItem>
           <MenuItem
             hasCheckbox
-            isSelected={providerSelections?.includes(CloudProvider.Azure)}
-            itemId={CloudProvider.Azure}
+            isSelected={providerSelections?.includes(ProviderApi.AzureProvider)}
+            itemId={ProviderApi.AzureProvider}
           >
             Azure
           </MenuItem>

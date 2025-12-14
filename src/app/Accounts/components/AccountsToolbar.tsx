@@ -17,7 +17,7 @@ import {
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { AccountsToolbarProps } from '../types';
-import { CloudProvider } from '@app/types/types';
+import { ProviderApi } from '@api';
 import debounce from 'lodash.debounce';
 
 export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
@@ -128,16 +128,24 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
     >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.AWS)} itemId={CloudProvider.AWS}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.AWSProvider)}
+            itemId={ProviderApi.AWSProvider}
+          >
             AWS
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.GCP)} itemId={CloudProvider.GCP}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.GCPProvider)}
+            itemId={ProviderApi.GCPProvider}
+          >
             Google Cloud
           </MenuItem>
           <MenuItem
             hasCheckbox
-            isSelected={providerSelections?.includes(CloudProvider.Azure)}
-            itemId={CloudProvider.Azure}
+            isSelected={providerSelections?.includes(ProviderApi.AzureProvider)}
+            itemId={ProviderApi.AzureProvider}
           >
             Azure
           </MenuItem>

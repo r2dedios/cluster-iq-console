@@ -3,10 +3,10 @@ import React from 'react';
 import AccountsToolbar from './components/AccountsToolbar';
 import AccountsTable from './components/AccountsTable';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
-import { CloudProvider } from '@app/types/types';
+import { ProviderApi } from '@api';
 
 const filterParams = {
-  provider: parseAsArrayOf(parseAsStringEnum<CloudProvider>(Object.values(CloudProvider))).withDefault([]),
+  provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
   accountName: parseAsString.withDefault(''),
 };
 

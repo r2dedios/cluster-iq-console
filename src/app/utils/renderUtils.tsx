@@ -1,18 +1,17 @@
-import { ClusterStates, ResultStatus } from '@app/types/types';
+import { ResultStatus } from '@app/types/types';
+import { ResourceStatusApi } from '@api';
 import React from 'react';
 import { Label } from '@patternfly/react-core';
 import { InfoCircleIcon, ExclamationTriangleIcon, ExclamationCircleIcon, UnknownIcon } from '@patternfly/react-icons';
 
 export function renderStatusLabel(labelText: string | null | undefined) {
   switch (labelText) {
-    case ClusterStates.Running:
+    case ResourceStatusApi.Running:
       return <Label color="green">{labelText}</Label>;
-    case ClusterStates.Stopped:
+    case ResourceStatusApi.Stopped:
       return <Label color="red">{labelText}</Label>;
-    case ClusterStates.Terminated:
+    case ResourceStatusApi.Terminated:
       return <Label color="purple">{labelText}</Label>;
-    case ClusterStates.Unknown:
-      return <Label color="gold">{labelText}</Label>;
     default:
       return <Label color="grey">{labelText}</Label>;
   }

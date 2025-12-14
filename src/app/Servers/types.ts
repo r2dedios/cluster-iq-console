@@ -1,18 +1,16 @@
-import { ClusterStates, CloudProvider } from '@app/types/types';
+import { ResourceStatusApi, ProviderApi } from '@api';
 
 export interface ServersTableProps {
   searchValue: string;
   statusSelection: string | null;
-  providerSelections: CloudProvider[] | null;
-  archived: boolean;
+  providerSelections: ProviderApi[] | null;
 }
 
 export interface ServersTableToolbarProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
-  statusSelection: ClusterStates | null;
-  setStatusSelection: (value: ClusterStates | null) => void;
-  providerSelections: CloudProvider[] | null;
-  setProviderSelections: (value: CloudProvider[] | null) => void;
-  archived: boolean;
+  statusSelection: ResourceStatusApi | null;
+  setStatusSelection: (value: ResourceStatusApi | null) => void;
+  providerSelections: ProviderApi[] | null;
+  setProviderSelections: (value: ProviderApi[] | null) => void;
 }

@@ -3,6 +3,7 @@
     "baseUrl": "./",
     "types": ["vite/client"],
     "paths": {
+      "@api/*": ["src/api/*"],
       "@app/*": ["src/app/*"],
       "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
       "src/*": ["src/*"]

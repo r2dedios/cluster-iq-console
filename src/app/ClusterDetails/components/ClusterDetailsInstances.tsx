@@ -1,13 +1,12 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { Instance } from '@app/types/types';
 import { renderStatusLabel } from '@app/utils/renderUtils';
-import { getClusterInstances } from '@app/services/api';
+import { api, InstanceResponseApi } from '@api';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 const ClusterDetailsInstances: React.FunctionComponent = () => {
-  const [data, setData] = useState<Instance[] | []>([]);
+  const [data, setData] = useState<InstanceResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
   const { clusterID } = useParams();
 
@@ -15,7 +14,7 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
     const fetchData = async () => {
       try {
         console.log('Fetching data...');
-        const fetchedInstancesPerCluster = await getClusterInstances(clusterID);
+        const { data: fetchedInstancesPerCluster } = await api.clusters.instancesList(clusterID);
         console.log('Fetched data:', fetchedInstancesPerCluster);
         setData(fetchedInstancesPerCluster);
       } catch (error) {

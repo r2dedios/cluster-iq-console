@@ -3,15 +3,15 @@ import React from 'react';
 import ClustersTable from './components/ClustersTable';
 import ClustersTableToolbar from './components/ClustersTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, parseAsBoolean, useQueryStates } from 'nuqs';
-import { CloudProvider, ClusterStates } from '@app/types/types';
+import { ResourceStatusApi, ProviderApi } from '@api';
 import { useLocation } from 'react-router-dom';
 
 const filterParams = {
   status: {
-    ...parseAsStringEnum<ClusterStates>(Object.values(ClusterStates)),
-    defaultValue: null as ClusterStates | null,
+    ...parseAsStringEnum<ResourceStatusApi>(Object.values(ResourceStatusApi)),
+    defaultValue: null as ResourceStatusApi | null,
   },
-  provider: parseAsArrayOf(parseAsStringEnum<CloudProvider>(Object.values(CloudProvider))).withDefault([]),
+  provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
   clusterName: parseAsString.withDefault(''),
   accountName: parseAsString.withDefault(''),
   archived: parseAsBoolean.withDefault(false),

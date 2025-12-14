@@ -1,6 +1,6 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { AuditEvent, ResultStatus } from '@app/types/types';
-import { getClusterEvents } from '@app/services/api';
+import { ResultStatus } from '@app/types/types';
+import { api, SystemEventResponseApi } from '@api';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { EmptyState, EmptyStateHeader, EmptyStateIcon } from '@patternfly/react-
 import { SearchIcon } from '@patternfly/react-icons';
 
 interface TableEventsProps {
-  data: AuditEvent[];
+  data: SystemEventResponseApi[];
   getSortParams: (columnIndex: number) => ThProps['sort'];
 }
 
@@ -45,14 +45,14 @@ const TableEvents: React.FunctionComponent<TableEventsProps> = ({ data, getSortP
       <Tbody>
         {data.map(event => (
           <Tr key={event.id}>
-            <Td>{event.action_name}</Td>
+            <Td>{event.action}</Td>
             <Td>
               {getResultIcon(event.result as ResultStatus)} {event.result}
             </Td>
             <Td>{event.severity}</Td>
-            <Td>{event.triggered_by}</Td>
+            <Td>{event.triggeredBy}</Td>
             <Td>{event.description}</Td>
-            <Td>{event.event_timestamp}</Td>
+            <Td>{event.timestamp}</Td>
           </Tr>
         ))}
       </Tbody>
@@ -61,17 +61,17 @@ const TableEvents: React.FunctionComponent<TableEventsProps> = ({ data, getSortP
 };
 
 export const ClusterDetailsEvents: React.FunctionComponent = () => {
-  const [data, setData] = useState<AuditEvent[] | []>([]);
+  const [data, setData] = useState<SystemEventResponseApi[] | []>([]);
   const [loading, setLoading] = useState(true);
   const { clusterID } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clusterEvents = await getClusterEvents(clusterID);
+        const { data: clusterEvents } = await api.clusters.eventsList(clusterID);
         // TODO. Move to debug
         console.log('Fetched events:', clusterEvents);
-        setData(clusterEvents);
+        setData(clusterEvents.items || []);
       } catch (error) {
         // TODO. Move to debug
         console.error('Error fetching events:', error);
@@ -86,12 +86,12 @@ export const ClusterDetailsEvents: React.FunctionComponent = () => {
   // TODO. Move to debug
   console.log('Rendered events data:', data);
 
-  const getSortableRowValues = (event: AuditEvent): (string | number | null)[] => {
-    const { action_name, result, severity, triggered_by, description: description, event_timestamp } = event;
-    return [action_name, result, severity, triggered_by, description ?? null, event_timestamp];
+  const getSortableRowValues = (event: SystemEventResponseApi): (string | number | null)[] => {
+    const { action, result, severity, triggeredBy, description: description, timestamp } = event;
+    return [action, result, severity, triggeredBy, description ?? null, timestamp];
   };
 
-  const { sortedData, getSortParams } = useTableSort<AuditEvent>(data, getSortableRowValues, 5, 'desc');
+  const { sortedData, getSortParams } = useTableSort<SystemEventResponseApi>(data, getSortableRowValues, 5, 'desc');
   if (loading) return <LoadingSpinner />;
   if (sortedData.length === 0) return <EmptyStateNoFound />;
   return <TableEvents data={sortedData} getSortParams={getSortParams} />;

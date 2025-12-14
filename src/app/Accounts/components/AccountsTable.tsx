@@ -1,17 +1,15 @@
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { api, AccountResponseApi } from '@api';
+import { api, AccountResponseApi, ProviderApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByProvider, paginateItems } from '@app/utils/tableFilters';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
 
-import { CloudProvider } from '@app/types/types';
-
 export const AccountsTable: React.FunctionComponent<{
   searchValue: string;
-  providerSelections: CloudProvider[] | null;
+  providerSelections: ProviderApi[] | null;
 }> = ({ searchValue, providerSelections }) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);

@@ -22,11 +22,11 @@ import {
   Spinner,
   LabelGroup,
 } from '@patternfly/react-core';
-import { getInstanceByID } from '../services/api';
+import { api, InstanceResponseApi, TagResponseApi } from '@api';
 import { Link } from 'react-router-dom';
-import { Instances, Tag } from '@app/types/types';
+
 interface LabelGroupOverflowProps {
-  labels: Array<Tag>;
+  labels: Array<TagResponseApi>;
 }
 
 const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({ labels }) => (
@@ -42,16 +42,14 @@ const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({ 
 const ServerDetails: React.FunctionComponent = () => {
   const { instanceID } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
-  const [instanceData, setInstanceData] = useState<Instances>({
-    count: 0,
-    instances: [],
-  });
+  const [instanceData, setInstanceData] = useState<InstanceResponseApi | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log('Fetching Account Clusters ', instanceID);
-        const fetchedInstance = await getInstanceByID(instanceID);
+        if (!instanceID) return;
+        const { data: fetchedInstance } = await api.instances.instancesDetail(instanceID);
         setInstanceData(fetchedInstance);
         console.log('Fetched Account Clusters data:', instanceID);
       } catch (error) {
@@ -62,9 +60,9 @@ const ServerDetails: React.FunctionComponent = () => {
     };
 
     fetchData();
-  }, []);
+  }, [instanceID]);
 
-  const handleTabClick = (event, tabIndex) => {
+  const handleTabClick = (_event, tabIndex) => {
     setActiveTabKey(tabIndex);
   };
 
@@ -98,42 +96,34 @@ const ServerDetails: React.FunctionComponent = () => {
                 <DescriptionListTerm>Name</DescriptionListTerm>
                 <DescriptionListDescription>{instanceID}</DescriptionListDescription>
                 <DescriptionListTerm>Status</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {renderStatusLabel(instanceData.instances[0].status)}
-                </DescriptionListDescription>
+                <DescriptionListDescription>{renderStatusLabel(instanceData?.status)}</DescriptionListDescription>
                 <DescriptionListTerm>Cluster ID</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <Link to={`/clusters/${instanceData.instances[0].clusterID}`}>
-                    {instanceData.instances[0].clusterID}
-                  </Link>
+                  <Link to={`/clusters/${instanceData?.clusterId}`}>{instanceData?.clusterId}</Link>
                 </DescriptionListDescription>
                 <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
-                <DescriptionListDescription>{instanceData.instances[0].provider}</DescriptionListDescription>
+                <DescriptionListDescription>{instanceData?.provider}</DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup>
                 <DescriptionListTerm>Labels</DescriptionListTerm>
-                <LabelGroupOverflow labels={instanceData.instances[0].tags} />
+                <LabelGroupOverflow labels={instanceData?.tags || []} />
                 <DescriptionListTerm>Last scanned at</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseScanTimestamp(instanceData.instances[0].lastScanTimestamp)}
+                  {parseScanTimestamp(instanceData?.lastScanTimestamp)}
                 </DescriptionListDescription>
                 <DescriptionListTerm>Created at</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseScanTimestamp(instanceData.instances[0].creationTimestamp)}
+                  {parseScanTimestamp(instanceData?.creationTimestamp)}
                 </DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup></DescriptionListGroup>
 
               <DescriptionListGroup>
-                <DescriptionListTerm>Daily Cost (aprox)</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {parseNumberToCurrency(instanceData.instances[0].dailyCost)}
-                </DescriptionListDescription>
                 <DescriptionListTerm>Total Cost (aprox)</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseNumberToCurrency(instanceData.instances[0].totalCost)}
+                  {parseNumberToCurrency(instanceData?.totalCost)}
                 </DescriptionListDescription>
               </DescriptionListGroup>
 

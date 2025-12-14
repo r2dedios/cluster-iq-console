@@ -1,8 +1,8 @@
-import { CloudProvider } from '@app/types/types';
+import { ProviderApi } from '@api';
 
 export interface AccountsToolbarProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
-  providerSelections: CloudProvider[] | null;
-  setProviderSelections: (value: CloudProvider[] | null) => void;
+  providerSelections: ProviderApi[] | null;
+  setProviderSelections: (value: ProviderApi[] | null) => void;
 }

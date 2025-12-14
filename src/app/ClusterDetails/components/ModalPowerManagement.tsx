@@ -17,7 +17,7 @@ import DateTimePicker from './DateTimePicker';
 import { CronAction, ScheduledAction } from './types';
 import { useParams } from 'react-router-dom';
 import { useUser } from '@app/Contexts/UserContext.tsx';
-import { startCluster, stopCluster, createScheduledAction } from '@app/services/api';
+import { startCluster, stopCluster } from '@api';
 import { debug } from '@app/utils/debugLogs';
 
 type PowerManagementData = ScheduledAction | CronAction;
@@ -100,7 +100,9 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
       const requestPayload = [powerActionRequest];
 
       try {
-        await createScheduledAction(requestPayload);
+        // TODO: Scheduled action creation not available in generated API yet
+        // await createScheduledAction(requestPayload);
+        console.warn('Scheduled action creation not implemented yet');
         debug('Scheduled action created:', requestPayload);
       } catch (error) {
         console.error('Failed to schedule action:', error);

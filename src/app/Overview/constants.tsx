@@ -1,4 +1,3 @@
-import { ClusterStates } from '@app/types/types';
 import React from 'react';
 import {
   CheckCircleIcon,
@@ -11,7 +10,7 @@ import {
   DatabaseIcon,
   RegistryIcon,
 } from '@patternfly/react-icons';
-import { CloudProvider } from './types';
+import { ResourceStatusApi, ProviderApi } from '@api';
 
 const PATTERNFLY_COLORS = {
   success: 'var(--pf-v5-global--success-color--100)',
@@ -23,47 +22,47 @@ const PATTERNFLY_COLORS = {
 const CLUSTER_ICON = <OpenshiftIcon color={PATTERNFLY_COLORS.danger} />;
 
 const PROVIDER_ICONS = {
-  [CloudProvider.AWS]: <AwsIcon color={PATTERNFLY_COLORS.danger} />,
-  [CloudProvider.GCP]: <GoogleIcon color={PATTERNFLY_COLORS.danger} />,
-  [CloudProvider.AZURE]: <AzureIcon color={PATTERNFLY_COLORS.danger} />,
+  [ProviderApi.AWSProvider]: <AwsIcon color={PATTERNFLY_COLORS.danger} />,
+  [ProviderApi.GCPProvider]: <GoogleIcon color={PATTERNFLY_COLORS.danger} />,
+  [ProviderApi.AzureProvider]: <AzureIcon color={PATTERNFLY_COLORS.danger} />,
 } as const;
 
 export const STATUSES = {
   running: {
-    key: ClusterStates.Running,
+    key: ResourceStatusApi.Running,
     icon: <CheckCircleIcon color={PATTERNFLY_COLORS.success} />,
     route: '/clusters?status=Running',
   },
   stopped: {
-    key: ClusterStates.Stopped,
+    key: ResourceStatusApi.Stopped,
     icon: <ErrorCircleOIcon color={PATTERNFLY_COLORS.danger} />,
     route: '/clusters?status=Stopped',
   },
   terminated: {
-    key: ClusterStates.Terminated,
+    key: ResourceStatusApi.Terminated,
     icon: <ArchiveIcon color={PATTERNFLY_COLORS.disabled} />,
     route: '/clusters?status=Terminated',
   },
 } as const;
 
 export const CLOUD_PROVIDERS = {
-  [CloudProvider.AWS]: {
-    key: CloudProvider.AWS,
+  [ProviderApi.AWSProvider]: {
+    key: ProviderApi.AWSProvider,
     title: 'AWS Clusters',
     icon: CLUSTER_ICON,
-    providerIcon: PROVIDER_ICONS[CloudProvider.AWS],
+    providerIcon: PROVIDER_ICONS[ProviderApi.AWSProvider],
   },
-  [CloudProvider.GCP]: {
-    key: CloudProvider.GCP,
+  [ProviderApi.GCPProvider]: {
+    key: ProviderApi.GCPProvider,
     title: 'GCP Clusters',
     icon: CLUSTER_ICON,
-    providerIcon: PROVIDER_ICONS[CloudProvider.GCP],
+    providerIcon: PROVIDER_ICONS[ProviderApi.GCPProvider],
   },
-  [CloudProvider.AZURE]: {
-    key: CloudProvider.AZURE,
+  [ProviderApi.AzureProvider]: {
+    key: ProviderApi.AzureProvider,
     title: 'Azure Clusters',
     icon: CLUSTER_ICON,
-    providerIcon: PROVIDER_ICONS[CloudProvider.AZURE],
+    providerIcon: PROVIDER_ICONS[ProviderApi.AzureProvider],
   },
 } as const;
 
