@@ -120,7 +120,9 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
                 </Td>
                 <Td dataLabel={columnNames.name}>{cluster.clusterName}</Td>
                 <Td dataLabel={columnNames.status}>{renderStatusLabel(cluster.status)}</Td>
-                <Td dataLabel={columnNames.account}>{cluster.accountId}</Td>
+                <Td dataLabel={columnNames.account}>
+                  <Link to={`/accounts/${cluster.accountId}`}>{cluster.accountName}</Link>
+                </Td>
                 <Td dataLabel={columnNames.cloudProvider}>{cluster.provider}</Td>
                 <Td dataLabel={columnNames.region}>{cluster.region}</Td>
                 <Td dataLabel={columnNames.nodes}>{cluster.instanceCount}</Td>

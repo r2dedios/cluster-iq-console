@@ -10,6 +10,10 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
   const [loading, setLoading] = useState(true);
   const { clusterID } = useParams();
 
+  if (!clusterID) {
+    return <LoadingSpinner />;
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,7 +29,7 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
     };
 
     fetchData();
-  }, []);
+  }, [clusterID]);
 
   console.log('Rendered with data:', data);
 
@@ -35,29 +39,37 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
   // sort direction of the currently active column
   const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
   // sort dropdown expansion
-  const getSortableRowValues = (instance: Instance): (string | number | null)[] => {
-    const { id, name, availabilityZone, instanceType, status, clusterID, provider } = instance;
-    return [id, name, availabilityZone, instanceType, status, clusterID, provider];
+  const getSortableRowValues = (instance: InstanceResponseApi): (string | number | null | undefined)[] => {
+    const { instanceId, instanceName, availabilityZone, instanceType, status, clusterId, provider } = instance;
+    return [instanceId, instanceName, availabilityZone, instanceType, status, clusterId, provider];
   };
 
   // Sorting
   let sortedData = data;
   if (typeof activeSortIndex === 'number' && activeSortIndex !== null) {
-    sortedData = data.sort((a, b) => {
+    sortedData = [...data].sort((a, b) => {
       const aValue = getSortableRowValues(a)[activeSortIndex];
       const bValue = getSortableRowValues(b)[activeSortIndex];
-      if (typeof aValue === 'number') {
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return 1;
+      if (bValue == null) return -1;
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
         // Numeric sort
         if (activeSortDirection === 'asc') {
-          return (aValue as number) - (bValue as number);
+          return aValue - bValue;
         }
-        return (bValue as number) - (aValue as number);
+        return bValue - aValue;
       } else {
         // String sort
+        const aStr = String(aValue);
+        const bStr = String(bValue);
         if (activeSortDirection === 'asc') {
-          return (aValue as string).localeCompare(bValue as string);
+          return aStr.localeCompare(bStr);
         }
-        return (bValue as string).localeCompare(aValue as string);
+        return bStr.localeCompare(aStr);
       }
     });
   }
@@ -93,11 +105,11 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
           </Thead>
           <Tbody>
             {sortedData.map(instance => (
-              <Tr key={instance.id}>
-                <Td dataLabel={instance.id}>
-                  <Link to={`/instances/${instance.id}`}>{instance.id}</Link>
+              <Tr key={instance.instanceId}>
+                <Td dataLabel={instance.instanceId}>
+                  <Link to={`/instances/${instance.instanceId}`}>{instance.instanceId}</Link>
                 </Td>
-                <Td>{instance.name}</Td>
+                <Td>{instance.instanceName}</Td>
                 <Td>{instance.instanceType}</Td>
                 <Td dataLabel={instance.status}>{renderStatusLabel(instance.status)}</Td>
                 <Td>{instance.availabilityZone}</Td>

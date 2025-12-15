@@ -82,7 +82,7 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
             {paginated.map(instance => (
               <Tr key={instance.instanceId}>
                 <Td dataLabel={columnNames.id} width={15}>
-                  <Link to={`/servers/${instance.instanceId}`}>{instance.instanceId}</Link>
+                  <Link to={`/instances/${instance.instanceId}`}>{instance.instanceId}</Link>
                 </Td>
                 <Td dataLabel={columnNames.name} width={30}>
                   {instance.instanceName}
