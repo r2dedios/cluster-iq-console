@@ -1,6 +1,14 @@
 export enum ClusterActions {
   PowerOn = 'PowerOn',
   PowerOff = 'PowerOff',
+  PowerOnCluster = 'PowerOnCluster',
+  PowerOffCluster = 'PowerOffCluster',
+}
+
+export enum ActionType {
+  InstantAction = 'instant_action',
+  ScheduledAction = 'scheduled_action',
+  CronAction = 'cron_action',
 }
 
 export enum ResultStatus {

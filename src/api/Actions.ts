@@ -26,13 +26,45 @@ export class Actions<SecurityDataType = unknown> {
    * @tags Actions
    * @name ActionsCreate
    * @summary Create actions
-   * @request POST:/actions
+   * @request POST:/schedule
    */
   actionsCreate = (actions: ActionRequestApi[], params: RequestParams = {}) =>
     this.http.request<PostResponseApi, GenericErrorResponseApi>({
-      path: `/actions`,
+      path: `/schedule`,
       method: 'POST',
       body: actions,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Enables one or multiple actions.
+   *
+   * @tags Actions
+   * @name ActionsEnable
+   * @summary Enable actions
+   * @request PATCH:/schedule
+   */
+  actionsEnable = (id: string, params: RequestParams = {}) =>
+    this.http.request<PostResponseApi, GenericErrorResponseApi>({
+      path: `/schedule/${id}/enable`,
+      method: 'PATCH',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Disables one or multiple actions.
+   *
+   * @tags Actions
+   * @name ActionsDisable
+   * @summary Disable actions
+   * @request PATCH:/schedule
+   */
+  actionsDisable = (id: string, params: RequestParams = {}) =>
+    this.http.request<PostResponseApi, GenericErrorResponseApi>({
+      path: `/schedule/${id}/disable`,
+      method: 'PATCH',
       type: ContentType.Json,
       format: 'json',
       ...params,
@@ -47,7 +79,7 @@ export class Actions<SecurityDataType = unknown> {
    */
   actionsDelete = (id: string, params: RequestParams = {}) =>
     this.http.request<void, GenericErrorResponseApi>({
-      path: `/actions/${id}`,
+      path: `/schedule/${id}`,
       method: 'DELETE',
       type: ContentType.Json,
       ...params,

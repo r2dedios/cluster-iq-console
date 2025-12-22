@@ -1,6 +1,6 @@
-import { ResultStatus } from '@app/types/types';
-import { ResourceStatusApi } from '@api';
 import React from 'react';
+import { ActionType, ClusterActions, ResultStatus } from '@app/types/types';
+import { ResourceStatusApi } from '@api';
 import { Label } from '@patternfly/react-core';
 import { InfoCircleIcon, ExclamationTriangleIcon, ExclamationCircleIcon, UnknownIcon } from '@patternfly/react-icons';
 
@@ -12,6 +12,34 @@ export function renderStatusLabel(labelText: string | null | undefined) {
       return <Label color="red">{labelText}</Label>;
     case ResourceStatusApi.Terminated:
       return <Label color="purple">{labelText}</Label>;
+    default:
+      return <Label color="grey">{labelText}</Label>;
+  }
+}
+
+export function renderActionTypeLabel(labelText: string | null | undefined) {
+  switch (labelText) {
+    case ActionType.InstantAction:
+      return <Label color="orange">Instant Action</Label>;
+    case ActionType.ScheduledAction:
+      return <Label color="green">Scheduled Action</Label>;
+    case ActionType.CronAction:
+      return <Label color="blue">Cron Action</Label>;
+    default:
+      return <Label color="grey">{labelText}</Label>;
+  }
+}
+
+export function renderOperationLabel(labelText: string | null | undefined) {
+  switch (labelText) {
+    case ClusterActions.PowerOn:
+      return <Label color="green">{labelText}</Label>;
+    case ClusterActions.PowerOff:
+      return <Label color="red">{labelText}</Label>;
+    case ClusterActions.PowerOnCluster:
+      return <Label color="green">{labelText}</Label>;
+    case ClusterActions.PowerOffCluster:
+      return <Label color="red">{labelText}</Label>;
     default:
       return <Label color="grey">{labelText}</Label>;
   }

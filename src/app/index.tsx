@@ -9,6 +9,7 @@ import AccountDetails from './AccountDetails/AccountDetails';
 import ServerDetails from './ServerDetails/ServerDetails';
 import Servers from './Servers/Servers';
 import Accounts from './Accounts/Accounts';
+import ScheduleActions from './Actions/Schedule/Schedule';
 import { NuqsAdapter } from 'nuqs/adapters/react';
 import { UserProvider } from './Contexts/UserContext';
 
@@ -36,6 +37,7 @@ const AppRoutes = (): React.ReactElement => (
       <Route path="clusters/:clusterID" element={<ClusterDetails />} />
       <Route path="instances" element={<Servers />} />
       <Route path="instances/:instanceID" element={<ServerDetails />} />
+      <Route path="actions/scheduler" element={<ScheduleActions />} />
     </Routes>
   </RouteDebugWrapper>
 );
