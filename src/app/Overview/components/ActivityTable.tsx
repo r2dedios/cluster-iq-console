@@ -1,7 +1,8 @@
 import React from 'react';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import { EmptyState, EmptyStateHeader, EmptyStateIcon } from '@patternfly/react-core';
 import { Event } from '@app/types/events';
-import { CheckCircleIcon, ErrorCircleOIcon, WarningTriangleIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon, ErrorCircleOIcon, WarningTriangleIcon, InboxIcon } from '@patternfly/react-icons';
 
 interface ActivityTableProps {
   events: Event[];
@@ -30,7 +31,11 @@ const getResultIcon = (result: string) => {
 
 export const ActivityTable: React.FunctionComponent<ActivityTableProps> = ({ events }) => {
   if (events.length === 0) {
-    return <div>No recent events</div>;
+    return (
+      <EmptyState>
+        <EmptyStateHeader titleText="No recent events" headingLevel="h4" icon={<EmptyStateIcon icon={InboxIcon} />} />
+      </EmptyState>
+    );
   }
 
   return (

@@ -1,7 +1,7 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { TagData, ClusterData, ClusterStates } from '@app/types/types';
 import { parseNumberToCurrency, parseScanTimestamp } from '@app/utils/parseFuncs';
 import { renderStatusLabel } from '@app/utils/renderUtils';
+import { ClusterResponseApi, TagResponseApi } from '@api';
 import {
   Flex,
   FlexItem,
@@ -25,29 +25,25 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { ClusterDetailsDropdown } from './ClusterDetailsDropdown';
 import { ClusterDetailsEvents } from './ClusterDetailsEvents';
-import { getCluster, getClusterTags } from '@app/services/api';
+import { api } from '@api';
 import ClusterDetailsInstances from './ClusterDetailsInstances';
 import { LabelGroupOverflow } from '@app/components/common/LabelGroupOverflow';
 
 const ClusterDetailsOverview: React.FunctionComponent = () => {
   const { clusterID } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
-  const [tags, setTagData] = useState<TagData>({
-    count: 0,
-    tags: [],
-  });
-  const [cluster, setClusterData] = useState<ClusterData>({
-    count: 0,
-    clusters: [],
-  });
+  const [tags, setTagData] = useState<TagResponseApi[]>([]);
+  const [cluster, setClusterData] = useState<ClusterResponseApi | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!clusterID) return;
+
     const fetchData = async () => {
       try {
-        const fetchedCluster = await getCluster(clusterID);
+        const { data: fetchedCluster } = await api.clusters.clustersDetail(clusterID!);
         setClusterData(fetchedCluster);
-        const fetchedTags = await getClusterTags(clusterID);
+        const { data: fetchedTags } = await api.clusters.tagsList(clusterID!);
         setTagData(fetchedTags);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -57,10 +53,10 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
     };
 
     fetchData();
-  }, []);
+  }, [clusterID]);
 
   const filterTagsByKey = key => {
-    const result = tags.tags.filter(tags => tags.key == key);
+    const result = tags.filter(tag => tag.key == key);
     if (result[0] !== undefined && result[0] != null) {
       return result[0].value;
     }
@@ -69,7 +65,6 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
 
   const ownerTag = filterTagsByKey('Owner');
   const partnerTag = filterTagsByKey('Partner');
-  const clusterStatus = cluster?.clusters[0]?.status as ClusterStates | null;
 
   const handleTabClick = (_, tabIndex) => {
     setActiveTabKey(tabIndex);
@@ -96,43 +91,41 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
                 <DescriptionListTerm>Name</DescriptionListTerm>
                 <DescriptionListDescription>{clusterID}</DescriptionListDescription>
                 <DescriptionListTerm>Status</DescriptionListTerm>
-                <DescriptionListDescription>{renderStatusLabel(cluster.clusters[0].status)}</DescriptionListDescription>
+                <DescriptionListDescription>{renderStatusLabel(cluster?.status)}</DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup name="Cluster links">
                 <DescriptionListTerm>Web console</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <a href={cluster.clusters[0].consoleLink} target="_blank" rel="noopener noreferrer">
+                  <a href={cluster?.consoleLink} target="_blank" rel="noopener noreferrer">
                     Console
                   </a>
                 </DescriptionListDescription>
                 <DescriptionListTerm>Number of nodes</DescriptionListTerm>
-                <DescriptionListDescription>{String(cluster.clusters[0].instanceCount)}</DescriptionListDescription>
+                <DescriptionListDescription>{String(cluster?.instanceCount)}</DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup name="Cloud Properties">
                 <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
-                <DescriptionListDescription>{cluster.clusters[0].provider}</DescriptionListDescription>
+                <DescriptionListDescription>{cluster?.provider}</DescriptionListDescription>
                 <DescriptionListTerm>Account</DescriptionListTerm>
-                <DescriptionListDescription>{cluster.clusters[0].accountName || 'unknown'}</DescriptionListDescription>
+                <DescriptionListDescription>{cluster?.accountId || 'unknown'}</DescriptionListDescription>
                 <DescriptionListTerm>Region</DescriptionListTerm>
-                <DescriptionListDescription>{cluster.clusters[0].region || 'unknown'}</DescriptionListDescription>
+                <DescriptionListDescription>{cluster?.region || 'unknown'}</DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup name="Timestamps">
                 <DescriptionListTerm>Created at</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {parseScanTimestamp(cluster.clusters[0].creationTimestamp)}
-                </DescriptionListDescription>
+                <DescriptionListDescription>{parseScanTimestamp(cluster?.createdAt)}</DescriptionListDescription>
                 <DescriptionListTerm>Last scanned at</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseScanTimestamp(cluster.clusters[0].lastScanTimestamp)}
+                  {parseScanTimestamp(cluster?.lastScanTimestamp)}
                 </DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup name="Extra metadata">
                 <DescriptionListTerm>Labels</DescriptionListTerm>
-                <LabelGroupOverflow labels={tags.tags} />
+                <LabelGroupOverflow labels={tags} />
                 <DescriptionListTerm>Partner</DescriptionListTerm>
                 <DescriptionListDescription>{partnerTag}</DescriptionListDescription>
                 <DescriptionListTerm>Owner</DescriptionListTerm>
@@ -143,21 +136,17 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
                 <DescriptionListTerm>
                   Cluster Total Cost (Estimated since the cluster is being scanned)
                 </DescriptionListTerm>
-                <DescriptionListDescription>
-                  {parseNumberToCurrency(cluster.clusters[0].totalCost)}
-                </DescriptionListDescription>
+                <DescriptionListDescription>{parseNumberToCurrency(cluster?.totalCost)}</DescriptionListDescription>
                 <DescriptionListTerm>Cluster Total (Current month so far)</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseNumberToCurrency(cluster.clusters[0].currentMonthSoFarCost)}
+                  {parseNumberToCurrency(cluster?.currentMonthSoFarCost)}
                 </DescriptionListDescription>
                 <DescriptionListTerm>Cluster Total (Last 15 days)</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {parseNumberToCurrency(cluster.clusters[0].last15DaysCost)}
+                  {parseNumberToCurrency(cluster?.last15DaysCost)}
                 </DescriptionListDescription>
                 <DescriptionListTerm>Cluster Total (Last Month)</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {parseNumberToCurrency(cluster.clusters[0].lastMonthCost)}
-                </DescriptionListDescription>
+                <DescriptionListDescription>{parseNumberToCurrency(cluster?.lastMonthCost)}</DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
           </FlexItem>
@@ -203,7 +192,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
           </FlexItem>
 
           <FlexItem align={{ default: 'alignRight' }}>
-            <ClusterDetailsDropdown clusterStatus={clusterStatus} />
+            <ClusterDetailsDropdown clusterStatus={cluster?.status ?? null} />
           </FlexItem>
         </Flex>
         {/* Page tabs */}

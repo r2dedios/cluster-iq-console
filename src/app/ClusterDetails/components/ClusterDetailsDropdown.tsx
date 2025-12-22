@@ -1,16 +1,12 @@
-import { ClusterStates } from '@app/types/types';
+import { ResourceStatusApi } from '@api';
 import { Dropdown, DropdownItem, DropdownList, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ModalPowerManagement } from './ModalPowerManagement';
-
-export enum PowerAction {
-  POWER_ON = 'Power on',
-  POWER_OFF = 'Power off',
-}
+import { PowerAction } from './types';
 
 interface ClusterDetailsDropdownProps {
-  clusterStatus: ClusterStates | null;
+  clusterStatus: ResourceStatusApi | null;
 }
 
 export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropdownProps> = ({ clusterStatus }) => {
@@ -21,10 +17,10 @@ export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropd
 
   // Disable actions based on cluster status
   const isPowerOnDisabled =
-    clusterStatus === null || [ClusterStates.Running, ClusterStates.Terminated].includes(clusterStatus);
+    clusterStatus === null || [ResourceStatusApi.Running, ResourceStatusApi.Terminated].includes(clusterStatus);
 
   const isPowerOffDisabled =
-    clusterStatus === null || [ClusterStates.Stopped, ClusterStates.Terminated].includes(clusterStatus);
+    clusterStatus === null || [ResourceStatusApi.Stopped, ResourceStatusApi.Terminated].includes(clusterStatus);
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
     if (value === PowerAction.POWER_ON || value === PowerAction.POWER_OFF) {

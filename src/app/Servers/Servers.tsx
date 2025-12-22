@@ -3,42 +3,26 @@ import React from 'react';
 import ServersTableToolbar from './components/ServersTableToolbar';
 import ServersTable from './components/ServersTable';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, parseAsBoolean, useQueryStates } from 'nuqs';
-import { ClusterStates, CloudProvider } from '@app/types/types';
-import { useLocation } from 'react-router-dom';
+import { ResourceStatusApi, ProviderApi } from '@api';
 
 const filterParams = {
   status: {
-    ...parseAsStringEnum<ClusterStates>(Object.values(ClusterStates)),
-    defaultValue: null as ClusterStates | null,
+    ...parseAsStringEnum<ResourceStatusApi>(Object.values(ResourceStatusApi)),
+    defaultValue: null as ResourceStatusApi | null,
   },
-  provider: parseAsArrayOf(parseAsStringEnum<CloudProvider>(Object.values(CloudProvider))).withDefault([]),
+  provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
   serverName: parseAsString.withDefault(''),
-  archived: parseAsBoolean.withDefault(false),
+  showTerminated: parseAsBoolean.withDefault(false),
 };
 
 const Servers: React.FunctionComponent = () => {
-  const location = useLocation();
-  const [{ status, provider, serverName, archived }, setQuery] = useQueryStates(filterParams);
-
-  // React to URL changes
-  React.useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const newArchived = params.get('archived') === 'true';
-
-    if (archived !== newArchived) {
-      setQuery({
-        archived: newArchived,
-        status: null,
-        provider: [],
-      });
-    }
-  }, [location.search, archived, setQuery]);
+  const [{ status, provider, serverName, showTerminated }, setQuery] = useQueryStates(filterParams);
 
   return (
     <React.Fragment>
       <PageSection variant={PageSectionVariants.light}>
         <TextContent>
-          <Text component="h1">Servers {archived ? '- History' : '- Active'}</Text>
+          <Text component="h1">Servers</Text>
         </TextContent>
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
@@ -50,13 +34,14 @@ const Servers: React.FunctionComponent = () => {
             setStatusSelection={value => setQuery({ status: value })}
             providerSelections={provider}
             setProviderSelections={value => setQuery({ provider: value || [] })}
-            archived={archived}
+            showTerminated={showTerminated}
+            setShowTerminated={value => setQuery({ showTerminated: value })}
           />
           <ServersTable
             searchValue={serverName}
             statusSelection={status}
             providerSelections={provider}
-            archived={archived}
+            showTerminated={showTerminated}
           />
         </Panel>
       </PageSection>
