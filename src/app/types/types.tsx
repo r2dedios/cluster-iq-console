@@ -12,6 +12,8 @@ export enum ActionType {
 }
 
 export enum ResultStatus {
+  Pending = 'Pending',
+  Running = 'Running',
   Success = 'Success',
   Failed = 'Failed',
   Warning = 'Warning',
