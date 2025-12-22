@@ -38,6 +38,8 @@ export const AccountDescriptionList: React.FunctionComponent<AccountDescriptionL
       <DescriptionListGroup>
         <DescriptionListTerm>Last scanned at</DescriptionListTerm>
         <DescriptionListDescription>{parseScanTimestamp(account.lastScanTimestamp)}</DescriptionListDescription>
+        <DescriptionListTerm>Created at (in ClusterIQ)</DescriptionListTerm>
+        <DescriptionListDescription>{parseScanTimestamp(account.createdAt)}</DescriptionListDescription>
       </DescriptionListGroup>
     </DescriptionList>
   );
