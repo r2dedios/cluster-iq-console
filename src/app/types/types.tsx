@@ -9,6 +9,7 @@ export enum ResultStatus {
   Success = 'Success',
   Failed = 'Failed',
   Warning = 'Warning',
+  Unknown = 'Unknown',
 }
 
 export enum ScheduledActionStatus {

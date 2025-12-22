@@ -95,7 +95,7 @@ export interface ClusterEventResponseApi {
   id?: number;
   resourceName?: string;
   resourceType?: string;
-  result?: ActionStatusApi;
+  result?: ResultStatus;
   severity?: string;
   timestamp?: string;
   triggeredBy?: string;
@@ -302,17 +302,17 @@ export interface SystemEventListResponseApi {
 }
 
 export interface SystemEventResponseApi {
-  accountId?: string;
-  action?: string;
-  description?: string;
   id?: number;
-  provider?: string;
+  action?: string;
   resourceName?: string;
   resourceType?: string;
-  result?: ActionStatusApi;
-  severity?: string;
   timestamp?: string;
+  result?: ResultStatus;
+  severity?: string;
   triggeredBy?: string;
+  description?: string;
+  accountId?: string;
+  provider?: string;
 }
 
 export interface TagRequestApi {
