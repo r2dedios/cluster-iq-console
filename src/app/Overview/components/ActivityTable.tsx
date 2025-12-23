@@ -44,7 +44,7 @@ export const ActivityTable: React.FunctionComponent<ActivityTableProps> = ({ eve
               </Link>
             </Td>
             <Td>{event.triggeredBy}</Td>
-            <Td>{event.timestamp ? new Date(event.timestamp).toLocaleString() : '-'}</Td>
+            <Td>{event.timestamp ? new Date(event.timestamp).toLocaleString('es-ES') : '-'}</Td>
           </Tr>
         ))}
       </Tbody>
