@@ -25,26 +25,26 @@ export const ActivityTable: React.FunctionComponent<ActivityTableProps> = ({ eve
       <Thead>
         <Tr>
           <Th></Th>
-          <Th>Time</Th>
-          <Th>Action</Th>
           <Th>Result</Th>
+          <Th>Action</Th>
           <Th>Resource</Th>
           <Th>Triggered By</Th>
+          <Th>Time</Th>
         </Tr>
       </Thead>
       <Tbody>
         {events.map(event => (
           <Tr key={event.id}>
             <Td>{getResultIcon(event.result)}</Td>
-            <Td>{event.timestamp ? new Date(event.timestamp).toLocaleString() : '-'}</Td>
-            <Td>{event.action}</Td>
             <Td>{event.result}</Td>
+            <Td>{event.action}</Td>
             <Td>
-              <Link to={resolveResourcePath(event.resourceType ?? '-', event.resourceName ?? '-')}>
-                {event.resourceName}
+              <Link to={resolveResourcePath(event.resourceType ?? '-', event.resourceId ?? '-')}>
+                {event.resourceId}
               </Link>
             </Td>
             <Td>{event.triggeredBy}</Td>
+            <Td>{event.timestamp ? new Date(event.timestamp).toLocaleString() : '-'}</Td>
           </Tr>
         ))}
       </Tbody>

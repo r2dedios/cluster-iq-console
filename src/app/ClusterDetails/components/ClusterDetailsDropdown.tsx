@@ -3,36 +3,36 @@ import { Dropdown, DropdownItem, DropdownList, MenuToggle, MenuToggleElement } f
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ModalPowerManagement } from './ModalPowerManagement';
-import { PowerAction } from './types';
+import { ActionOperations, ActionTypes } from '@app/types/types';
 
 interface ClusterDetailsDropdownProps {
   clusterStatus: ResourceStatusApi | null;
 }
 
-export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropdownProps> = ({ clusterStatus }) => {
+export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropdownProps> = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   useParams();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [modalAction, setModalAction] = React.useState<PowerAction | null>(null);
-
-  // Disable actions based on cluster status
-  const isPowerOnDisabled =
-    clusterStatus === null || [ResourceStatusApi.Running, ResourceStatusApi.Terminated].includes(clusterStatus);
-
-  const isPowerOffDisabled =
-    clusterStatus === null || [ResourceStatusApi.Stopped, ResourceStatusApi.Terminated].includes(clusterStatus);
+  const [actionOperation, setActionOperation] = React.useState<ActionOperations | null>(null);
+  const [actionType, setActionType] = React.useState<ActionTypes | null>(null);
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    if (value === PowerAction.POWER_ON || value === PowerAction.POWER_OFF) {
-      setModalAction(value as PowerAction);
-      setIsModalOpen(true);
-      setIsOpen(false);
+    const operation = value as ActionOperations | undefined;
+    if (operation === ActionOperations.POWER_ON || operation === ActionOperations.POWER_OFF) {
+      setActionOperation(operation);
+      setActionType(ActionTypes.INSTANT_ACTION);
+    } else {
+      setActionOperation(null);
+      setActionType(ActionTypes.SCHEDULED_ACTION);
     }
+    setIsModalOpen(true);
+    setIsOpen(false);
   };
 
   const resetModalState = () => {
     setIsModalOpen(false);
-    setModalAction(null);
+    setActionOperation(null);
+    setActionType(null);
   };
 
   return (
@@ -41,6 +41,9 @@ export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropd
         isOpen={isOpen}
         onSelect={onSelect}
         onOpenChange={setIsOpen}
+        popperProps={{
+          position: 'end',
+        }}
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
           <MenuToggle ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
             Actions
@@ -48,16 +51,24 @@ export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropd
         )}
       >
         <DropdownList>
-          <DropdownItem value={PowerAction.POWER_ON} key="power on" isDisabled={isPowerOnDisabled}>
-            {PowerAction.POWER_ON}
+          <DropdownItem value={ActionOperations.POWER_ON} type={ActionTypes.INSTANT_ACTION} key="power on">
+            {ActionOperations.POWER_ON}
           </DropdownItem>
-          <DropdownItem value={PowerAction.POWER_OFF} key="power off" isDisabled={isPowerOffDisabled}>
-            {PowerAction.POWER_OFF}
+          <DropdownItem value={ActionOperations.POWER_OFF} type={ActionTypes.INSTANT_ACTION} key="power off">
+            {ActionOperations.POWER_OFF}
+          </DropdownItem>
+          <DropdownItem value="schedule" key="schedule">
+            {ActionTypes.SCHEDULED_ACTION}
           </DropdownItem>
         </DropdownList>
       </Dropdown>
 
-      <ModalPowerManagement isOpen={isModalOpen} onClose={resetModalState} action={modalAction} />
+      <ModalPowerManagement
+        isOpen={isModalOpen}
+        onClose={resetModalState}
+        actionOperation={actionOperation}
+        actionType={actionType}
+      />
     </>
   );
 };
