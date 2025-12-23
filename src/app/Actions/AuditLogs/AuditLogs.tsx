@@ -1,10 +1,10 @@
 import React from 'react';
 import { PageSection, PageSectionVariants, Panel, Text, TextContent } from '@patternfly/react-core';
-import AuditLogsTableToolbar from '@app/Observe/AuditLogs/AuditLogsTableToolbar.tsx';
+import AuditLogsTableToolbar from './AuditLogsTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
 import { ClusterActions, ResultStatus } from '@app/types/types.tsx';
 import { ProviderApi } from '@api';
-import { AuditLogsTable } from '@app/Observe/AuditLogs/AuditLogsTable.tsx';
+import { AuditLogsTable } from './AuditLogsTable.tsx';
 
 const filterParams = {
   accountName: parseAsString.withDefault(''),

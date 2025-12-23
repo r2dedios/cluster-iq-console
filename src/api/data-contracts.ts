@@ -299,7 +299,7 @@ export interface SystemEventResponseApi {
   description?: string;
   id?: number;
   provider?: string;
-  resourceId?: string;
+  resourceName?: string;
   resourceType?: string;
   result?: string;
   severity?: string;

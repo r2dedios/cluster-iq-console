@@ -1,23 +1,5 @@
 import { ClusterActions } from '@app/types/types';
 
-export interface Target {
-  accountName: string;
-  region: string;
-  clusterID: string;
-  instances: string[];
-}
-
-export interface ScheduledAction {
-  id: string;
-  type: 'scheduled_action' | 'cron_action';
-  time?: string;
-  cronExp?: string;
-  operation: string;
-  target: Target;
-  status: string;
-  enabled: boolean;
-}
-
 export interface SchedulerTableToolbarProps {
   searchValue: string;
   setSearchValue: (value: string) => void;

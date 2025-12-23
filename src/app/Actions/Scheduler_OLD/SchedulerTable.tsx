@@ -1,5 +1,5 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { api } from '@api';
+import { api, ActionResponseApi } from '@api';
 import { ActionsColumn, IAction, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React, { useEffect, useState } from 'react';
 import { useTableSort } from '@app/hooks/useTableSort.tsx';
@@ -7,14 +7,14 @@ import { Button, EmptyState, EmptyStateHeader, EmptyStateIcon, Modal, ModalVaria
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { paginateItems } from '@app/utils/tableFilters';
 import { SearchIcon } from '@patternfly/react-icons';
-import { apiOperationToClusterAction, ScheduledAction, SchedulerTableProps } from './types';
+import { apiOperationToClusterAction, SchedulerTableProps } from './types';
 import { Link } from 'react-router-dom';
 
 const columnNames = {
   operation: 'Action',
   type: 'Type',
   time: 'Time',
-  accountName: 'Account',
+  accountId: 'Account',
   clusterID: 'Cluster',
   enabled: 'Enabled',
   status: 'Status',
@@ -29,7 +29,7 @@ const EmptyStateNoFound: React.FunctionComponent = () => (
 export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
   type,
   action,
-  accountName,
+  accountId,
   cluster,
   status,
   enabled,
@@ -39,9 +39,9 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
   const [perPage, setPerPage] = React.useState(10);
   const [filteredCount, setFilteredCount] = useState(0);
 
-  const [data, setData] = useState<ScheduledAction[]>([]);
+  const [data, setData] = useState<ActionResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState<ScheduledAction[]>([]);
+  const [filteredData, setFilteredData] = useState<ActionResponseApi[]>([]);
   const [modalState, setModalState] = useState<{ isOpen: boolean; action: string; selectedId: string | null }>({
     isOpen: false,
     action: '',
@@ -71,8 +71,8 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
       filtered = filtered.filter(item => item.type === type);
     }
 
-    if (accountName) {
-      filtered = filtered.filter(item => item.target.accountName.toLowerCase().includes(accountName.toLowerCase()));
+    if (accountId) {
+      filtered = filtered.filter(item => item.accountId.toLowerCase().includes(accountId.toLowerCase()));
     }
 
     if (action?.length) {
@@ -98,22 +98,14 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
 
     setFilteredCount(filtered.length);
     setFilteredData(paginateItems(filtered, page, perPage));
-  }, [data, type, accountName, action, cluster, status, enabled, page, perPage]);
+  }, [data, type, accountId, action, cluster, status, enabled, page, perPage]);
 
-  const getSortableRowValues = (scheduledAction: ScheduledAction): (string | number | null)[] => {
-    const { operation, type, time, cronExp, target, status, enabled } = scheduledAction;
-    return [
-      operation,
-      type,
-      time || cronExp || null,
-      target.accountName,
-      target.clusterID,
-      enabled ? 'Yes' : 'No',
-      status,
-    ];
+  const getSortableRowValues = (scheduledAction: ActionResponseApi): (string | number | null)[] => {
+    const { operation, type, time, cronExp, status, enabled } = scheduledAction;
+    return [operation, type, time || cronExp || null, accountId, cluster, enabled ? 'Yes' : 'No', status];
   };
 
-  const { sortedData, getSortParams } = useTableSort<ScheduledAction>(filteredData, getSortableRowValues, 2, 'desc');
+  const { sortedData, getSortParams } = useTableSort<ActionResponseApi>(filteredData, getSortableRowValues, 2, 'desc');
 
   const openModal = (action: 'enable' | 'disable' | 'delete', id: string) => {
     setModalState({
@@ -162,7 +154,7 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
     }
   };
 
-  const getRowActions = (scheduledAction: ScheduledAction): IAction[] => [
+  const getRowActions = (scheduledAction: ActionResponseApi): IAction[] => [
     {
       title: scheduledAction.enabled ? 'Disable' : 'Enable',
       onClick: () => openModal(scheduledAction.enabled ? 'disable' : 'enable', scheduledAction.id),
@@ -184,7 +176,7 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
             <Th sort={getSortParams(0)}>{columnNames.operation}</Th>
             <Th sort={getSortParams(1)}>{columnNames.type}</Th>
             <Th sort={getSortParams(2)}>{columnNames.time}</Th>
-            <Th sort={getSortParams(3)}>{columnNames.accountName}</Th>
+            <Th sort={getSortParams(3)}>{columnNames.accountId}</Th>
             <Th sort={getSortParams(4)}>{columnNames.clusterID}</Th>
             <Th sort={getSortParams(5)}>{columnNames.enabled}</Th>
             <Th sort={getSortParams(6)}>{columnNames.status}</Th>
@@ -196,9 +188,9 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
               <Td>{apiOperationToClusterAction[action.operation] || action.operation}</Td>
               <Td>{action.type}</Td>
               <Td>{action.time || action.cronExp}</Td>
-              <Td>{action.target.accountName}</Td>
+              <Td>{action.accountId}</Td>
               <Td>
-                <Link to={`/clusters/${action.target.clusterID}`}>{action.target.clusterID}</Link>
+                <Link to={`/clusters/${action.clusterId}`}>{action.clusterId}</Link>
               </Td>
               <Td>{action.enabled ? 'Yes' : 'No'}</Td>
               <Td>{action.status}</Td>
