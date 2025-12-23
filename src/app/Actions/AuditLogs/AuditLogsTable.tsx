@@ -18,7 +18,7 @@ const columnNames = {
   resource: 'Resource',
   account: 'Account',
   provider: 'Provider',
-  loggedBy: 'Logged by',
+  triggeredBy: 'Triggered By',
   description: 'Description',
   date: 'Date',
 };
@@ -89,11 +89,11 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   }, [data, accountName, action, provider, result, triggered_by, page, perPage]);
 
   const getSortableRowValues = (event: SystemEventResponseApi): (string | number | null)[] => {
-    const { action, result, resourceName, accountId, provider, triggeredBy, description, timestamp } = event;
+    const { action, result, resourceId, accountId, provider, triggeredBy, description, timestamp } = event;
     return [
       action ?? null,
       result ?? null,
-      resourceName ?? null,
+      resourceId ?? null,
       accountId ?? null,
       provider ?? null,
       triggeredBy ?? null,
@@ -121,7 +121,7 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
             <Th sort={getSortParams(0)}>{columnNames.action}</Th>
             <Th sort={getSortParams(3)}>{columnNames.account}</Th>
             <Th sort={getSortParams(4)}>{columnNames.provider}</Th>
-            <Th sort={getSortParams(5)}>{columnNames.loggedBy}</Th>
+            <Th sort={getSortParams(5)}>{columnNames.triggeredBy}</Th>
             <Th>{columnNames.description}</Th>
             <Th sort={getSortParams(1)}>{columnNames.result}</Th>
             <Th sort={getSortParams(7)}>{columnNames.date}</Th>
@@ -130,15 +130,15 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
         <Tbody>
           {sortedData.map(event => (
             <Tr key={event.id}>
-              <Td dataLabel={event.resourceName}>
+              <Td dataLabel={event.resourceId}>
                 <Link
                   to={
                     event.resourceType === 'instance'
-                      ? `/instances/${event.resourceName}`
-                      : `/clusters/${event.resourceName}`
+                      ? `/instances/${event.resourceId}`
+                      : `/clusters/${event.resourceId}`
                   }
                 >
-                  {event.resourceName}
+                  {event.resourceId}
                 </Link>
               </Td>
               <Td>{renderOperationLabel(event.action)}</Td>
