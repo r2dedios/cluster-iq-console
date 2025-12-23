@@ -87,7 +87,7 @@ export interface ClusterEventResponseApi {
   id?: number;
   resourceId?: string;
   resourceType?: string;
-  result?: string;
+  result?: ResultStatus;
   severity?: string;
   timestamp?: string;
   triggeredBy?: string;
@@ -294,17 +294,17 @@ export interface SystemEventListResponseApi {
 }
 
 export interface SystemEventResponseApi {
-  accountId?: string;
-  action?: string;
-  description?: string;
   id?: number;
-  provider?: string;
-  resourceName?: string;
+  action?: string;
+  resourceId?: string;
   resourceType?: string;
-  result?: string;
-  severity?: string;
   timestamp?: string;
+  result?: ResultStatus;
+  severity?: string;
   triggeredBy?: string;
+  description?: string;
+  accountId?: string;
+  provider?: string;
 }
 
 export interface TagRequestApi {

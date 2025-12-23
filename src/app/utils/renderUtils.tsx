@@ -60,6 +60,7 @@ export const getResultIcon = (result: ResultStatus) => {
       [ResultStatus.Pending]: <PendingIcon color="var(--pf-v5-global--warning-color--100)" title="Pending" />,
       [ResultStatus.Failed]: <ExclamationTriangleIcon color="var(--pf-v5-global--danger-color--100)" title="Error" />,
       [ResultStatus.Warning]: <ExclamationCircleIcon color="var(--pf-v5-global--warning-color--100)" title="Warning" />,
+      [ResultStatus.Unknown]: <UnknownIcon color="gray" title="Unknown" />,
     }[result] || <UnknownIcon color="gray" title="Unknown" />
   );
 };
