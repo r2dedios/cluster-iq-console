@@ -13,12 +13,14 @@ import {
   ToolbarGroup,
   ToolbarItem,
   ToolbarFilter,
+  Switch,
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { ServersTableToolbarProps } from '../types';
-import { CloudProvider, ClusterStates } from '@app/types/types';
+import { ResourceStatusApi, ProviderApi } from '@api';
 import debounce from 'lodash.debounce';
+import { usePopperContainer } from '@app/hooks/usePopperContainer';
 
 export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarProps> = ({
   searchValue,
@@ -27,7 +29,8 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
   setProviderSelections,
   providerSelections,
   statusSelection,
-  archived,
+  showTerminated,
+  setShowTerminated,
 }) => {
   const debouncedSearch = React.useMemo(() => debounce(setSearchValue, 300), [setSearchValue]);
 
@@ -51,33 +54,40 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
   const [isStatusMenuOpen, setIsStatusMenuOpen] = React.useState<boolean>(false);
   const statusToggleRef = React.useRef<HTMLButtonElement>(null);
   const statusMenuRef = React.useRef<HTMLDivElement>(null);
-  const statusContainerRef = React.useRef<HTMLDivElement>(null);
-  const handleStatusMenuKeys = (event: KeyboardEvent) => {
-    if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsStatusMenuOpen(!isStatusMenuOpen);
-        statusToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleStatusClickOutside = (event: MouseEvent) => {
-    if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
-      setIsStatusMenuOpen(false);
-    }
-  };
+  const { containerRef: statusContainerRef, containerElement: statusContainerElement } = usePopperContainer();
+  const handleStatusMenuKeysRef = React.useRef<((event: KeyboardEvent) => void) | undefined>(undefined);
+  const handleStatusClickOutsideRef = React.useRef<((event: MouseEvent) => void) | undefined>(undefined);
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleStatusMenuKeys);
-    window.addEventListener('click', handleStatusClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleStatusMenuKeys);
-      window.removeEventListener('click', handleStatusClickOutside);
+    handleStatusMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsStatusMenuOpen(!isStatusMenuOpen);
+          statusToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isStatusMenuOpen, statusMenuRef]);
 
-  const onStatusToggleClick = (ev: React.MouseEvent) => {
-    ev.stopPropagation();
+    handleStatusClickOutsideRef.current = (event: MouseEvent) => {
+      if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
+        setIsStatusMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleStatusMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleStatusClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isStatusMenuOpen]);
+
+  const onStatusToggleClick = (_ev: React.MouseEvent) => {
+    _ev.stopPropagation();
     setTimeout(() => {
       if (statusMenuRef.current) {
         const firstElement = statusMenuRef.current.querySelector('li > button:not(:disabled)');
@@ -89,12 +99,12 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
     setIsStatusMenuOpen(!isStatusMenuOpen);
   };
 
-  function onStatusSelect(event: React.MouseEvent | undefined, itemId: string | number | undefined) {
+  function onStatusSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
     if (typeof itemId === 'undefined') {
       return;
     }
 
-    setStatusSelection(itemId as ClusterStates);
+    setStatusSelection(itemId as ResourceStatusApi);
     setIsStatusMenuOpen(!isStatusMenuOpen);
   }
 
@@ -117,22 +127,22 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
     <Menu ref={statusMenuRef} id="attribute-search-status-menu" onSelect={onStatusSelect} selected={statusSelection}>
       <MenuContent>
         <MenuList>
-          <MenuItem itemId={ClusterStates.Unknown}>{ClusterStates.Unknown}</MenuItem>
-          <MenuItem itemId={ClusterStates.Running}>{ClusterStates.Running}</MenuItem>
-          <MenuItem itemId={ClusterStates.Stopped}>{ClusterStates.Stopped}</MenuItem>
+          <MenuItem itemId={ResourceStatusApi.Running}>{ResourceStatusApi.Running}</MenuItem>
+          <MenuItem itemId={ResourceStatusApi.Stopped}>{ResourceStatusApi.Stopped}</MenuItem>
+          <MenuItem itemId={ResourceStatusApi.Terminated}>{ResourceStatusApi.Terminated}</MenuItem>
         </MenuList>
       </MenuContent>
     </Menu>
   );
 
-  const statusSelect = archived ? null : (
+  const statusSelect = (
     <div ref={statusContainerRef}>
       <Popper
         trigger={statusToggle}
         triggerRef={statusToggleRef}
         popper={statusMenu}
         popperRef={statusMenuRef}
-        appendTo={statusContainerRef.current || undefined}
+        appendTo={statusContainerElement || undefined}
         isVisible={isStatusMenuOpen}
       />
     </div>
@@ -142,34 +152,41 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
   const [isProviderMenuOpen, setIsProviderMenuOpen] = React.useState<boolean>(false);
   const providerToggleRef = React.useRef<HTMLButtonElement>(null);
   const providerMenuRef = React.useRef<HTMLDivElement>(null);
-  const providerContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: providerContainerRef, containerElement: providerContainerElement } = usePopperContainer();
 
-  const handleProviderMenuKeys = (event: KeyboardEvent) => {
-    if (isProviderMenuOpen && providerMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsProviderMenuOpen(!isProviderMenuOpen);
-        providerToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleProviderClickOutside = (event: MouseEvent) => {
-    if (isProviderMenuOpen && !providerMenuRef.current?.contains(event.target as Node)) {
-      setIsProviderMenuOpen(false);
-    }
-  };
+  const handleProviderMenuKeysRef = React.useRef<((event: KeyboardEvent) => void) | undefined>(undefined);
+  const handleProviderClickOutsideRef = React.useRef<((event: MouseEvent) => void) | undefined>(undefined);
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleProviderMenuKeys);
-    window.addEventListener('click', handleProviderClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleProviderMenuKeys);
-      window.removeEventListener('click', handleProviderClickOutside);
+    handleProviderMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isProviderMenuOpen && providerMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsProviderMenuOpen(!isProviderMenuOpen);
+          providerToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isProviderMenuOpen, providerMenuRef]);
 
-  const onProviderMenuToggleClick = (ev: React.MouseEvent) => {
-    ev.stopPropagation();
+    handleProviderClickOutsideRef.current = (event: MouseEvent) => {
+      if (isProviderMenuOpen && !providerMenuRef.current?.contains(event.target as Node)) {
+        setIsProviderMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleProviderMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleProviderClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isProviderMenuOpen]);
+
+  const onProviderMenuToggleClick = (_ev: React.MouseEvent) => {
+    _ev.stopPropagation();
     setTimeout(() => {
       if (providerMenuRef.current) {
         const firstElement = providerMenuRef.current.querySelector('li > button:not(:disabled)');
@@ -181,12 +198,12 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
     setIsProviderMenuOpen(!isProviderMenuOpen);
   };
 
-  function onProviderMenuSelect(event: React.MouseEvent | undefined, itemId: string | number | undefined) {
+  function onProviderMenuSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
     if (typeof itemId === 'undefined') {
       return;
     }
 
-    const provider = itemId as CloudProvider;
+    const provider = itemId as ProviderApi;
     setProviderSelections(
       providerSelections && providerSelections.includes(provider)
         ? providerSelections.filter(selection => selection !== provider)
@@ -224,16 +241,24 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
     >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.AWS)} itemId={CloudProvider.AWS}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.AWSProvider)}
+            itemId={ProviderApi.AWSProvider}
+          >
             AWS
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={providerSelections?.includes(CloudProvider.GCP)} itemId={CloudProvider.GCP}>
+          <MenuItem
+            hasCheckbox
+            isSelected={providerSelections?.includes(ProviderApi.GCPProvider)}
+            itemId={ProviderApi.GCPProvider}
+          >
             Google Cloud
           </MenuItem>
           <MenuItem
             hasCheckbox
-            isSelected={providerSelections?.includes(CloudProvider.Azure)}
-            itemId={CloudProvider.Azure}
+            isSelected={providerSelections?.includes(ProviderApi.AzureProvider)}
+            itemId={ProviderApi.AzureProvider}
           >
             Azure
           </MenuItem>
@@ -249,7 +274,7 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
         triggerRef={providerToggleRef}
         popper={providerMenu}
         popperRef={providerMenuRef}
-        appendTo={providerContainerRef.current || undefined}
+        appendTo={providerContainerElement || undefined}
         isVisible={isProviderMenuOpen}
       />
     </div>
@@ -260,37 +285,44 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
-  const attributeContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: attributeContainerRef, containerElement: attributeContainerElement } = usePopperContainer();
 
-  const handleAttribueMenuKeys = (event: KeyboardEvent) => {
-    if (!isAttributeMenuOpen) {
-      return;
-    }
-    if (
-      attributeMenuRef.current?.contains(event.target as Node) ||
-      attributeToggleRef.current?.contains(event.target as Node)
-    ) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsAttributeMenuOpen(!isAttributeMenuOpen);
-        attributeToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleAttributeClickOutside = (event: MouseEvent) => {
-    if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
-      setIsAttributeMenuOpen(false);
-    }
-  };
+  const handleAttribueMenuKeysRef = React.useRef<((event: KeyboardEvent) => void) | undefined>(undefined);
+  const handleAttributeClickOutsideRef = React.useRef<((event: MouseEvent) => void) | undefined>(undefined);
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleAttribueMenuKeys);
-    window.addEventListener('click', handleAttributeClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleAttribueMenuKeys);
-      window.removeEventListener('click', handleAttributeClickOutside);
+    handleAttribueMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (!isAttributeMenuOpen) {
+        return;
+      }
+      if (
+        attributeMenuRef.current?.contains(event.target as Node) ||
+        attributeToggleRef.current?.contains(event.target as Node)
+      ) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsAttributeMenuOpen(!isAttributeMenuOpen);
+          attributeToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isAttributeMenuOpen, attributeMenuRef]);
+
+    handleAttributeClickOutsideRef.current = (event: MouseEvent) => {
+      if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
+        setIsAttributeMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleAttribueMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleAttributeClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isAttributeMenuOpen]);
 
   const onAttributeToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -326,7 +358,7 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
       <MenuContent>
         <MenuList>
           <MenuItem itemId="Servers">Servers</MenuItem>
-          {!archived && <MenuItem itemId="Status">Status</MenuItem>}
+          <MenuItem itemId="Status">Status</MenuItem>
           <MenuItem itemId="Provider">Provider</MenuItem>
         </MenuList>
       </MenuContent>
@@ -340,7 +372,7 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
         triggerRef={attributeToggleRef}
         popper={attributeMenu}
         popperRef={attributeMenuRef}
-        appendTo={attributeContainerRef.current || undefined}
+        appendTo={attributeContainerElement || undefined}
         isVisible={isAttributeMenuOpen}
       />
     </div>
@@ -368,20 +400,18 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
             >
               {searchInput}
             </ToolbarFilter>
-            {!archived && (
-              <ToolbarFilter
-                chips={statusSelection ? [statusSelection] : []}
-                deleteChip={() => setStatusSelection(null)}
-                deleteChipGroup={() => setStatusSelection(null)}
-                categoryName="Status"
-                showToolbarItem={activeAttributeMenu === 'Status'}
-              >
-                {statusSelect}
-              </ToolbarFilter>
-            )}
+            <ToolbarFilter
+              chips={statusSelection ? [statusSelection] : []}
+              deleteChip={() => setStatusSelection(null)}
+              deleteChipGroup={() => setStatusSelection(null)}
+              categoryName="Status"
+              showToolbarItem={activeAttributeMenu === 'Status'}
+            >
+              {statusSelect}
+            </ToolbarFilter>
             <ToolbarFilter
               chips={providerSelections || []}
-              deleteChip={(category, chip) => onProviderMenuSelect(undefined, chip as string)}
+              deleteChip={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
               deleteChipGroup={() => setProviderSelections([])}
               categoryName="Provider"
               showToolbarItem={activeAttributeMenu === 'Provider'}
@@ -390,6 +420,15 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
             </ToolbarFilter>
           </ToolbarGroup>
         </ToolbarToggleGroup>
+        <ToolbarItem>
+          <Switch
+            id="show-terminated-instances"
+            label="Show terminated instances"
+            labelOff="Show terminated instances"
+            isChecked={showTerminated}
+            onChange={(_event, checked) => setShowTerminated(checked)}
+          />
+        </ToolbarItem>
       </ToolbarContent>
     </Toolbar>
   );

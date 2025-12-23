@@ -12,12 +12,12 @@ import {
   TextInput,
 } from '@patternfly/react-core';
 import React from 'react';
-import { ActionOperations, ActionTypes } from './ClusterDetailsDropdown';
+import { ActionOperations, ActionTypes } from '@app/types/types';
 import DateTimePicker from './DateTimePicker';
 import { CronAction, ScheduledAction } from './types';
 import { useParams } from 'react-router-dom';
 import { useUser } from '@app/Contexts/UserContext.tsx';
-import { startCluster, stopCluster, createScheduledAction } from '@app/services/api';
+import { startCluster, stopCluster } from '@api';
 import { debug } from '@app/utils/debugLogs';
 
 type PowerManagementData = ScheduledAction | CronAction;

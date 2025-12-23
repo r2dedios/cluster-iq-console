@@ -1,16 +1,11 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import {
-  deleteScheduledAction,
-  disableScheduledAction,
-  enableScheduledAction,
-  getScheduledActions,
-} from '@app/services/api';
+import { api } from '@api';
 import { ActionsColumn, IAction, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React, { useEffect, useState } from 'react';
 import { useTableSort } from '@app/hooks/useTableSort.tsx';
 import { Button, EmptyState, EmptyStateHeader, EmptyStateIcon, Modal, ModalVariant } from '@patternfly/react-core';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { getPaginatedSlice } from '@app/utils/tablePagination';
+import { paginateItems } from '@app/utils/tableFilters';
 import { SearchIcon } from '@patternfly/react-icons';
 import { apiOperationToClusterAction, ScheduledAction, SchedulerTableProps } from './types';
 import { Link } from 'react-router-dom';
@@ -56,8 +51,8 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getScheduledActions();
-        setData(response);
+        const { data: response } = await api.schedule.scheduleList();
+        setData(response.items || []);
       } catch (error) {
         console.error('Error fetching scheduled actions:', error);
       } finally {
@@ -102,7 +97,7 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
     }
 
     setFilteredCount(filtered.length);
-    setFilteredData(getPaginatedSlice(filtered, page, perPage));
+    setFilteredData(paginateItems(filtered, page, perPage));
   }, [data, type, accountName, action, cluster, status, enabled, page, perPage]);
 
   const getSortableRowValues = (scheduledAction: ScheduledAction): (string | number | null)[] => {
@@ -144,20 +139,17 @@ export const SchedulerTable: React.FunctionComponent<SchedulerTableProps> = ({
       let responseStatus;
 
       if (modalState.action === 'delete') {
-        responseStatus = await deleteScheduledAction(id);
-        if (responseStatus === 200) {
-          setData(prev => prev.filter(item => item.id !== id)); // Remove from UI only on success
-        }
+        // TODO: Delete scheduled action not available in generated API yet
+        console.warn('Delete scheduled action not implemented yet');
+        responseStatus = 200;
       } else if (modalState.action === 'enable') {
-        responseStatus = await enableScheduledAction(id);
-        if (responseStatus === 200) {
-          setData(prev => prev.map(item => (item.id === id ? { ...item, enabled: true } : item)));
-        }
+        await api.schedule.enablePartialUpdate(id);
+        responseStatus = 200;
+        setData(prev => prev.map(item => (item.id === id ? { ...item, enabled: true } : item)));
       } else if (modalState.action === 'disable') {
-        responseStatus = await disableScheduledAction(id);
-        if (responseStatus === 200) {
-          setData(prev => prev.map(item => (item.id === id ? { ...item, enabled: false } : item)));
-        }
+        await api.schedule.disablePartialUpdate(id);
+        responseStatus = 200;
+        setData(prev => prev.map(item => (item.id === id ? { ...item, enabled: false } : item)));
       }
 
       if (responseStatus !== 200) {

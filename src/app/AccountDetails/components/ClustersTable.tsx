@@ -26,11 +26,11 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({ clu
       </Thead>
       <Tbody>
         {clusters.map(cluster => (
-          <Tr key={cluster.id}>
-            <Td dataLabel={cluster.name}>
-              <Link to={`/clusters/${cluster.id}`}>{cluster.id}</Link>
+          <Tr key={cluster.clusterId}>
+            <Td dataLabel={cluster.clusterName}>
+              <Link to={`/clusters/${cluster.clusterId}`}>{cluster.clusterId}</Link>
             </Td>
-            <Td>{cluster.name}</Td>
+            <Td>{cluster.clusterName}</Td>
             <Td dataLabel={cluster.status}>{renderStatusLabel(cluster.status)}</Td>
             <Td>{cluster.provider}</Td>
             <Td>{cluster.instanceCount}</Td>

@@ -1,21 +1,12 @@
-import { ClusterStates } from '@app/types/types';
+import { ResourceStatusApi } from '@api';
 import { Dropdown, DropdownItem, DropdownList, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ModalPowerManagement } from './ModalPowerManagement';
-
-export enum ActionOperations {
-  POWER_ON = 'Power On',
-  POWER_OFF = 'Power Off',
-}
-
-export enum ActionTypes {
-  INSTANT_ACTION = 'Instant Action',
-  SCHEDULED_ACTION = 'Scheduled Action',
-}
+import { ActionOperations, ActionTypes } from '@app/types/types';
 
 interface ClusterDetailsDropdownProps {
-  clusterStatus: ClusterStates | null;
+  clusterStatus: ResourceStatusApi | null;
 }
 
 export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropdownProps> = () => {

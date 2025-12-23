@@ -1,4 +1,4 @@
-import { AccountData, Cluster } from '@app/types/types';
+import { AccountResponseApi, ClusterResponseApi } from '@api';
 import React from 'react';
 
 export interface AccountsHeaderProps {
@@ -13,13 +13,13 @@ export interface AccountsTabsProps {
 
 export interface AccountDetailsContentProps {
   loading: boolean;
-  accountData: AccountData;
+  accountData: AccountResponseApi | null;
 }
 
 export interface AccountDescriptionListProps {
-  account: AccountData['accounts'][0];
+  account: AccountResponseApi;
 }
 
 export interface ClustersTableProps {
-  clusters: Cluster[];
+  clusters: ClusterResponseApi[];
 }

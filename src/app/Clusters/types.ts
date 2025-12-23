@@ -1,22 +1,22 @@
-import { ClusterStates, CloudProvider } from '@app/types/types';
-
-export type FilterCategory = 'accountName' | 'clusterName';
+import { ResourceStatusApi, ProviderApi } from '@api';
 
 export interface ClustersTableToolbarProps {
-  filterCategory: FilterCategory;
-  setFilterCategory: (category: FilterCategory) => void;
-  filterValue: string;
-  setFilterValue: (value: string) => void;
-  statusSelection: ClusterStates | null;
-  setStatusSelection: (value: ClusterStates | null) => void;
-  providerSelections: CloudProvider[] | null;
-  setProviderSelections: (value: CloudProvider[] | null) => void;
-  archived: boolean;
+  clusterNameSearch: string;
+  setClusterNameSearch: (value: string) => void;
+  accountNameSearch: string;
+  setAccountNameSearch: (value: string) => void;
+  statusSelection: ResourceStatusApi | null;
+  setStatusSelection: (value: ResourceStatusApi | null) => void;
+  providerSelections: ProviderApi[] | null;
+  setProviderSelections: (value: ProviderApi[] | null) => void;
+  showTerminated: boolean;
+  setShowTerminated: (value: boolean) => void;
 }
+
 export interface ClustersTableProps {
-  filterCategory: FilterCategory;
-  filterValue: string;
+  clusterNameSearch: string;
+  accountNameSearch: string;
   statusFilter: string | null;
-  providerSelections: CloudProvider[] | null;
-  archived: boolean;
+  providerSelections: ProviderApi[] | null;
+  showTerminated: boolean;
 }

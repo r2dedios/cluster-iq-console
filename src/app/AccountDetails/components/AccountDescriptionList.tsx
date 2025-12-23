@@ -14,9 +14,9 @@ export const AccountDescriptionList: React.FunctionComponent<AccountDescriptionL
     <DescriptionList columnModifier={{ lg: '2Col' }} aria-labelledby="open-tabs-example-tabs-list-details-title">
       <DescriptionListGroup>
         <DescriptionListTerm>Account Name</DescriptionListTerm>
-        <DescriptionListDescription>{account.name}</DescriptionListDescription>
+        <DescriptionListDescription>{account.accountName}</DescriptionListDescription>
         <DescriptionListTerm>Account ID</DescriptionListTerm>
-        <DescriptionListDescription>{account.id}</DescriptionListDescription>
+        <DescriptionListDescription>{account.accountId}</DescriptionListDescription>
         <DescriptionListTerm>Clusters count</DescriptionListTerm>
         <DescriptionListDescription>{account.clusterCount}</DescriptionListDescription>
         <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
@@ -38,6 +38,8 @@ export const AccountDescriptionList: React.FunctionComponent<AccountDescriptionL
       <DescriptionListGroup>
         <DescriptionListTerm>Last scanned at</DescriptionListTerm>
         <DescriptionListDescription>{parseScanTimestamp(account.lastScanTimestamp)}</DescriptionListDescription>
+        <DescriptionListTerm>Created at (in ClusterIQ)</DescriptionListTerm>
+        <DescriptionListDescription>{parseScanTimestamp(account.createdAt)}</DescriptionListDescription>
       </DescriptionListGroup>
     </DescriptionList>
   );

@@ -12,7 +12,7 @@ export const AccountDetailsContent: React.FunctionComponent<AccountDetailsConten
     <React.Fragment>
       {loading ? (
         <LoadingSpinner />
-      ) : (
+      ) : accountData ? (
         <Flex direction={{ default: 'column' }}>
           <FlexItem spacer={{ default: 'spacerLg' }}>
             <Title headingLevel="h2" size="lg" className="pf-v5-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
@@ -20,10 +20,10 @@ export const AccountDetailsContent: React.FunctionComponent<AccountDetailsConten
             </Title>
           </FlexItem>
           <FlexItem>
-            <AccountDescriptionList account={accountData.accounts[0]} />
+            <AccountDescriptionList account={accountData} />
           </FlexItem>
         </Flex>
-      )}
+      ) : null}
     </React.Fragment>
   );
 };

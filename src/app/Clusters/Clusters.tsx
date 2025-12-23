@@ -3,65 +3,49 @@ import React from 'react';
 import ClustersTable from './components/ClustersTable';
 import ClustersTableToolbar from './components/ClustersTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, parseAsBoolean, useQueryStates } from 'nuqs';
-import { CloudProvider, ClusterStates } from '@app/types/types';
-import { useLocation } from 'react-router-dom';
-import { FilterCategory } from './types';
+import { ResourceStatusApi, ProviderApi } from '@api';
 
 const filterParams = {
   status: {
-    ...parseAsStringEnum<ClusterStates>(Object.values(ClusterStates)),
-    defaultValue: null as ClusterStates | null,
+    ...parseAsStringEnum<ResourceStatusApi>(Object.values(ResourceStatusApi)),
+    defaultValue: null as ResourceStatusApi | null,
   },
-  provider: parseAsArrayOf(parseAsStringEnum<CloudProvider>(Object.values(CloudProvider))).withDefault([]),
-  search: parseAsString.withDefault(''),
-  filterCategory: parseAsStringEnum<FilterCategory>(['accountName', 'clusterName']).withDefault('clusterName'),
-  archived: parseAsBoolean.withDefault(false),
+  provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
+  clusterName: parseAsString.withDefault(''),
+  accountName: parseAsString.withDefault(''),
+  showTerminated: parseAsBoolean.withDefault(false),
 };
 
 const Clusters: React.FunctionComponent = () => {
-  const location = useLocation();
-  const [{ status, provider, search, filterCategory, archived }, setQuery] = useQueryStates(filterParams);
-
-  // React to URL changes
-  React.useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const newArchived = params.get('archived') === 'true';
-
-    if (archived !== newArchived) {
-      setQuery({
-        archived: newArchived,
-        status: null,
-        provider: [],
-      });
-    }
-  }, [location.search, archived, setQuery]);
+  const [{ status, provider, clusterName, accountName, showTerminated }, setQuery] = useQueryStates(filterParams);
 
   return (
     <React.Fragment>
       <PageSection variant={PageSectionVariants.light}>
         <TextContent>
-          <Text component="h1">Clusters {archived ? '- History' : '- Active'}</Text>
+          <Text component="h1">Clusters</Text>
         </TextContent>
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
           <ClustersTableToolbar
-            filterCategory={filterCategory}
-            setFilterCategory={value => setQuery({ filterCategory: value })}
-            filterValue={search}
-            setFilterValue={value => setQuery({ search: value })}
+            clusterNameSearch={clusterName}
+            setClusterNameSearch={value => setQuery({ clusterName: value })}
+            accountNameSearch={accountName}
+            setAccountNameSearch={value => setQuery({ accountName: value })}
             statusSelection={status}
             setStatusSelection={value => setQuery({ status: value })}
             providerSelections={provider}
             setProviderSelections={value => setQuery({ provider: value || [] })}
-            archived={archived}
+            showTerminated={showTerminated}
+            setShowTerminated={value => setQuery({ showTerminated: value })}
           />
           <ClustersTable
-            filterCategory={filterCategory}
-            filterValue={search}
+            clusterNameSearch={clusterName}
+            accountNameSearch={accountName}
             statusFilter={status}
             providerSelections={provider}
-            archived={archived}
+            showTerminated={showTerminated}
           />
         </Panel>
       </PageSection>
