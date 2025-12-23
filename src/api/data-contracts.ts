@@ -304,7 +304,7 @@ export interface SystemEventListResponseApi {
 export interface SystemEventResponseApi {
   id?: number;
   action?: string;
-  resourceName?: string;
+  resourceId?: string;
   resourceType?: string;
   timestamp?: string;
   result?: ResultStatus;

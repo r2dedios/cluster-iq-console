@@ -18,3 +18,14 @@ export enum ScheduledActionStatus {
   Pending = 'Pending',
   Unknown = 'Unknown',
 }
+
+export enum ActionOperations {
+  POWER_ON = 'Power On',
+  POWER_OFF = 'Power Off',
+}
+
+export enum ActionTypes {
+  INSTANT_ACTION = 'Instant Action',
+  SCHEDULED_ACTION = 'Scheduled Action',
+  CRON_ACTION = 'Cron Action',
+}
