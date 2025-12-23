@@ -12,3 +12,16 @@ export function parseNumberToCurrency(value: number | undefined) {
     currency: 'USD',
   });
 }
+
+export function resolveResourcePath(resourceType: string, resourceName: string): string {
+  if (resourceType === 'cluster') {
+    return `/clusters/${resourceName}`;
+  }
+
+  if (resourceType === 'instance') {
+    return `/instances/${resourceName}`;
+  }
+
+  // Fallback / defensive default
+  return '#';
+}
