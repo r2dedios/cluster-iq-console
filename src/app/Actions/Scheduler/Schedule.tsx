@@ -1,4 +1,5 @@
 import React from 'react';
+import { ModalPowerManagement } from './components/ModalPowerManagement';
 import {
   Flex,
   FlexItem,
@@ -12,6 +13,17 @@ import {
 import ScheduleActionsTable from './components/ActionsTable';
 
 const Scheduler: React.FunctionComponent = () => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [reloadFlag, setReloadFlag] = React.useState(0);
+
+  const onClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const resetModalState = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <React.Fragment>
       <PageSection variant={PageSectionVariants.light}>
@@ -22,7 +34,7 @@ const Scheduler: React.FunctionComponent = () => {
             </TextContent>
           </FlexItem>
           <FlexItem>
-            <Button variant="primary" onClick={() => navigate('/actions/create')}>
+            <Button variant="primary" onClick={onClick}>
               New Action
             </Button>
           </FlexItem>
@@ -30,8 +42,13 @@ const Scheduler: React.FunctionComponent = () => {
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
-          <ScheduleActionsTable actionType={null} />
+          <ScheduleActionsTable actionType={null} reloadFlag={reloadFlag} />
         </Panel>
+        <ModalPowerManagement
+          isOpen={isModalOpen}
+          onClose={resetModalState}
+          onCreated={() => setReloadFlag(k => k + 1)}
+        />
       </PageSection>
     </React.Fragment>
   );

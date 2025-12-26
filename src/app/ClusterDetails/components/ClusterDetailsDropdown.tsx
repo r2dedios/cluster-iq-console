@@ -2,7 +2,6 @@ import { ResourceStatusApi } from '@api';
 import { Dropdown, DropdownItem, DropdownList, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { ModalPowerManagement } from './ModalPowerManagement';
 import { ActionOperations, ActionTypes } from '@app/types/types';
 
 interface ClusterDetailsDropdownProps {
@@ -12,9 +11,6 @@ interface ClusterDetailsDropdownProps {
 export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropdownProps> = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   useParams();
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [actionOperation, setActionOperation] = React.useState<ActionOperations | null>(null);
-  const [actionType, setActionType] = React.useState<ActionTypes | null>(null);
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
     const operation = value as ActionOperations | undefined;
@@ -29,11 +25,12 @@ export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropd
     setIsOpen(false);
   };
 
-  const resetModalState = () => {
-    setIsModalOpen(false);
-    setActionOperation(null);
-    setActionType(null);
-  };
+  // TODO restore ModalWindow for confirming action
+  //const resetModalState = () => {
+  //  setIsModalOpen(false);
+  //  setActionOperation(null);
+  //  setActionType(null);
+  //};
 
   return (
     <>
@@ -57,18 +54,8 @@ export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropd
           <DropdownItem value={ActionOperations.POWER_OFF} type={ActionTypes.INSTANT_ACTION} key="power off">
             {ActionOperations.POWER_OFF}
           </DropdownItem>
-          <DropdownItem value="schedule" key="schedule">
-            {ActionTypes.SCHEDULED_ACTION}
-          </DropdownItem>
         </DropdownList>
       </Dropdown>
-
-      <ModalPowerManagement
-        isOpen={isModalOpen}
-        onClose={resetModalState}
-        actionOperation={actionOperation}
-        actionType={actionType}
-      />
     </>
   );
 };

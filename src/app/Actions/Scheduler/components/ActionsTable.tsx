@@ -2,7 +2,7 @@ import { renderActionTypeLabel, renderOperationLabel, renderStatusLabel } from '
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
 import React, { useState, useEffect } from 'react';
-import { ActionType } from '@app/types/types';
+import { ActionTypes } from '@app/types/types';
 import { Link } from 'react-router-dom';
 import { api, ActionResponseApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
@@ -13,8 +13,9 @@ import { ActionsColumn } from '@patternfly/react-table';
 import { rowActions } from './ActionsKebabMenu';
 
 export const ScheduleActionsTable: React.FunctionComponent<{
-  actionType: ActionType | null;
-}> = ({ actionType }) => {
+  actionType: ActionTypes | null;
+  reloadFlag: number;
+}> = ({ actionType, reloadFlag }) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [allActions, setAllActions] = useState<ActionResponseApi[]>([]);
@@ -41,7 +42,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
 
   useEffect(() => {
     reloadActions();
-  }, []);
+  }, [reloadFlag]);
 
   let filtered = allActions;
   filtered = filterByActionType(filtered, actionType);
