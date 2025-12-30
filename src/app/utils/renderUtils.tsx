@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionType, ClusterActions, ResultStatus } from '@app/types/types';
+import { ActionType, ActionStatus, ClusterActions, ResultStatus } from '@app/types/types';
 import { ResourceStatusApi } from '@api';
 import { Label } from '@patternfly/react-core';
 import {
@@ -10,6 +10,21 @@ import {
   ExclamationCircleIcon,
   UnknownIcon,
 } from '@patternfly/react-icons';
+
+export function renderActionStatusLabel(labelText: string | null | undefined) {
+  switch (labelText) {
+    case ActionStatus.Running:
+      return <Label color="purple">{labelText}</Label>;
+    case ActionStatus.Success:
+      return <Label color="green">{labelText}</Label>;
+    case ActionStatus.Failed:
+      return <Label color="red">{labelText}</Label>;
+    case ActionStatus.Pending:
+      return <Label color="gold">{labelText}</Label>;
+    default:
+      return <Label color="grey">{labelText}</Label>;
+  }
+}
 
 export function renderStatusLabel(labelText: string | null | undefined) {
   switch (labelText) {

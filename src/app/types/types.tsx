@@ -23,6 +23,7 @@ export enum ResultStatus {
 }
 
 export enum ActionStatus {
+  Running = 'Running',
   Success = 'Success',
   Failed = 'Failed',
   Pending = 'Pending',

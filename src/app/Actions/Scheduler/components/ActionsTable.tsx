@@ -1,4 +1,4 @@
-import { renderActionTypeLabel, renderOperationLabel, renderStatusLabel } from '@app/utils/renderUtils';
+import { renderActionTypeLabel, renderOperationLabel, renderActionStatusLabel } from '@app/utils/renderUtils';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
 import React, { useState, useEffect } from 'react';
@@ -92,7 +92,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
                   {action.type === 'cron_action' ? action.cronExpression : '-'}
                 </Td>
                 <Td dataLabel={columnNames.operation}>{renderOperationLabel(action.operation)}</Td>
-                <Td dataLabel={columnNames.status}>{renderStatusLabel(action.status)}</Td>
+                <Td dataLabel={columnNames.status}>{renderActionStatusLabel(action.status)}</Td>
                 <Td dataLabel={columnNames.clusterId}>
                   <Link to={`/clusters/${action.clusterId}`}>{action.clusterId}</Link>
                 </Td>
