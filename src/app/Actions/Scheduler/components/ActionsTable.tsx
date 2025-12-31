@@ -2,23 +2,29 @@ import { renderActionTypeLabel, renderOperationLabel, renderActionStatusLabel } 
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
 import React, { useState, useEffect } from 'react';
-import { ActionTypes } from '@app/types/types';
+import { ActionStatus, ActionOperations, ActionTypes } from '@app/types/types';
 import { Link } from 'react-router-dom';
 import { api, ActionResponseApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { paginateItems, filterByActionType } from '@app/utils/tableFilters';
+import { paginateItems } from '@app/utils/tableFilters';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { ActionsColumn } from '@patternfly/react-table';
 import { rowActions } from './ActionsKebabMenu';
 
 export const ScheduleActionsTable: React.FunctionComponent<{
   actionType: ActionTypes | null;
+  actionOperation: ActionOperations[] | null;
+  actionStatus: ActionStatus | null;
+  actionEnabled: boolean | null;
+  accountId: string | null;
   reloadFlag: number;
-}> = ({ actionType, reloadFlag }) => {
+}> = ({ actionType, actionOperation, actionStatus, actionEnabled, accountId, reloadFlag }) => {
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
+  const [perPage, setPerPage] = useState(10);
   const [allActions, setAllActions] = useState<ActionResponseApi[]>([]);
+  const [filteredActions, setFilteredActions] = useState<ActionResponseApi[]>([]);
+  const [filteredCount, setFilteredCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // useEffect logic abstracted in this function to be reused in the kebab menu
@@ -44,10 +50,35 @@ export const ScheduleActionsTable: React.FunctionComponent<{
     reloadActions();
   }, [reloadFlag]);
 
-  let filtered = allActions;
-  filtered = filterByActionType(filtered, actionType);
+  // Apply filters when data or filter props change
+  useEffect(() => {
+    let filtered = allActions;
 
-  const paginated = paginateItems(filtered, page, perPage);
+    if (actionType) {
+      filtered = filtered.filter(item => item.type === actionType);
+    }
+
+    if (accountId) {
+      filtered = filtered.filter(item => item.accountId?.includes(accountId));
+    }
+
+    if (actionOperation?.length) {
+      filtered = filtered.filter(item => {
+        return actionOperation.includes(item.operation as never);
+      });
+    }
+
+    if (actionStatus) {
+      filtered = filtered.filter(item => item.status === actionStatus);
+    }
+
+    if (actionEnabled !== null) {
+      filtered = filtered.filter(item => item.enabled === actionEnabled);
+    }
+
+    setFilteredCount(filtered.length);
+    setFilteredActions(paginateItems(filtered, page, perPage));
+  }, [allActions, actionType, accountId, actionOperation, actionStatus, actionEnabled, page, perPage]);
 
   const columnNames = {
     id: 'ID',
@@ -83,13 +114,13 @@ export const ScheduleActionsTable: React.FunctionComponent<{
             </Tr>
           </Thead>
           <Tbody>
-            {paginated.map(action => (
+            {filteredActions.map(action => (
               <Tr key={action.id}>
                 <Td dataLabel={columnNames.id}>{action.id}</Td>
                 <Td dataLabel={columnNames.type}>{renderActionTypeLabel(action.type)}</Td>
-                <Td dataLabel={columnNames.time}>{action.type === 'scheduled_action' ? action.time : '-'}</Td>
+                <Td dataLabel={columnNames.time}>{action.type !== ActionTypes.CRON_ACTION ? action.time : '-'}</Td>
                 <Td dataLabel={columnNames.cronExpression}>
-                  {action.type === 'cron_action' ? action.cronExpression : '-'}
+                  {action.type === ActionTypes.CRON_ACTION ? action.cronExpression : '-'}
                 </Td>
                 <Td dataLabel={columnNames.operation}>{renderOperationLabel(action.operation)}</Td>
                 <Td dataLabel={columnNames.status}>{renderActionStatusLabel(action.status)}</Td>
@@ -113,7 +144,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
         </Table>
       )}
       <TablePagination
-        itemCount={filtered.length}
+        itemCount={filteredCount}
         page={page}
         perPage={perPage}
         onSetPage={setPage}

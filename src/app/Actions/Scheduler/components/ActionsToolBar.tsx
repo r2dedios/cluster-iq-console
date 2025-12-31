@@ -1,31 +1,51 @@
 import {
-  SearchInput,
-  MenuToggle,
   Badge,
   Menu,
   MenuContent,
-  MenuList,
   MenuItem,
+  MenuList,
+  MenuToggle,
   Popper,
+  SearchInput,
   Toolbar,
   ToolbarContent,
-  ToolbarToggleGroup,
+  ToolbarFilter,
   ToolbarGroup,
   ToolbarItem,
-  ToolbarFilter,
+  ToolbarToggleGroup,
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
-import { ScheduleActionsToolbarProps } from '../types';
-import { ProviderApi } from '@api';
 import debounce from 'lodash.debounce';
+import { ActionTypes, ActionOperations, ActionStatus } from '@app/types/types';
 import { usePopperContainer } from '@app/hooks/usePopperContainer';
 
-export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsToolbarProps> = ({
+type AttributeMenuOption = 'Account' | 'Action' | 'Type' | 'Status' | 'Enabled';
+
+export interface SchedulerTableToolbarProps {
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+  actionType: ActionTypes | null;
+  setType: (value: ActionTypes | null) => void;
+  actionOperation: ActionOperations[] | null;
+  setOperation: (value: ActionOperations[] | null) => void;
+  actionStatus: ActionStatus | null;
+  setStatus: (value: ActionStatus | null) => void;
+  actionEnabled: boolean | null;
+  setEnabled: (value: boolean | null) => void;
+}
+
+export const ScheduleActionsTableToolbar: React.FunctionComponent<SchedulerTableToolbarProps> = ({
   searchValue,
   setSearchValue,
-  providerSelections,
-  setProviderSelections,
+  actionType,
+  setType,
+  actionOperation,
+  setOperation,
+  actionStatus,
+  setStatus,
+  actionEnabled,
+  setEnabled,
 }) => {
   const debouncedSearch = React.useMemo(() => debounce(setSearchValue, 300), [setSearchValue]);
 
@@ -35,87 +55,89 @@ export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsTool
     };
   }, [debouncedSearch]);
 
+  // Set up account name search input
   const searchInput = (
     <SearchInput
-      placeholder="Filter by action type"
+      placeholder="Filter by account name"
       value={searchValue}
       onChange={(_event, value) => debouncedSearch(value)}
       onClear={() => debouncedSearch('')}
     />
   );
 
-  const [isProviderMenuOpen, setIsProviderMenuOpen] = React.useState<boolean>(false);
-  const providerToggleRef = React.useRef<HTMLButtonElement>(null);
-  const providerMenuRef = React.useRef<HTMLDivElement>(null);
-  const { containerRef: providerContainerRef, containerElement: providerContainerElement } = usePopperContainer();
+  // Actions filter setup
+  const [isActionMenuOpen, setIsActionMenuOpen] = React.useState<boolean>(false);
+  const actionToggleRef = React.useRef<HTMLButtonElement>(null);
+  const actionMenuRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: actionContainerRef, containerElement: actionContainerElement } = usePopperContainer();
 
-  const handleProviderMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
-  const handleProviderClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
+  const handleActionMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleActionClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    handleProviderMenuKeysRef.current = (event: KeyboardEvent) => {
-      if (isProviderMenuOpen && providerMenuRef.current?.contains(event.target as Node)) {
+    handleActionMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isActionMenuOpen && actionMenuRef.current?.contains(event.target as Node)) {
         if (event.key === 'Escape' || event.key === 'Tab') {
-          setIsProviderMenuOpen(!isProviderMenuOpen);
-          providerToggleRef.current?.focus();
+          setIsActionMenuOpen(!isActionMenuOpen);
+          actionToggleRef.current?.focus();
         }
       }
     };
 
-    handleProviderClickOutsideRef.current = (event: MouseEvent) => {
-      if (isProviderMenuOpen && !providerMenuRef.current?.contains(event.target as Node)) {
-        setIsProviderMenuOpen(false);
+    handleActionClickOutsideRef.current = (event: MouseEvent) => {
+      if (isActionMenuOpen && !actionMenuRef.current?.contains(event.target as Node)) {
+        setIsActionMenuOpen(false);
       }
     };
   });
 
   React.useEffect(() => {
-    const handleKeydown = (event: KeyboardEvent) => handleProviderMenuKeysRef.current?.(event);
-    const handleClick = (event: MouseEvent) => handleProviderClickOutsideRef.current?.(event);
+    const handleKeydown = (event: KeyboardEvent) => handleActionMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleActionClickOutsideRef.current?.(event);
     window.addEventListener('keydown', handleKeydown);
     window.addEventListener('click', handleClick);
     return () => {
       window.removeEventListener('keydown', handleKeydown);
       window.removeEventListener('click', handleClick);
     };
-  }, [isProviderMenuOpen]);
+  }, [isActionMenuOpen]);
 
-  const onProviderMenuToggleClick = (ev: React.MouseEvent) => {
+  const onActionMenuToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
     setTimeout(() => {
-      if (providerMenuRef.current) {
-        const firstElement = providerMenuRef.current.querySelector('li > button:not(:disabled)');
+      if (actionMenuRef.current) {
+        const firstElement = actionMenuRef.current.querySelector('li > button:not(:disabled)');
         if (firstElement) {
           (firstElement as HTMLElement).focus();
         }
       }
     }, 0);
-    setIsProviderMenuOpen(!isProviderMenuOpen);
+    setIsActionMenuOpen(!isActionMenuOpen);
   };
 
-  function onProviderMenuSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
+  function onActionMenuSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
     if (typeof itemId === 'undefined') {
       return;
     }
 
-    const provider = itemId as CloudProvider;
-    setProviderSelections(
-      providerSelections && providerSelections.includes(provider)
-        ? providerSelections.filter(selection => selection !== provider)
-        : provider
-          ? [provider, ...(providerSelections || [])]
+    const selectedAction = itemId as ActionOperations;
+    setOperation(
+      actionOperation && actionOperation.includes(selectedAction)
+        ? actionOperation.filter(item => item !== selectedAction)
+        : selectedAction
+          ? [selectedAction, ...(actionOperation || [])]
           : []
     );
   }
 
-  const providerToggle = (
+  const actionToggle = (
     <MenuToggle
-      ref={providerToggleRef}
-      onClick={onProviderMenuToggleClick}
-      isExpanded={isProviderMenuOpen}
-      {...(providerSelections &&
-        providerSelections.length > 0 && {
-          badge: <Badge isRead>{providerSelections.length}</Badge>,
+      ref={actionToggleRef}
+      onClick={onActionMenuToggleClick}
+      isExpanded={isActionMenuOpen}
+      {...(actionOperation &&
+        actionOperation.length > 0 && {
+          badge: <Badge isRead>{actionOperation.length}</Badge>,
         })}
       style={
         {
@@ -123,70 +145,432 @@ export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsTool
         } as React.CSSProperties
       }
     >
-      Filter by provider
+      Filter by action
     </MenuToggle>
   );
 
-  const providerMenu = (
+  const actionMenu = (
     <Menu
-      ref={providerMenuRef}
-      id="attribute-search-provider-menu"
-      onSelect={onProviderMenuSelect}
-      selected={providerSelections}
+      ref={actionMenuRef}
+      id="attribute-search-action-menu"
+      onSelect={onActionMenuSelect}
+      selected={actionOperation}
     >
       <MenuContent>
         <MenuList>
           <MenuItem
             hasCheckbox
-            isSelected={providerSelections?.includes(ProviderApi.AWSProvider)}
-            itemId={ProviderApi.AWSProvider}
+            isSelected={actionOperation?.includes(ActionOperations.POWER_ON)}
+            itemId={ActionOperations.POWER_ON}
           >
-            AWS
+            {ActionOperations.POWER_ON}
           </MenuItem>
           <MenuItem
             hasCheckbox
-            isSelected={providerSelections?.includes(ProviderApi.GCPProvider)}
-            itemId={ProviderApi.GCPProvider}
+            isSelected={actionOperation?.includes(ActionOperations.POWER_OFF)}
+            itemId={ActionOperations.POWER_OFF}
           >
-            Google Cloud
-          </MenuItem>
-          <MenuItem
-            hasCheckbox
-            isSelected={providerSelections?.includes(ProviderApi.AzureProvider)}
-            itemId={ProviderApi.AzureProvider}
-          >
-            Azure
+            {ActionOperations.POWER_OFF}
           </MenuItem>
         </MenuList>
       </MenuContent>
     </Menu>
   );
 
-  const providerSelect = (
-    <div ref={providerContainerRef}>
+  const actionSelect = (
+    <div ref={actionContainerRef}>
       <Popper
-        trigger={providerToggle}
-        triggerRef={providerToggleRef}
-        popper={providerMenu}
-        popperRef={providerMenuRef}
-        appendTo={providerContainerElement || undefined}
-        isVisible={isProviderMenuOpen}
+        trigger={actionToggle}
+        triggerRef={actionToggleRef}
+        popper={actionMenu}
+        popperRef={actionMenuRef}
+        appendTo={actionContainerElement || undefined}
+        isVisible={isActionMenuOpen}
       />
     </div>
   );
 
-  // Set up attribute selector
-  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<'Account' | 'Provider'>('Account');
+  // Type filter setup
+  const [isTypeMenuOpen, setIsTypeMenuOpen] = React.useState<boolean>(false);
+  const typeToggleRef = React.useRef<HTMLButtonElement>(null);
+  const typeMenuRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: typeContainerRef, containerElement: typeContainerElement } = usePopperContainer();
+
+  const handleTypeMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleTypeClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
+
+  React.useEffect(() => {
+    handleTypeMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isTypeMenuOpen && typeMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsTypeMenuOpen(!isTypeMenuOpen);
+          typeToggleRef.current?.focus();
+        }
+      }
+    };
+
+    handleTypeClickOutsideRef.current = (event: MouseEvent) => {
+      if (isTypeMenuOpen && !typeMenuRef.current?.contains(event.target as Node)) {
+        setIsTypeMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleTypeMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleTypeClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isTypeMenuOpen]);
+
+  const onTypeMenuToggleClick = (ev: React.MouseEvent) => {
+    ev.stopPropagation();
+    setTimeout(() => {
+      if (typeMenuRef.current) {
+        const firstElement = typeMenuRef.current.querySelector('li > button:not(:disabled)');
+        if (firstElement) {
+          (firstElement as HTMLElement).focus();
+        }
+      }
+    }, 0);
+    setIsTypeMenuOpen(!isTypeMenuOpen);
+  };
+
+  function onTypeMenuSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
+    if (typeof itemId === 'undefined') {
+      return;
+    }
+
+    const selectedType = itemId as ActionTypes | null;
+    // Toggle type selection - clear if already selected, otherwise set new value
+    setType(actionType === selectedType ? null : selectedType);
+    setIsTypeMenuOpen(false);
+  }
+
+  const typeToggleLabel = (t?: ActionTypes | null) => {
+    if (!t) return 'Filter by type';
+
+    switch (t) {
+      case ActionTypes.INSTANT_ACTION:
+        return 'Instant Action';
+      case ActionTypes.SCHEDULED_ACTION:
+        return 'Scheduled Action';
+      case ActionTypes.CRON_ACTION:
+        return 'Cron Action';
+      default:
+        return 'Filter by type';
+    }
+  };
+
+  const actionTypeLabel = (t: ActionTypes | null) => {
+    if (!t) return '';
+    if (t === ActionTypes.INSTANT_ACTION) return 'Instant Action';
+    if (t === ActionTypes.SCHEDULED_ACTION) return 'Scheduled Action';
+    return 'Cron Action';
+  };
+
+  const typeToggle = (
+    <MenuToggle
+      ref={typeToggleRef}
+      onClick={onTypeMenuToggleClick}
+      isExpanded={isTypeMenuOpen}
+      {...(actionType && {
+        badge: <Badge isRead>1</Badge>,
+      })}
+      style={
+        {
+          width: '200px',
+        } as React.CSSProperties
+      }
+    >
+      {typeToggleLabel(actionType)}
+    </MenuToggle>
+  );
+
+  const typeMenu = (
+    <Menu
+      ref={typeMenuRef}
+      id="attribute-search-type-menu"
+      onSelect={onTypeMenuSelect}
+      selected={actionType ? [actionType] : []}
+    >
+      <MenuContent>
+        <MenuList>
+          <MenuItem hasCheckbox isSelected={actionType === ActionTypes.INSTANT_ACTION} itemId="instant_action">
+            Instant Action
+          </MenuItem>
+          <MenuItem hasCheckbox isSelected={actionType === ActionTypes.SCHEDULED_ACTION} itemId="scheduled_action">
+            Scheduled Action
+          </MenuItem>
+          <MenuItem hasCheckbox isSelected={actionType === ActionTypes.CRON_ACTION} itemId="cron_action">
+            Cron Action
+          </MenuItem>
+        </MenuList>
+      </MenuContent>
+    </Menu>
+  );
+
+  const typeSelect = (
+    <div ref={typeContainerRef}>
+      <Popper
+        trigger={typeToggle}
+        triggerRef={typeToggleRef}
+        popper={typeMenu}
+        popperRef={typeMenuRef}
+        appendTo={typeContainerElement || undefined}
+        isVisible={isTypeMenuOpen}
+      />
+    </div>
+  );
+
+  // Status filter setup
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = React.useState<boolean>(false);
+  const statusToggleRef = React.useRef<HTMLButtonElement>(null);
+  const statusMenuRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: statusContainerRef, containerElement: statusContainerElement } = usePopperContainer();
+
+  const handleStatusMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleStatusClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
+
+  React.useEffect(() => {
+    handleStatusMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsStatusMenuOpen(!isStatusMenuOpen);
+          statusToggleRef.current?.focus();
+        }
+      }
+    };
+
+    handleStatusClickOutsideRef.current = (event: MouseEvent) => {
+      if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
+        setIsStatusMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleStatusMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleStatusClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isStatusMenuOpen]);
+
+  const onStatusMenuToggleClick = (ev: React.MouseEvent) => {
+    ev.stopPropagation();
+    setTimeout(() => {
+      if (statusMenuRef.current) {
+        const firstElement = statusMenuRef.current.querySelector('li > button:not(:disabled)');
+        if (firstElement) {
+          (firstElement as HTMLElement).focus();
+        }
+      }
+    }, 0);
+    setIsStatusMenuOpen(!isStatusMenuOpen);
+  };
+
+  function onStatusMenuSelect(_event: React.MouseEvent | undefined, itemId: string | number | undefined) {
+    if (typeof itemId === 'undefined') {
+      return;
+    }
+
+    const selectedStatus = itemId as ActionStatus | null;
+    // Toggle status selection
+    setStatus(status === selectedStatus ? null : selectedStatus);
+    setIsStatusMenuOpen(false);
+  }
+
+  const statusToggle = (
+    <MenuToggle
+      ref={statusToggleRef}
+      onClick={onStatusMenuToggleClick}
+      isExpanded={isStatusMenuOpen}
+      {...(status && {
+        badge: <Badge isRead>1</Badge>,
+      })}
+      style={
+        {
+          width: '200px',
+        } as React.CSSProperties
+      }
+    >
+      {status || 'Filter by status'}
+    </MenuToggle>
+  );
+
+  const statusMenu = (
+    <Menu
+      ref={statusMenuRef}
+      id="attribute-search-status-menu"
+      onSelect={onStatusMenuSelect}
+      selected={status ? [status] : []}
+    >
+      <MenuContent>
+        <MenuList>
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Success} itemId={ActionStatus.Success}>
+            {ActionStatus.Success}
+          </MenuItem>
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Failed} itemId={ActionStatus.Failed}>
+            {ActionStatus.Failed}
+          </MenuItem>
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Pending} itemId={ActionStatus.Pending}>
+            {ActionStatus.Pending}
+          </MenuItem>
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Unknown} itemId={ActionStatus.Unknown}>
+            {ActionStatus.Unknown}
+          </MenuItem>
+        </MenuList>
+      </MenuContent>
+    </Menu>
+  );
+
+  const statusSelect = (
+    <div ref={statusContainerRef}>
+      <Popper
+        trigger={statusToggle}
+        triggerRef={statusToggleRef}
+        popper={statusMenu}
+        popperRef={statusMenuRef}
+        appendTo={statusContainerElement || undefined}
+        isVisible={isStatusMenuOpen}
+      />
+    </div>
+  );
+
+  // Enabled filter setup
+  const [isEnabledMenuOpen, setIsEnabledMenuOpen] = React.useState<boolean>(false);
+  const enabledToggleRef = React.useRef<HTMLButtonElement>(null);
+  const enabledMenuRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: enabledContainerRef, containerElement: enabledContainerElement } = usePopperContainer();
+
+  const handleEnabledMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleEnabledClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
+
+  React.useEffect(() => {
+    handleEnabledMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isEnabledMenuOpen && enabledMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsEnabledMenuOpen(false);
+          enabledToggleRef.current?.focus();
+        }
+      }
+    };
+
+    handleEnabledClickOutsideRef.current = (event: MouseEvent) => {
+      if (isEnabledMenuOpen && !enabledMenuRef.current?.contains(event.target as Node)) {
+        setIsEnabledMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleEnabledMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleEnabledClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isEnabledMenuOpen]);
+
+  const onEnabledMenuToggleClick = (ev: React.MouseEvent) => {
+    ev.stopPropagation();
+    setTimeout(() => {
+      if (enabledMenuRef.current) {
+        const firstElement = enabledMenuRef.current.querySelector('li > button:not(:disabled)');
+        if (firstElement) {
+          (firstElement as HTMLElement).focus();
+        }
+      }
+    }, 0);
+    setIsEnabledMenuOpen(!isEnabledMenuOpen);
+  };
+
+  const onEnabledMenuSelect = (_event: React.MouseEvent | undefined, itemId: string | number | undefined) => {
+    if (typeof itemId !== 'string') {
+      return;
+    }
+
+    if (itemId === 'enabled') {
+      setEnabled(true);
+    } else if (itemId === 'disabled') {
+      setEnabled(false);
+    } else {
+      setEnabled(null);
+    }
+  };
+
+  const enabledToggleLabel = (v: boolean | null) => {
+    if (v === true) return 'Yes';
+    if (v === false) return 'No';
+    return 'Filter by enabled';
+  };
+
+  const enabledToggle = (
+    <MenuToggle
+      ref={enabledToggleRef}
+      onClick={onEnabledMenuToggleClick}
+      isExpanded={isEnabledMenuOpen}
+      style={{ width: '200px' } as React.CSSProperties}
+    >
+      {enabledToggleLabel(actionEnabled)}
+    </MenuToggle>
+  );
+
+  const enabledMenu = (
+    <Menu
+      ref={enabledMenuRef}
+      id="attribute-search-enabled-menu"
+      onSelect={onEnabledMenuSelect}
+      selected={actionEnabled}
+    >
+      <MenuContent>
+        <MenuList>
+          <MenuItem hasCheckbox isSelected={actionEnabled === true} itemId="enabled">
+            Yes
+          </MenuItem>
+          <MenuItem hasCheckbox isSelected={actionEnabled === false} itemId="disabled">
+            No
+          </MenuItem>
+        </MenuList>
+      </MenuContent>
+    </Menu>
+  );
+
+  const enabledSelect = (
+    <div ref={enabledContainerRef}>
+      <Popper
+        trigger={enabledToggle}
+        triggerRef={enabledToggleRef}
+        popper={enabledMenu}
+        popperRef={enabledMenuRef}
+        appendTo={enabledContainerElement || undefined}
+        isVisible={isEnabledMenuOpen}
+      />
+    </div>
+  );
+
+  // Attribute selector setup
+  const [activeAttributeMenu, setActiveAttributeMenu] = React.useState<AttributeMenuOption>('Account');
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
   const { containerRef: attributeContainerRef, containerElement: attributeContainerElement } = usePopperContainer();
 
-  const handleAttribueMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleAttributeMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
   const handleAttributeClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    handleAttribueMenuKeysRef.current = (event: KeyboardEvent) => {
+    handleAttributeMenuKeysRef.current = (event: KeyboardEvent) => {
       if (!isAttributeMenuOpen) {
         return;
       }
@@ -209,7 +593,7 @@ export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsTool
   });
 
   React.useEffect(() => {
-    const handleKeydown = (event: KeyboardEvent) => handleAttribueMenuKeysRef.current?.(event);
+    const handleKeydown = (event: KeyboardEvent) => handleAttributeMenuKeysRef.current?.(event);
     const handleClick = (event: MouseEvent) => handleAttributeClickOutsideRef.current?.(event);
     window.addEventListener('keydown', handleKeydown);
     window.addEventListener('click', handleClick);
@@ -242,18 +626,23 @@ export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsTool
       {activeAttributeMenu}
     </MenuToggle>
   );
+
   const attributeMenu = (
     <Menu
       ref={attributeMenuRef}
       onSelect={(_ev, itemId) => {
-        setActiveAttributeMenu(itemId?.toString() as 'Account' | 'Provider');
+        const selected = itemId?.toString() as AttributeMenuOption;
+        setActiveAttributeMenu(selected);
         setIsAttributeMenuOpen(!isAttributeMenuOpen);
       }}
     >
       <MenuContent>
         <MenuList>
           <MenuItem itemId="Account">Account</MenuItem>
-          <MenuItem itemId="Provider">Provider</MenuItem>
+          <MenuItem itemId="Action">Action</MenuItem>
+          <MenuItem itemId="Type">Type</MenuItem>
+          <MenuItem itemId="Status">Status</MenuItem>
+          <MenuItem itemId="Enabled">Enabled</MenuItem>
         </MenuList>
       </MenuContent>
     </Menu>
@@ -274,10 +663,13 @@ export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsTool
 
   return (
     <Toolbar
-      id="attribute-search-filter-toolbar"
+      id="scheduler-filter-toolbar"
       clearAllFilters={() => {
         setSearchValue('');
-        setProviderSelections([]);
+        setOperation(null);
+        setType(null);
+        setStatus(null);
+        setEnabled(null);
       }}
     >
       <ToolbarContent>
@@ -285,23 +677,49 @@ export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsTool
           <ToolbarGroup variant="filter-group">
             <ToolbarItem>{attributeDropdown}</ToolbarItem>
             <ToolbarFilter
-              chips={searchValue !== '' ? [searchValue] : ([] as string[])}
+              chips={searchValue !== '' ? [searchValue] : []}
               deleteChip={() => setSearchValue('')}
               deleteChipGroup={() => setSearchValue('')}
-              categoryName="Name"
+              categoryName="Account"
               showToolbarItem={activeAttributeMenu === 'Account'}
             >
               {searchInput}
             </ToolbarFilter>
-
             <ToolbarFilter
-              chips={providerSelections || []}
-              deleteChip={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setProviderSelections([])}
-              categoryName="Provider"
-              showToolbarItem={activeAttributeMenu === 'Provider'}
+              chips={actionOperation || []}
+              deleteChip={(_category, chip) => onActionMenuSelect(undefined, chip as string)}
+              deleteChipGroup={() => setOperation([])}
+              categoryName="Action"
+              showToolbarItem={activeAttributeMenu === 'Action'}
             >
-              {providerSelect}
+              {actionSelect}
+            </ToolbarFilter>
+            <ToolbarFilter
+              chips={actionType ? [actionTypeLabel(actionType)] : []}
+              deleteChip={() => setType(null)}
+              deleteChipGroup={() => setType(null)}
+              categoryName="Type"
+              showToolbarItem={activeAttributeMenu === 'Type'}
+            >
+              {typeSelect}
+            </ToolbarFilter>
+            <ToolbarFilter
+              chips={actionStatus ? [actionStatus] : []}
+              deleteChip={() => setStatus(null)}
+              deleteChipGroup={() => setStatus(null)}
+              categoryName="Status"
+              showToolbarItem={activeAttributeMenu === 'Status'}
+            >
+              {statusSelect}
+            </ToolbarFilter>
+            <ToolbarFilter
+              chips={actionEnabled !== null ? [actionEnabled === true ? 'Enabled' : 'Disabled'] : []}
+              deleteChip={() => setEnabled(null)}
+              deleteChipGroup={() => setEnabled(null)}
+              categoryName="Enabled"
+              showToolbarItem={activeAttributeMenu === 'Enabled'}
+            >
+              {enabledSelect}
             </ToolbarFilter>
           </ToolbarGroup>
         </ToolbarToggleGroup>
@@ -310,4 +728,4 @@ export const ScheduleActionsToolbar: React.FunctionComponent<ScheduleActionsTool
   );
 };
 
-export default ScheduleActionsToolbar;
+export default ScheduleActionsTableToolbar;
