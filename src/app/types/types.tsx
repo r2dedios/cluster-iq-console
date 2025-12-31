@@ -1,18 +1,3 @@
-// TODO REMOVE
-export enum ClusterActions {
-  PowerOn = 'PowerOn',
-  PowerOff = 'PowerOff',
-  PowerOnCluster = 'PowerOnCluster',
-  PowerOffCluster = 'PowerOffCluster',
-}
-
-// TODO REMOVE
-export enum ActionType {
-  InstantAction = 'instant_action',
-  ScheduledAction = 'scheduled_action',
-  CronAction = 'cron_action',
-}
-
 export enum ResultStatus {
   Pending = 'Pending',
   Running = 'Running',
@@ -41,15 +26,9 @@ export enum ActionTypes {
   CRON_ACTION = 'cron_action',
 }
 
-// TODO: REMOVE
-export enum PowerAction {
-  POWER_ON = 'Power on',
-  POWER_OFF = 'Power off',
-}
-
 export interface BaseAction {
-  type: 'scheduled_action' | 'cron_action';
-  operation: 'PowerOffCluster' | 'PowerOnCluster';
+  type: 'instant_action' | 'scheduled_action' | 'cron_action';
+  operation: 'PowerOff' | 'PowerOn';
   target: {
     clusterID: string;
   };

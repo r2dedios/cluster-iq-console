@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionType, ActionStatus, ClusterActions, ResultStatus } from '@app/types/types';
+import { ActionTypes, ActionStatus, ActionOperations, ResultStatus } from '@app/types/types';
 import { ResourceStatusApi } from '@api';
 import { Label } from '@patternfly/react-core';
 import {
@@ -41,11 +41,11 @@ export function renderStatusLabel(labelText: string | null | undefined) {
 
 export function renderActionTypeLabel(labelText: string | null | undefined) {
   switch (labelText) {
-    case ActionType.InstantAction:
+    case ActionTypes.INSTANT_ACTION:
       return <Label color="orange">Instant Action</Label>;
-    case ActionType.ScheduledAction:
+    case ActionTypes.SCHEDULED_ACTION:
       return <Label color="green">Scheduled Action</Label>;
-    case ActionType.CronAction:
+    case ActionTypes.CRON_ACTION:
       return <Label color="blue">Cron Action</Label>;
     default:
       return <Label color="grey">{labelText}</Label>;
@@ -54,14 +54,10 @@ export function renderActionTypeLabel(labelText: string | null | undefined) {
 
 export function renderOperationLabel(labelText: string | null | undefined) {
   switch (labelText) {
-    case ClusterActions.PowerOn:
-      return <Label color="green">{labelText}</Label>;
-    case ClusterActions.PowerOff:
-      return <Label color="red">{labelText}</Label>;
-    case ClusterActions.PowerOnCluster:
-      return <Label color="green">{labelText}</Label>;
-    case ClusterActions.PowerOffCluster:
-      return <Label color="red">{labelText}</Label>;
+    case ActionOperations.POWER_ON:
+      return <Label color="cyan">{labelText}</Label>;
+    case ActionOperations.POWER_OFF:
+      return <Label color="purple">{labelText}</Label>;
     default:
       return <Label color="grey">{labelText}</Label>;
   }

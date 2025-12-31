@@ -1,5 +1,5 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { ClusterActions, ResultStatus } from '@app/types/types';
+import { ActionOperations, ResultStatus } from '@app/types/types';
 import { api, SystemEventResponseApi } from '@api';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React, { useEffect, useState } from 'react';
@@ -69,7 +69,7 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
     }
 
     if (action?.length) {
-      filtered = filtered.filter(event => action.includes(event.action as ClusterActions));
+      filtered = filtered.filter(event => action.includes(event.action as ActionOperations));
     }
 
     if (provider?.length) {

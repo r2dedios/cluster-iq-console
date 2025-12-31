@@ -2,13 +2,13 @@ import React from 'react';
 import { PageSection, PageSectionVariants, Panel, Text, TextContent } from '@patternfly/react-core';
 import AuditLogsTableToolbar from './AuditLogsTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
-import { ClusterActions, ResultStatus } from '@app/types/types.tsx';
+import { ActionOperations, ResultStatus } from '@app/types/types.tsx';
 import { ProviderApi } from '@api';
 import { AuditLogsTable } from './AuditLogsTable.tsx';
 
 const filterParams = {
   accountName: parseAsString.withDefault(''),
-  action: parseAsArrayOf(parseAsStringEnum<ClusterActions>(Object.values(ClusterActions))).withDefault([]),
+  action: parseAsArrayOf(parseAsStringEnum<ActionOperations>(Object.values(ActionOperations))).withDefault([]),
   provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
   result: parseAsArrayOf(parseAsStringEnum<ResultStatus>(Object.values(ResultStatus))).withDefault([]),
   triggered_by: parseAsString.withDefault(''),
