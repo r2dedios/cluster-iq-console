@@ -63,6 +63,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   const [isSelected, setIsSelected] = React.useState('');
 
   const resetExecutionFields = (next: ActionTypes) => {
+    setActionEnabled(true);
     if (next !== ActionTypes.SCHEDULED_ACTION) {
       setScheduledDateTime('');
     }
@@ -125,6 +126,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     // Reset dependent state when account changes / clears
     setSelectedCluster(null);
     setAllClusters([]);
+    setActionEnabled(true);
 
     const accountId = selectedAccount?.accountId;
     if (!accountId) return;
@@ -260,7 +262,9 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                 <OutlinedClockIcon /> Instant Action
               </TabTitleText>
             }
-          ></Tab>
+          >
+            Create an Action to be executed immediately
+          </Tab>
           <Tab
             eventKey={ActionTypes.SCHEDULED_ACTION}
             title={
@@ -268,7 +272,9 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                 <CalendarAltIcon /> Schedule Action
               </TabTitleText>
             }
-          ></Tab>
+          >
+            Create an Action to be executed in the future
+          </Tab>
           <Tab
             eventKey={ActionTypes.CRON_ACTION}
             title={
@@ -276,7 +282,9 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                 <SyncAltIcon /> Cron Action
               </TabTitleText>
             }
-          ></Tab>
+          >
+            Create an Action to be executed as a CronJob
+          </Tab>
         </Tabs>
 
         {/* Account selection */}
