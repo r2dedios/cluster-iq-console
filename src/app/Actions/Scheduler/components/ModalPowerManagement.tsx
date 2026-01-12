@@ -11,7 +11,6 @@ import {
   FormGroup,
   StackItem,
   TextInput,
-  Divider,
   Tabs,
   TabTitleText,
   Tab,
@@ -290,7 +289,6 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             onClearCluster={onClusterClearButtonClick}
           />
         </FormGroup>
-        <Divider />
 
         {/* Action selection */}
         <FormGroup label="Action Operation" isRequired>
@@ -315,7 +313,6 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             />
           </ToggleGroup>
         </FormGroup>
-        <Divider />
 
         {/* Schedule management */}
         {actionType !== ActionTypes.INSTANT_ACTION && (
@@ -342,7 +339,6 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             )}
           </FormGroup>
         )}
-        <Divider />
 
         {/* Reason management */}
         <FormGroup label="Description">
