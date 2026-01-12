@@ -5,7 +5,8 @@ import {
   HelperTextItem,
   Modal,
   ModalVariant,
-  Radio,
+  ToggleGroup,
+  ToggleGroupItem,
   Form,
   FormGroup,
   StackItem,
@@ -57,6 +58,8 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
 
   // Action type selection
   const [actionType, setActionType] = React.useState<ActionTypes>(ActionTypes.INSTANT_ACTION);
+  const [isSelected, setIsSelected] = React.useState('');
+
   const resetExecutionFields = (next: ActionTypes) => {
     if (next !== ActionTypes.SCHEDULED_ACTION) {
       setScheduledDateTime('');
@@ -291,53 +294,54 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
 
         {/* Action selection */}
         <FormGroup label="Action Operation" isRequired>
-          <Radio
-            id="action-power-on"
-            name="action"
-            label="Power On"
-            onChange={() => setActionOperation(ActionOperations.POWER_ON)}
-          />
-          <Radio
-            id="action-power-off"
-            name="action"
-            label="Power Off"
-            onChange={() => setActionOperation(ActionOperations.POWER_OFF)}
-          />
+          <ToggleGroup aria-label="Action Operation">
+            <ToggleGroupItem
+              text="Power On"
+              buttonId="action-power-on"
+              isSelected={isSelected === 'action-power-on'}
+              onChange={() => {
+                setActionOperation(ActionOperations.POWER_ON);
+                setIsSelected('action-power-on');
+              }}
+            />
+            <ToggleGroupItem
+              text="Power Off"
+              buttonId="action-power-off"
+              isSelected={isSelected === 'action-power-off'}
+              onChange={() => {
+                setActionOperation(ActionOperations.POWER_OFF);
+                setIsSelected('action-power-off');
+              }}
+            />
+          </ToggleGroup>
         </FormGroup>
         <Divider />
 
         {/* Schedule management */}
-        <FormGroup label="Execution parameters" isRequired>
-          {actionType === ActionTypes.INSTANT_ACTION && (
-            <HelperText>
-              <HelperTextItem>The action will be run inmediately</HelperTextItem>
-            </HelperText>
-          )}
-          {actionType === ActionTypes.SCHEDULED_ACTION && (
-            <StackItem>
-              <DateTimePicker onChange={setScheduledDateTime} />
-            </StackItem>
-          )}
-          {actionType === ActionTypes.CRON_ACTION && (
-            <StackItem>
-              <TextInput
-                type="text"
-                id="cron-expression-input"
-                value={cronExpression}
-                onChange={(_event, value) => setCronExpression(value)}
-                placeholder="0 0 * * *"
-              />
-              <FormHelperText>
-                <HelperText>
-                  <HelperTextItem>
-                    Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
-                    midnight)
-                  </HelperTextItem>
-                </HelperText>
-              </FormHelperText>
-            </StackItem>
-          )}
-        </FormGroup>
+        {actionType !== ActionTypes.INSTANT_ACTION && (
+          <FormGroup label="Execution parameters" isRequired>
+            {actionType === ActionTypes.SCHEDULED_ACTION && <DateTimePicker onChange={setScheduledDateTime} />}
+            {actionType === ActionTypes.CRON_ACTION && (
+              <StackItem>
+                <TextInput
+                  type="text"
+                  id="cron-expression-input"
+                  value={cronExpression}
+                  onChange={(_event, value) => setCronExpression(value)}
+                  placeholder="0 0 * * *"
+                />
+                <FormHelperText>
+                  <HelperText>
+                    <HelperTextItem>
+                      Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
+                      midnight)
+                    </HelperTextItem>
+                  </HelperText>
+                </FormHelperText>
+              </StackItem>
+            )}
+          </FormGroup>
+        )}
         <Divider />
 
         {/* Reason management */}
