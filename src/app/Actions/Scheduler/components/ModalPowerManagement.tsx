@@ -16,16 +16,16 @@ import {
   Tab,
 } from '@patternfly/react-core';
 import React from 'react';
-import { ActionOperations, ActionTypes } from '@app/types/types';
+import { ActionStatus, ActionOperations, ActionTypes } from '@app/types/types';
 import DateTimePicker from './DateTimePicker';
 import { AccountTypeaheadSelect } from './AccountSelector';
 import { ClusterTypeaheadSelect } from './ClusterSelector';
-import { ActionStatus } from '@app/types/types';
 import { useUser } from '@app/Contexts/UserContext.tsx';
 import { debug } from '@app/utils/debugLogs';
 import { api, startCluster, stopCluster, AccountResponseApi, ClusterResponseApi, ActionRequestApi } from '@api';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { OutlinedClockIcon, CalendarAltIcon, SyncAltIcon } from '@patternfly/react-icons';
+import cronValidate from 'cron-validate';
 
 interface ModalPowerManagementProps {
   isOpen: boolean;
@@ -68,13 +68,21 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     }
   };
 
-  const isFormValid =
-    (!!selectedAccount &&
-      !!selectedCluster &&
-      actionOperation.trim() !== '' &&
-      actionType === ActionTypes.INSTANT_ACTION) ||
+  const isValidCronExpression = (expr: string): boolean => {
+    if (!expr.trim()) return false;
+    const result = cronValidate(expr, { preset: 'default' });
+    return result.isValid();
+  };
+
+  const isCommonValid = !!selectedAccount && !!selectedCluster && actionOperation.trim() !== '';
+
+  const isExecutionValid =
+    actionType === ActionTypes.INSTANT_ACTION ||
     (actionType === ActionTypes.SCHEDULED_ACTION && scheduledDateTime !== '') ||
-    (actionType === ActionTypes.CRON_ACTION && cronExpression !== '');
+    (actionType === ActionTypes.CRON_ACTION && cronExpression !== '' && isValidCronExpression(cronExpression));
+
+  const isFormValid = isCommonValid && isExecutionValid;
+
   // Typeahead clear button functions
   const onAccountClearButtonClick = () => {
     setSelectedAccount(null);
@@ -325,6 +333,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                   id="cron-expression-input"
                   value={cronExpression}
                   onChange={(_event, value) => setCronExpression(value)}
+                  validated={isValidCronExpression(cronExpression) ? 'default' : 'error'}
                   placeholder="0 0 * * *"
                 />
                 <FormHelperText>
