@@ -1,5 +1,7 @@
 import {
   Button,
+  Checkbox,
+  Divider,
   FormHelperText,
   HelperText,
   HelperTextItem,
@@ -9,11 +11,11 @@ import {
   ToggleGroupItem,
   Form,
   FormGroup,
-  StackItem,
   TextInput,
   Tabs,
   TabTitleText,
   Tab,
+  Title,
 } from '@patternfly/react-core';
 import React from 'react';
 import { ActionStatus, ActionOperations, ActionTypes } from '@app/types/types';
@@ -44,6 +46,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   const [selectedAccount, setSelectedAccount] = React.useState<AccountResponseApi | null>(null);
   const [selectedCluster, setSelectedCluster] = React.useState<ClusterResponseApi | null>(null);
   const [actionOperation, setActionOperation] = React.useState('');
+  const [actionEnabled, setActionEnabled] = React.useState<boolean>(true);
   const [scheduledDateTime, setScheduledDateTime] = React.useState('');
   const [cronExpression, setCronExpression] = React.useState('');
   const [description, setDescription] = React.useState<string>('');
@@ -179,7 +182,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
       const powerActionRequest = {
         accountId: selectedAccount?.accountId,
         clusterId: selectedCluster?.clusterId,
-        enabled: true,
+        enabled: actionEnabled,
         operation: actionOperation,
         region: selectedCluster?.region,
         status: ActionStatus.Pending,
@@ -277,28 +280,29 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
         </Tabs>
 
         {/* Account selection */}
-        <FormGroup label="Target" isRequired>
-          <AccountTypeaheadSelect
-            accounts={allAccounts}
-            selectedAccount={selectedAccount}
-            onSelectAccount={account => {
-              setSelectedAccount(account);
-            }}
-            onClearAccount={onAccountClearButtonClick}
-          />
-          <ClusterTypeaheadSelect
-            accountId={selectedAccount?.accountId ?? null}
-            clusters={allClusters}
-            selectedCluster={selectedCluster}
-            onSelectCluster={cluster => {
-              setSelectedCluster(cluster);
-            }}
-            isDisabled={!selectedAccount}
-            onClearCluster={onClusterClearButtonClick}
-          />
-        </FormGroup>
+        <Title headingLevel="h3">Target</Title>
+        <AccountTypeaheadSelect
+          accounts={allAccounts}
+          selectedAccount={selectedAccount}
+          onSelectAccount={account => {
+            setSelectedAccount(account);
+          }}
+          onClearAccount={onAccountClearButtonClick}
+        />
+        <ClusterTypeaheadSelect
+          accountId={selectedAccount?.accountId ?? null}
+          clusters={allClusters}
+          selectedCluster={selectedCluster}
+          onSelectCluster={cluster => {
+            setSelectedCluster(cluster);
+          }}
+          isDisabled={!selectedAccount}
+          onClearCluster={onClusterClearButtonClick}
+        />
+        <Divider />
 
         {/* Action selection */}
+        <Title headingLevel="h3">Action Parameters</Title>
         <FormGroup label="Action Operation" isRequired>
           <ToggleGroup aria-label="Action Operation">
             <ToggleGroupItem
@@ -321,32 +325,51 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             />
           </ToggleGroup>
         </FormGroup>
+        <Divider />
 
         {/* Schedule management */}
         {actionType !== ActionTypes.INSTANT_ACTION && (
-          <FormGroup label="Execution parameters" isRequired>
-            {actionType === ActionTypes.SCHEDULED_ACTION && <DateTimePicker onChange={setScheduledDateTime} />}
-            {actionType === ActionTypes.CRON_ACTION && (
-              <StackItem>
-                <TextInput
-                  type="text"
-                  id="cron-expression-input"
-                  value={cronExpression}
-                  onChange={(_event, value) => setCronExpression(value)}
-                  validated={isValidCronExpression(cronExpression) ? 'default' : 'error'}
-                  placeholder="0 0 * * *"
-                />
-                <FormHelperText>
-                  <HelperText>
-                    <HelperTextItem>
-                      Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
-                      midnight)
-                    </HelperTextItem>
-                  </HelperText>
-                </FormHelperText>
-              </StackItem>
+          <>
+            <Title headingLevel="h3">Execution parameters</Title>
+            {actionType === ActionTypes.SCHEDULED_ACTION && (
+              <>
+                <FormGroup label="Execution time" isRequired>
+                  <DateTimePicker onChange={setScheduledDateTime} />
+                </FormGroup>
+              </>
             )}
-          </FormGroup>
+            {actionType === ActionTypes.CRON_ACTION && (
+              <>
+                <FormGroup label="Cron Expression" isRequired>
+                  <TextInput
+                    type="text"
+                    id="cron-expression-input"
+                    value={cronExpression}
+                    onChange={(_event, value) => setCronExpression(value)}
+                    validated={isValidCronExpression(cronExpression) ? 'default' : 'error'}
+                    placeholder="0 0 * * *"
+                  />
+                  <FormHelperText>
+                    <HelperText>
+                      <HelperTextItem>
+                        Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
+                        midnight)
+                      </HelperTextItem>
+                    </HelperText>
+                  </FormHelperText>
+                </FormGroup>
+              </>
+            )}
+            <FormGroup label="Action Enabled" isRequired>
+              <Checkbox
+                id="action-enabled"
+                label="Enable action"
+                isChecked={actionEnabled}
+                onChange={(_event, checked) => setActionEnabled(checked)}
+              />
+            </FormGroup>
+            <Divider />
+          </>
         )}
 
         {/* Reason management */}
