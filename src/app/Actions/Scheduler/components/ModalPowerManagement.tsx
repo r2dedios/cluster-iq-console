@@ -1,19 +1,19 @@
 import {
   Button,
-  Checkbox,
   FormHelperText,
   HelperText,
   HelperTextItem,
   Modal,
   ModalVariant,
   Radio,
-  Stack,
+  Form,
+  FormGroup,
   StackItem,
   TextInput,
   Divider,
-  Flex,
-  FlexItem,
-  Text,
+  Tabs,
+  TabTitleText,
+  Tab,
 } from '@patternfly/react-core';
 import React from 'react';
 import { ActionOperations, ActionTypes } from '@app/types/types';
@@ -40,20 +40,29 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   const { userEmail } = useUser();
   const [showDescriptionField, setShowDescriptionField] = React.useState(false);
   const [description, setDescription] = React.useState<string>('');
-  const [showSchedule, setShowSchedule] = React.useState(false);
   const [scheduledDateTime, setScheduledDateTime] = React.useState('');
   const [cronExpression, setCronExpression] = React.useState('');
   const [actionOperation, setActionOperation] = React.useState('');
-  const [selectedAccount, setSelectedAccount] = React.useState<AccountResponseApi | null>(null);
-  const [selectedCluster, setSelectedCluster] = React.useState<ClusterResponseApi | null>(null);
-  // TODO: restore Loading spinner
-  //const [loading, setLoading] = React.useState(true);
+
+  // Account/Cluster typeahead vars
   const [allAccounts, setAllAccounts] = React.useState<AccountResponseApi[]>([]);
   const [allClusters, setAllClusters] = React.useState<ClusterResponseApi[]>([]);
-  const [actionType, setActionType] = React.useState<ActionTypes>(ActionTypes.INSTANT_ACTION);
+  const [selectedAccount, setSelectedAccount] = React.useState<AccountResponseApi | null>(null);
+  const [selectedCluster, setSelectedCluster] = React.useState<ClusterResponseApi | null>(null);
 
-  // const isInstantAction = actionType === ActionTypes.INSTANT_ACTION;
-  // const isScheduleAction = actionType === ActionTypes.SCHEDULED_ACTION;
+  // TODO: restore Loading spinner
+  //const [loading, setLoading] = React.useState(true);
+
+  // Action type selection
+  const [actionType, setActionType] = React.useState<ActionTypes>(ActionTypes.INSTANT_ACTION);
+  const resetExecutionFields = (next: ActionTypes) => {
+    if (next !== ActionTypes.SCHEDULED_ACTION) {
+      setScheduledDateTime('');
+    }
+    if (next !== ActionTypes.CRON_ACTION) {
+      setCronExpression('');
+    }
+  };
 
   // Load accounts when the modal opens.
   React.useEffect(() => {
@@ -193,7 +202,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   return (
     <Modal
       variant={ModalVariant.small}
-      title="Power management"
+      title="New Action"
       isOpen={isOpen}
       onClose={onClose}
       actions={[
@@ -206,18 +215,24 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
       ]}
       appendTo={document.body}
     >
-      {/* Account selection */}
+      <Form>
+        {/* Action Type selection */}
+        <Tabs
+          activeKey={actionType}
+          onSelect={(_, key) => {
+            const next = key as ActionTypes;
+            setActionType(next);
+            resetExecutionFields(next);
+          }}
+          isBox
+        >
+          <Tab eventKey={ActionTypes.INSTANT_ACTION} title={<TabTitleText>Instant Action</TabTitleText>}></Tab>
+          <Tab eventKey={ActionTypes.SCHEDULED_ACTION} title={<TabTitleText>Schedule Action</TabTitleText>}></Tab>
+          <Tab eventKey={ActionTypes.CRON_ACTION} title={<TabTitleText>Cron Action</TabTitleText>}></Tab>
+        </Tabs>
 
-      <Stack hasGutter>
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Target</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
+        {/* Account selection */}
+        <FormGroup label="Target" isRequired>
           <AccountTypeaheadSelect
             accounts={allAccounts}
             selectedAccount={selectedAccount}
@@ -234,19 +249,11 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             }}
             isDisabled={!selectedAccount}
           />
-        </StackItem>
+        </FormGroup>
         <Divider />
 
         {/* Action selection */}
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Action</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
+        <FormGroup label="Action Operation" isRequired>
           <Radio
             id="action-power-on"
             name="action"
@@ -259,106 +266,55 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             label="Power Off"
             onChange={() => setActionOperation(ActionOperations.POWER_OFF)}
           />
-        </StackItem>
+        </FormGroup>
+        <Divider />
 
         {/* Schedule management */}
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Execution</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
-          <Checkbox
-            id="scheduled-action-type"
-            name="scheduled-action-type"
-            label="Schedule Action"
-            isChecked={showSchedule}
-            onChange={(_event, checked) => {
-              setShowSchedule(checked);
-              setActionType(checked ? ActionTypes.SCHEDULED_ACTION : ActionTypes.INSTANT_ACTION);
-            }}
-          />
-        </StackItem>
-        {showSchedule && (
-          <>
+        <FormGroup label="Execution parameters" isRequired>
+          {actionType === ActionTypes.INSTANT_ACTION && (
+            <HelperText>
+              <HelperTextItem>The action will be run inmediately</HelperTextItem>
+            </HelperText>
+          )}
+          {actionType === ActionTypes.SCHEDULED_ACTION && (
             <StackItem>
-              <Radio
-                id="specific-time"
-                name="scheduleType"
-                label="Specific time"
-                isChecked={actionType === ActionTypes.SCHEDULED_ACTION}
-                onChange={() => setActionType(ActionTypes.SCHEDULED_ACTION)}
-              />
+              <DateTimePicker onChange={setScheduledDateTime} />
             </StackItem>
-            {actionType === ActionTypes.SCHEDULED_ACTION && (
-              <StackItem>
-                <DateTimePicker onChange={setScheduledDateTime} />
-              </StackItem>
-            )}
+          )}
+          {actionType === ActionTypes.CRON_ACTION && (
             <StackItem>
-              <Radio
-                id="cron-expression"
-                name="scheduleType"
-                label="Cron expression"
-                isChecked={actionType === ActionTypes.CRON_ACTION}
-                onChange={() => setActionType(ActionTypes.CRON_ACTION)}
+              <TextInput
+                type="text"
+                id="cron-expression-input"
+                value={cronExpression}
+                onChange={(_event, value) => setCronExpression(value)}
+                placeholder="0 0 * * *"
               />
+              <FormHelperText>
+                <HelperText>
+                  <HelperTextItem>
+                    Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
+                    midnight)
+                  </HelperTextItem>
+                </HelperText>
+              </FormHelperText>
             </StackItem>
-            {actionType === ActionTypes.CRON_ACTION && (
-              <StackItem>
-                <TextInput
-                  type="text"
-                  id="cron-expression-input"
-                  value={cronExpression}
-                  onChange={(_event, value) => setCronExpression(value)}
-                  placeholder="0 0 * * *"
-                />
-                <FormHelperText>
-                  <HelperText>
-                    <HelperTextItem>
-                      Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
-                      midnight)
-                    </HelperTextItem>
-                  </HelperText>
-                </FormHelperText>
-              </StackItem>
-            )}
-          </>
-        )}
+          )}
+        </FormGroup>
+        <Divider />
 
         {/* Reason management */}
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Description (Optional)</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
-          <Checkbox
-            label="Specify reason"
-            isChecked={showDescriptionField}
-            onChange={(_event, checked) => setShowDescriptionField(checked)}
-            id="specify-reason"
+        <FormGroup label="Description">
+          <TextInput
+            type="text"
+            id="description-input"
+            value={description}
+            onChange={(_event, value) => setDescription(value)}
+            placeholder="Enter action description"
+            aria-label="Reason for action"
           />
-        </StackItem>
-        {showDescriptionField && (
-          <StackItem>
-            <TextInput
-              type="text"
-              id="description-input"
-              value={description}
-              onChange={(_event, value) => setDescription(value)}
-              placeholder="Enter reason"
-              aria-label="Reason for action"
-            />
-          </StackItem>
-        )}
-      </Stack>
+        </FormGroup>
+      </Form>
     </Modal>
   );
 
