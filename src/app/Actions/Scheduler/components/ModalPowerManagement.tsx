@@ -25,6 +25,7 @@ import { useUser } from '@app/Contexts/UserContext.tsx';
 import { debug } from '@app/utils/debugLogs';
 import { api, startCluster, stopCluster, AccountResponseApi, ClusterResponseApi, ActionRequestApi } from '@api';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
+import { OutlinedClockIcon, CalendarAltIcon, SyncAltIcon } from '@patternfly/react-icons';
 
 interface ModalPowerManagementProps {
   isOpen: boolean;
@@ -239,9 +240,30 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
           }}
           isBox
         >
-          <Tab eventKey={ActionTypes.INSTANT_ACTION} title={<TabTitleText>Instant Action</TabTitleText>}></Tab>
-          <Tab eventKey={ActionTypes.SCHEDULED_ACTION} title={<TabTitleText>Schedule Action</TabTitleText>}></Tab>
-          <Tab eventKey={ActionTypes.CRON_ACTION} title={<TabTitleText>Cron Action</TabTitleText>}></Tab>
+          <Tab
+            eventKey={ActionTypes.INSTANT_ACTION}
+            title={
+              <TabTitleText>
+                <OutlinedClockIcon /> Instant Action
+              </TabTitleText>
+            }
+          ></Tab>
+          <Tab
+            eventKey={ActionTypes.SCHEDULED_ACTION}
+            title={
+              <TabTitleText>
+                <CalendarAltIcon /> Schedule Action
+              </TabTitleText>
+            }
+          ></Tab>
+          <Tab
+            eventKey={ActionTypes.CRON_ACTION}
+            title={
+              <TabTitleText>
+                <SyncAltIcon /> Cron Action
+              </TabTitleText>
+            }
+          ></Tab>
         </Tabs>
 
         {/* Account selection */}
