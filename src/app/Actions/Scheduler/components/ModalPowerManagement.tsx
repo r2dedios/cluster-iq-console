@@ -38,17 +38,18 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   onCreated,
 }) => {
   const { userEmail } = useUser();
-  const [showDescriptionField, setShowDescriptionField] = React.useState(false);
-  const [description, setDescription] = React.useState<string>('');
+
+  // Modal From parameters
+  const [selectedAccount, setSelectedAccount] = React.useState<AccountResponseApi | null>(null);
+  const [selectedCluster, setSelectedCluster] = React.useState<ClusterResponseApi | null>(null);
+  const [actionOperation, setActionOperation] = React.useState('');
   const [scheduledDateTime, setScheduledDateTime] = React.useState('');
   const [cronExpression, setCronExpression] = React.useState('');
-  const [actionOperation, setActionOperation] = React.useState('');
+  const [description, setDescription] = React.useState<string>('');
 
   // Account/Cluster typeahead vars
   const [allAccounts, setAllAccounts] = React.useState<AccountResponseApi[]>([]);
   const [allClusters, setAllClusters] = React.useState<ClusterResponseApi[]>([]);
-  const [selectedAccount, setSelectedAccount] = React.useState<AccountResponseApi | null>(null);
-  const [selectedCluster, setSelectedCluster] = React.useState<ClusterResponseApi | null>(null);
 
   // TODO: restore Loading spinner
   //const [loading, setLoading] = React.useState(true);
@@ -62,6 +63,22 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     if (next !== ActionTypes.CRON_ACTION) {
       setCronExpression('');
     }
+  };
+
+  const isFormValid =
+    (!!selectedAccount &&
+      !!selectedCluster &&
+      actionOperation.trim() !== '' &&
+      actionType === ActionTypes.INSTANT_ACTION) ||
+    (actionType === ActionTypes.SCHEDULED_ACTION && scheduledDateTime !== '') ||
+    (actionType === ActionTypes.CRON_ACTION && cronExpression !== '');
+  // Typeahead clear button functions
+  const onAccountClearButtonClick = () => {
+    setSelectedAccount(null);
+  };
+
+  const onClusterClearButtonClick = () => {
+    setSelectedCluster(null);
   };
 
   // Load accounts when the modal opens.
@@ -121,9 +138,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   React.useEffect(() => {
     if (isOpen) return;
 
-    setShowDescriptionField(false);
     setDescription('');
-    setShowSchedule(false);
     setActionType(ActionTypes.INSTANT_ACTION);
     setScheduledDateTime('');
     setCronExpression('');
@@ -139,16 +154,14 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
       return;
     }
 
-    const finalDescription = showDescriptionField ? description : 'Routine maintenance';
-
     // Instant Action run
     if (actionType === ActionTypes.INSTANT_ACTION) {
       if (actionOperation === ActionOperations.POWER_ON) {
         debug('Powering on the cluster');
-        startCluster(selectedCluster?.clusterId, userEmail, finalDescription);
+        startCluster(selectedCluster?.clusterId, userEmail, description);
       } else if (actionOperation === ActionOperations.POWER_OFF) {
         debug('Powering off the cluster');
-        stopCluster(selectedCluster?.clusterId, userEmail, finalDescription);
+        stopCluster(selectedCluster?.clusterId, userEmail, description);
       }
     } else {
       // Creating base action. Tunning depending on ActionType
@@ -159,7 +172,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
         operation: actionOperation,
         region: selectedCluster?.region,
         status: ActionStatus.Pending,
-        description: finalDescription,
+        description: description,
       } as ActionRequestApi;
 
       // Scheduled Action run
@@ -206,7 +219,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
       isOpen={isOpen}
       onClose={onClose}
       actions={[
-        <Button key="confirm" variant="primary" onClick={handlerConfirmActionCreation}>
+        <Button key="confirm" variant="primary" onClick={handlerConfirmActionCreation} isDisabled={!isFormValid}>
           Confirm
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose}>
@@ -239,6 +252,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             onSelectAccount={account => {
               setSelectedAccount(account);
             }}
+            onClearAccount={onAccountClearButtonClick}
           />
           <ClusterTypeaheadSelect
             accountId={selectedAccount?.accountId ?? null}
@@ -248,6 +262,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
               setSelectedCluster(cluster);
             }}
             isDisabled={!selectedAccount}
+            onClearCluster={onClusterClearButtonClick}
           />
         </FormGroup>
         <Divider />

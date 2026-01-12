@@ -1,25 +1,30 @@
 import React from 'react';
 import {
+  Button,
   FormGroup,
   Select,
   SelectOption,
   MenuToggle,
   TextInputGroup,
   TextInputGroupMain,
+  TextInputGroupUtilities,
 } from '@patternfly/react-core';
 import { ClusterResponseApi } from '@api';
+import TimesIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
 
 interface ClusterTypeaheadSelectProps {
   accountId: string | null;
   clusters: ClusterResponseApi[];
   selectedCluster: ClusterResponseApi | null;
   onSelectCluster: (cluster: ClusterResponseApi | null) => void;
+  onClearCluster: () => void;
   isDisabled: boolean;
 }
 
 export const ClusterTypeaheadSelect: React.FunctionComponent<ClusterTypeaheadSelectProps> = ({
   clusters,
   selectedCluster,
+  onClearCluster,
   onSelectCluster,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -75,6 +80,18 @@ export const ClusterTypeaheadSelect: React.FunctionComponent<ClusterTypeaheadSel
                 placeholder="Search by name or ID..."
                 aria-label="Search clusters"
               />
+              <TextInputGroupUtilities {...(!inputValue ? { style: { display: 'none' } } : {})}>
+                <Button
+                  variant="plain"
+                  onClick={() => {
+                    setInputValue('');
+                    onClearCluster();
+                  }}
+                  aria-label="Clear input value"
+                >
+                  <TimesIcon aria-hidden />
+                </Button>
+              </TextInputGroupUtilities>
             </TextInputGroup>
           </MenuToggle>
         )}

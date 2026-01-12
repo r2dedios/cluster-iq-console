@@ -1,24 +1,29 @@
 import React from 'react';
 import {
+  Button,
   FormGroup,
   Select,
   SelectOption,
   MenuToggle,
   TextInputGroup,
   TextInputGroupMain,
+  TextInputGroupUtilities,
 } from '@patternfly/react-core';
 import { AccountResponseApi } from '@api';
+import TimesIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
 
 interface AccountTypeaheadSelectProps {
   accounts: AccountResponseApi[];
   selectedAccount: AccountResponseApi | null;
   onSelectAccount: (account: AccountResponseApi | null) => void;
+  onClearAccount: () => void;
 }
 
 export const AccountTypeaheadSelect: React.FunctionComponent<AccountTypeaheadSelectProps> = ({
   accounts,
   selectedAccount,
   onSelectAccount,
+  onClearAccount,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
@@ -73,6 +78,18 @@ export const AccountTypeaheadSelect: React.FunctionComponent<AccountTypeaheadSel
                 placeholder="Search by name or ID..."
                 aria-label="Search accounts"
               />
+              <TextInputGroupUtilities {...(!inputValue ? { style: { display: 'none' } } : {})}>
+                <Button
+                  variant="plain"
+                  onClick={() => {
+                    setInputValue('');
+                    onClearAccount();
+                  }}
+                  aria-label="Clear input value"
+                >
+                  <TimesIcon aria-hidden />
+                </Button>
+              </TextInputGroupUtilities>
             </TextInputGroup>
           </MenuToggle>
         )}
