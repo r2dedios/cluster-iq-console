@@ -2,18 +2,14 @@ import {
   Button,
   Checkbox,
   FormHelperText,
+  FormGroup,
+  Form,
+  TextInput,
   HelperText,
   HelperTextItem,
   Modal,
   ModalVariant,
   Radio,
-  Stack,
-  StackItem,
-  TextInput,
-  Divider,
-  Flex,
-  FlexItem,
-  Text,
 } from '@patternfly/react-core';
 import React from 'react';
 import { ActionOperations, ActionTypes } from '@app/types/types';
@@ -165,10 +161,10 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     if (actionType === ActionTypes.INSTANT_ACTION) {
       if (actionOperation === ActionOperations.POWER_ON) {
         debug('Powering on the cluster');
-        startCluster(selectedCluster?.clusterId, userEmail, finalDescription);
+        startCluster(selectedCluster?.clusterId, userEmail ?? undefined, finalDescription);
       } else if (actionOperation === ActionOperations.POWER_OFF) {
         debug('Powering off the cluster');
-        stopCluster(selectedCluster?.clusterId, userEmail, finalDescription);
+        stopCluster(selectedCluster?.clusterId, userEmail ?? undefined, finalDescription);
       }
     } else {
       // Creating base action. Tunning depending on ActionType
@@ -237,85 +233,60 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     >
       {/* Account selection */}
 
-      <Stack hasGutter>
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Target</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
-          <AccountTypeaheadSelect
-            accounts={allAccounts}
-            selectedAccount={selectedAccount}
-            onSelectAccount={account => {
-              setSelectedAccount(account);
-            }}
-            onClearAccount={onAccountClearButtonClick}
-          />
-          <ClusterTypeaheadSelect
-            accountId={selectedAccount?.accountId ?? null}
-            clusters={allClusters}
-            selectedCluster={selectedCluster}
-            onSelectCluster={cluster => {
-              setSelectedCluster(cluster);
-            }}
-            isDisabled={!selectedAccount}
-            onClearCluster={onClusterClearButtonClick}
-          />
-        </StackItem>
-        <Divider />
+      <Form>
+        <AccountTypeaheadSelect
+          accounts={allAccounts}
+          selectedAccount={selectedAccount}
+          onSelectAccount={account => {
+            setSelectedAccount(account);
+          }}
+          onClearAccount={onAccountClearButtonClick}
+        />
+        <ClusterTypeaheadSelect
+          accountId={selectedAccount?.accountId ?? null}
+          clusters={allClusters}
+          selectedCluster={selectedCluster}
+          onSelectCluster={cluster => {
+            setSelectedCluster(cluster);
+          }}
+          isDisabled={!selectedAccount}
+          onClearCluster={onClusterClearButtonClick}
+        />
 
         {/* Action selection */}
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Action</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
+        <FormGroup label="Action" role="radiogroup" isRequired fieldId="action-operation">
           <Radio
             id="action-power-on"
             name="action"
             label="Power On"
+            isChecked={actionOperation === ActionOperations.POWER_ON}
             onChange={() => setActionOperation(ActionOperations.POWER_ON)}
           />
           <Radio
             id="action-power-off"
             name="action"
             label="Power Off"
+            isChecked={actionOperation === ActionOperations.POWER_OFF}
             onChange={() => setActionOperation(ActionOperations.POWER_OFF)}
           />
-        </StackItem>
+        </FormGroup>
 
         {/* Schedule management */}
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Execution</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
+        <FormGroup label="Execution" fieldId="scheduled-action-type">
           <Checkbox
             id="scheduled-action-type"
             name="scheduled-action-type"
-            label="Schedule Action"
+            label="Schedule action"
             isChecked={showSchedule}
             onChange={(_event, checked) => {
               setShowSchedule(checked);
               setActionType(checked ? ActionTypes.SCHEDULED_ACTION : ActionTypes.INSTANT_ACTION);
             }}
           />
-        </StackItem>
+        </FormGroup>
         {showSchedule && (
           <>
-            <StackItem>
+            <FormGroup role="radiogroup" fieldId="schedule-type">
               <Radio
                 id="specific-time"
                 name="scheduleType"
@@ -323,13 +294,13 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                 isChecked={actionType === ActionTypes.SCHEDULED_ACTION}
                 onChange={() => setActionType(ActionTypes.SCHEDULED_ACTION)}
               />
-            </StackItem>
+            </FormGroup>
             {actionType === ActionTypes.SCHEDULED_ACTION && (
-              <StackItem>
+              <FormGroup fieldId="datetime-picker" isRequired>
                 <DateTimePicker onChange={setScheduledDateTime} />
-              </StackItem>
+              </FormGroup>
             )}
-            <StackItem>
+            <FormGroup fieldId="cron-expression-input" isRequired>
               <Radio
                 id="cron-expression"
                 name="scheduleType"
@@ -337,9 +308,9 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                 isChecked={actionType === ActionTypes.CRON_ACTION}
                 onChange={() => setActionType(ActionTypes.CRON_ACTION)}
               />
-            </StackItem>
+            </FormGroup>
             {actionType === ActionTypes.CRON_ACTION && (
-              <StackItem>
+              <FormGroup fieldId="cron-expression-input" isRequired>
                 <TextInput
                   type="text"
                   id="cron-expression-input"
@@ -355,21 +326,13 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                     </HelperTextItem>
                   </HelperText>
                 </FormHelperText>
-              </StackItem>
+              </FormGroup>
             )}
           </>
         )}
 
-        {/* Reason management */}
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Text component="h2">Description (Optional)</Text>
-          </FlexItem>
-          <FlexItem grow={{ default: 'grow' }}>
-            <Divider />
-          </FlexItem>
-        </Flex>
-        <StackItem>
+        {/* Description management */}
+        <FormGroup label="Description" fieldId="description-input">
           <TextInput
             type="text"
             id="description-input"
@@ -378,8 +341,8 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
             placeholder="Enter reason"
             aria-label="Reason for action"
           />
-        </StackItem>
-      </Stack>
+        </FormGroup>
+      </Form>
     </Modal>
   );
 
