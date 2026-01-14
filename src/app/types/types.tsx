@@ -1,8 +1,3 @@
-export enum ClusterActions {
-  PowerOn = 'PowerOn',
-  PowerOff = 'PowerOff',
-}
-
 export enum ResultStatus {
   Pending = 'Pending',
   Running = 'Running',
@@ -12,7 +7,8 @@ export enum ResultStatus {
   Unknown = 'Unknown',
 }
 
-export enum ScheduledActionStatus {
+export enum ActionStatus {
+  Running = 'Running',
   Success = 'Success',
   Failed = 'Failed',
   Pending = 'Pending',
@@ -20,12 +16,36 @@ export enum ScheduledActionStatus {
 }
 
 export enum ActionOperations {
-  POWER_ON = 'Power On',
-  POWER_OFF = 'Power Off',
+  POWER_ON = 'PowerOn',
+  POWER_OFF = 'PowerOff',
 }
 
 export enum ActionTypes {
-  INSTANT_ACTION = 'Instant Action',
-  SCHEDULED_ACTION = 'Scheduled Action',
-  CRON_ACTION = 'Cron Action',
+  INSTANT_ACTION = 'instant_action',
+  SCHEDULED_ACTION = 'scheduled_action',
+  CRON_ACTION = 'cron_action',
+}
+
+export interface BaseAction {
+  type: 'instant_action' | 'scheduled_action' | 'cron_action';
+  operation: 'PowerOff' | 'PowerOn';
+  target: {
+    clusterID: string;
+  };
+  status: 'Pending';
+  enabled: boolean;
+}
+
+export interface ScheduledAction extends BaseAction {
+  type: 'scheduled_action';
+  time: string;
+}
+
+export interface CronAction extends BaseAction {
+  type: 'cron_action';
+  cronExp: string;
+}
+
+export interface InstantAction {
+  description?: string;
 }

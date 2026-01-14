@@ -26,7 +26,7 @@ export class Schedule<SecurityDataType = unknown> {
    * @tags Actions
    * @name ScheduleList
    * @summary List scheduled actions
-   * @request GET:/schedule
+   * @request GET:/actions
    */
   scheduleList = (
     query?: {
@@ -48,7 +48,7 @@ export class Schedule<SecurityDataType = unknown> {
     params: RequestParams = {}
   ) =>
     this.http.request<ActionListResponseApi, GenericErrorResponseApi>({
-      path: `/schedule`,
+      path: `/actions`,
       method: 'GET',
       query: query,
       type: ContentType.Json,
@@ -61,11 +61,11 @@ export class Schedule<SecurityDataType = unknown> {
    * @tags Actions
    * @name ScheduleDetail
    * @summary Get scheduled action by ID
-   * @request GET:/schedule/{id}
+   * @request GET:/actions/{id}
    */
   scheduleDetail = (id: string, params: RequestParams = {}) =>
     this.http.request<ScheduledActionApi, GenericErrorResponseApi>({
-      path: `/schedule/${id}`,
+      path: `/actions/${id}`,
       method: 'GET',
       type: ContentType.Json,
       format: 'json',
@@ -77,11 +77,11 @@ export class Schedule<SecurityDataType = unknown> {
    * @tags Actions
    * @name DisablePartialUpdate
    * @summary Disable scheduled action
-   * @request PATCH:/schedule/{id}/disable
+   * @request PATCH:/actions/{id}/disable
    */
   disablePartialUpdate = (id: string, params: RequestParams = {}) =>
     this.http.request<void, GenericErrorResponseApi>({
-      path: `/schedule/${id}/disable`,
+      path: `/actions/${id}/disable`,
       method: 'PATCH',
       ...params,
     });
@@ -91,11 +91,11 @@ export class Schedule<SecurityDataType = unknown> {
    * @tags Actions
    * @name EnablePartialUpdate
    * @summary Enable scheduled action
-   * @request PATCH:/schedule/{id}/enable
+   * @request PATCH:/actions/{id}/enable
    */
   enablePartialUpdate = (id: string, params: RequestParams = {}) =>
     this.http.request<void, GenericErrorResponseApi>({
-      path: `/schedule/${id}/enable`,
+      path: `/actions/${id}/enable`,
       method: 'PATCH',
       ...params,
     });

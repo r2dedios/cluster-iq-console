@@ -38,6 +38,38 @@ export class Actions<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description Enables one or multiple actions.
+   *
+   * @tags Actions
+   * @name ActionsEnable
+   * @summary Enable actions
+   * @request PATCH:/actions
+   */
+  actionsEnable = (id: string, params: RequestParams = {}) =>
+    this.http.request<PostResponseApi, GenericErrorResponseApi>({
+      path: `/actions/${id}/enable`,
+      method: 'PATCH',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Disables one or multiple actions.
+   *
+   * @tags Actions
+   * @name ActionsDisable
+   * @summary Disable actions
+   * @request PATCH:/actions
+   */
+  actionsDisable = (id: string, params: RequestParams = {}) =>
+    this.http.request<PostResponseApi, GenericErrorResponseApi>({
+      path: `/actions/${id}/disable`,
+      method: 'PATCH',
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
    * @description Patch an existing actions by ID.
    *
    * @tags Actions

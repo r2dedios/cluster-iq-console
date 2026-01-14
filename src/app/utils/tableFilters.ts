@@ -19,6 +19,16 @@ export function filterByStatus<T extends { status?: string | null }>(items: T[],
   return items.filter(item => item.status === status);
 }
 
+export function filterByActionType<T extends { actionType?: string | null }>(
+  items: T[],
+  actionTypes?: string[] | null
+): T[] {
+  if (!actionTypes || actionTypes.length === 0) {
+    return items;
+  }
+  return items.filter(item => item.actionType && actionTypes.includes(item.actionType));
+}
+
 export function filterByProvider<T extends { provider?: string | null }>(items: T[], providers?: string[] | null): T[] {
   if (!providers || providers.length === 0) {
     return items;

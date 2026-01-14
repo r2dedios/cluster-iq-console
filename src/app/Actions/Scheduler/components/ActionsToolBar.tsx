@@ -17,22 +17,34 @@ import {
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
 import debounce from 'lodash.debounce';
-import { ClusterActions, ScheduledActionStatus } from '@app/types/types';
-import { SchedulerTableToolbarProps } from './types';
+import { ActionTypes, ActionOperations, ActionStatus } from '@app/types/types';
 import { usePopperContainer } from '@app/hooks/usePopperContainer';
 
 type AttributeMenuOption = 'Account' | 'Action' | 'Type' | 'Status' | 'Enabled';
 
-export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolbarProps> = ({
+export interface SchedulerTableToolbarProps {
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+  actionType: ActionTypes | null;
+  setType: (value: ActionTypes | null) => void;
+  actionOperation: ActionOperations[] | null;
+  setOperation: (value: ActionOperations[] | null) => void;
+  actionStatus: ActionStatus | null;
+  setStatus: (value: ActionStatus | null) => void;
+  actionEnabled: boolean | null;
+  setEnabled: (value: boolean | null) => void;
+}
+
+export const ScheduleActionsTableToolbar: React.FunctionComponent<SchedulerTableToolbarProps> = ({
   searchValue,
   setSearchValue,
-  action,
-  setAction,
-  status,
-  setStatus,
-  type,
+  actionType,
   setType,
-  enabled,
+  actionOperation,
+  setOperation,
+  actionStatus,
+  setStatus,
+  actionEnabled,
   setEnabled,
 }) => {
   const debouncedSearch = React.useMemo(() => debounce(setSearchValue, 300), [setSearchValue]);
@@ -108,12 +120,12 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
       return;
     }
 
-    const selectedAction = itemId as ClusterActions;
-    setAction(
-      action && action.includes(selectedAction)
-        ? action.filter(item => item !== selectedAction)
+    const selectedAction = itemId as ActionOperations;
+    setOperation(
+      actionOperation && actionOperation.includes(selectedAction)
+        ? actionOperation.filter(item => item !== selectedAction)
         : selectedAction
-          ? [selectedAction, ...(action || [])]
+          ? [selectedAction, ...(actionOperation || [])]
           : []
     );
   }
@@ -123,9 +135,9 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
       ref={actionToggleRef}
       onClick={onActionMenuToggleClick}
       isExpanded={isActionMenuOpen}
-      {...(action &&
-        action.length > 0 && {
-          badge: <Badge isRead>{action.length}</Badge>,
+      {...(actionOperation &&
+        actionOperation.length > 0 && {
+          badge: <Badge isRead>{actionOperation.length}</Badge>,
         })}
       style={
         {
@@ -138,14 +150,27 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   );
 
   const actionMenu = (
-    <Menu ref={actionMenuRef} id="attribute-search-action-menu" onSelect={onActionMenuSelect} selected={action}>
+    <Menu
+      ref={actionMenuRef}
+      id="attribute-search-action-menu"
+      onSelect={onActionMenuSelect}
+      selected={actionOperation}
+    >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={action?.includes(ClusterActions.PowerOn)} itemId={ClusterActions.PowerOn}>
-            {ClusterActions.PowerOn}
+          <MenuItem
+            hasCheckbox
+            isSelected={actionOperation?.includes(ActionOperations.POWER_ON)}
+            itemId={ActionOperations.POWER_ON}
+          >
+            {ActionOperations.POWER_ON}
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={action?.includes(ClusterActions.PowerOff)} itemId={ClusterActions.PowerOff}>
-            {ClusterActions.PowerOff}
+          <MenuItem
+            hasCheckbox
+            isSelected={actionOperation?.includes(ActionOperations.POWER_OFF)}
+            itemId={ActionOperations.POWER_OFF}
+          >
+            {ActionOperations.POWER_OFF}
           </MenuItem>
         </MenuList>
       </MenuContent>
@@ -220,18 +245,40 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
       return;
     }
 
-    const selectedType = itemId as string;
+    const selectedType = itemId as ActionTypes | null;
     // Toggle type selection - clear if already selected, otherwise set new value
-    setType(type === selectedType ? '' : selectedType);
+    setType(actionType === selectedType ? null : selectedType);
     setIsTypeMenuOpen(false);
   }
+
+  const typeToggleLabel = (t?: ActionTypes | null) => {
+    if (!t) return 'Filter by type';
+
+    switch (t) {
+      case ActionTypes.INSTANT_ACTION:
+        return 'Instant Action';
+      case ActionTypes.SCHEDULED_ACTION:
+        return 'Scheduled Action';
+      case ActionTypes.CRON_ACTION:
+        return 'Cron Action';
+      default:
+        return 'Filter by type';
+    }
+  };
+
+  const actionTypeLabel = (t: ActionTypes | null) => {
+    if (!t) return '';
+    if (t === ActionTypes.INSTANT_ACTION) return 'Instant Action';
+    if (t === ActionTypes.SCHEDULED_ACTION) return 'Scheduled Action';
+    return 'Cron Action';
+  };
 
   const typeToggle = (
     <MenuToggle
       ref={typeToggleRef}
       onClick={onTypeMenuToggleClick}
       isExpanded={isTypeMenuOpen}
-      {...(type && {
+      {...(actionType && {
         badge: <Badge isRead>1</Badge>,
       })}
       style={
@@ -240,18 +287,26 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
         } as React.CSSProperties
       }
     >
-      {type ? (type === 'scheduled_action' ? 'Scheduled Action' : 'Cron Action') : 'Filter by type'}
+      {typeToggleLabel(actionType)}
     </MenuToggle>
   );
 
   const typeMenu = (
-    <Menu ref={typeMenuRef} id="attribute-search-type-menu" onSelect={onTypeMenuSelect} selected={type ? [type] : []}>
+    <Menu
+      ref={typeMenuRef}
+      id="attribute-search-type-menu"
+      onSelect={onTypeMenuSelect}
+      selected={actionType ? [actionType] : []}
+    >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={type === 'scheduled_action'} itemId="scheduled_action">
+          <MenuItem hasCheckbox isSelected={actionType === ActionTypes.INSTANT_ACTION} itemId="instant_action">
+            Instant Action
+          </MenuItem>
+          <MenuItem hasCheckbox isSelected={actionType === ActionTypes.SCHEDULED_ACTION} itemId="scheduled_action">
             Scheduled Action
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={type === 'cron_action'} itemId="cron_action">
+          <MenuItem hasCheckbox isSelected={actionType === ActionTypes.CRON_ACTION} itemId="cron_action">
             Cron Action
           </MenuItem>
         </MenuList>
@@ -276,7 +331,7 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   const [isStatusMenuOpen, setIsStatusMenuOpen] = React.useState<boolean>(false);
   const statusToggleRef = React.useRef<HTMLButtonElement>(null);
   const statusMenuRef = React.useRef<HTMLDivElement>(null);
-  const statusContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: statusContainerRef, containerElement: statusContainerElement } = usePopperContainer();
 
   const handleStatusMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
   const handleStatusClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
@@ -327,9 +382,9 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
       return;
     }
 
-    const selectedStatus = itemId as string;
+    const selectedStatus = itemId as ActionStatus | null;
     // Toggle status selection
-    setStatus(status === selectedStatus ? '' : selectedStatus);
+    setStatus(status === selectedStatus ? null : selectedStatus);
     setIsStatusMenuOpen(false);
   }
 
@@ -360,33 +415,17 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
     >
       <MenuContent>
         <MenuList>
-          <MenuItem
-            hasCheckbox
-            isSelected={status === ScheduledActionStatus.Success}
-            itemId={ScheduledActionStatus.Success}
-          >
-            {ScheduledActionStatus.Success}
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Success} itemId={ActionStatus.Success}>
+            {ActionStatus.Success}
           </MenuItem>
-          <MenuItem
-            hasCheckbox
-            isSelected={status === ScheduledActionStatus.Failed}
-            itemId={ScheduledActionStatus.Failed}
-          >
-            {ScheduledActionStatus.Failed}
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Failed} itemId={ActionStatus.Failed}>
+            {ActionStatus.Failed}
           </MenuItem>
-          <MenuItem
-            hasCheckbox
-            isSelected={status === ScheduledActionStatus.Pending}
-            itemId={ScheduledActionStatus.Pending}
-          >
-            {ScheduledActionStatus.Pending}
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Pending} itemId={ActionStatus.Pending}>
+            {ActionStatus.Pending}
           </MenuItem>
-          <MenuItem
-            hasCheckbox
-            isSelected={status === ScheduledActionStatus.Unknown}
-            itemId={ScheduledActionStatus.Unknown}
-          >
-            {ScheduledActionStatus.Unknown}
+          <MenuItem hasCheckbox isSelected={status === ActionStatus.Unknown} itemId={ActionStatus.Unknown}>
+            {ActionStatus.Unknown}
           </MenuItem>
         </MenuList>
       </MenuContent>
@@ -461,9 +500,19 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
       return;
     }
 
-    if (itemId === 'yes' || itemId === 'no' || itemId === '') {
-      setEnabled(itemId);
+    if (itemId === 'enabled') {
+      setEnabled(true);
+    } else if (itemId === 'disabled') {
+      setEnabled(false);
+    } else {
+      setEnabled(null);
     }
+  };
+
+  const enabledToggleLabel = (v: boolean | null) => {
+    if (v === true) return 'Yes';
+    if (v === false) return 'No';
+    return 'Filter by enabled';
   };
 
   const enabledToggle = (
@@ -473,18 +522,23 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
       isExpanded={isEnabledMenuOpen}
       style={{ width: '200px' } as React.CSSProperties}
     >
-      {enabled === 'yes' ? 'Yes' : 'No'}
+      {enabledToggleLabel(actionEnabled)}
     </MenuToggle>
   );
 
   const enabledMenu = (
-    <Menu ref={enabledMenuRef} id="attribute-search-enabled-menu" onSelect={onEnabledMenuSelect} selected={enabled}>
+    <Menu
+      ref={enabledMenuRef}
+      id="attribute-search-enabled-menu"
+      onSelect={onEnabledMenuSelect}
+      selected={actionEnabled}
+    >
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={enabled === 'yes'} itemId="yes">
+          <MenuItem hasCheckbox isSelected={actionEnabled === true} itemId="enabled">
             Yes
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={enabled === 'no'} itemId="no">
+          <MenuItem hasCheckbox isSelected={actionEnabled === false} itemId="disabled">
             No
           </MenuItem>
         </MenuList>
@@ -612,10 +666,10 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
       id="scheduler-filter-toolbar"
       clearAllFilters={() => {
         setSearchValue('');
-        setAction(null);
-        setType('');
-        setStatus('');
-        setEnabled('');
+        setOperation(null);
+        setType(null);
+        setStatus(null);
+        setEnabled(null);
       }}
     >
       <ToolbarContent>
@@ -632,36 +686,36 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
               {searchInput}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={action || []}
+              chips={actionOperation || []}
               deleteChip={(_category, chip) => onActionMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setAction([])}
+              deleteChipGroup={() => setOperation([])}
               categoryName="Action"
               showToolbarItem={activeAttributeMenu === 'Action'}
             >
               {actionSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={type ? [type === 'scheduled_action' ? 'Scheduled Action' : 'Cron Action'] : []}
-              deleteChip={() => setType('')}
-              deleteChipGroup={() => setType('')}
+              chips={actionType ? [actionTypeLabel(actionType)] : []}
+              deleteChip={() => setType(null)}
+              deleteChipGroup={() => setType(null)}
               categoryName="Type"
               showToolbarItem={activeAttributeMenu === 'Type'}
             >
               {typeSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={status ? [status] : []}
-              deleteChip={() => setStatus('')}
-              deleteChipGroup={() => setStatus('')}
+              chips={actionStatus ? [actionStatus] : []}
+              deleteChip={() => setStatus(null)}
+              deleteChipGroup={() => setStatus(null)}
               categoryName="Status"
               showToolbarItem={activeAttributeMenu === 'Status'}
             >
               {statusSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={enabled ? [enabled === 'yes' ? 'Yes' : 'No'] : []}
-              deleteChip={() => setEnabled('')}
-              deleteChipGroup={() => setEnabled('')}
+              chips={actionEnabled !== null ? [actionEnabled === true ? 'Enabled' : 'Disabled'] : []}
+              deleteChip={() => setEnabled(null)}
+              deleteChipGroup={() => setEnabled(null)}
               categoryName="Enabled"
               showToolbarItem={activeAttributeMenu === 'Enabled'}
             >
@@ -674,4 +728,4 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   );
 };
 
-export default SchedulerTableToolbar;
+export default ScheduleActionsTableToolbar;

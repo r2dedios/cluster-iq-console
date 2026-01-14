@@ -18,7 +18,7 @@ import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { AuditLogsTableToolbarProps } from './types';
 import debounce from 'lodash.debounce';
-import { ClusterActions, ResultStatus } from '@app/types/types';
+import { ActionOperations, ResultStatus } from '@app/types/types';
 import { usePopperContainer } from '@app/hooks/usePopperContainer';
 import { ProviderApi } from '@api';
 
@@ -254,7 +254,7 @@ export const AuditLogsTableToolbar: React.FunctionComponent<AuditLogsTableToolba
       return;
     }
 
-    const selectedAction = itemId as ClusterActions;
+    const selectedAction = itemId as ActionOperations;
     setAction(
       action && action.includes(selectedAction)
         ? action.filter(item => item !== selectedAction)
@@ -287,11 +287,19 @@ export const AuditLogsTableToolbar: React.FunctionComponent<AuditLogsTableToolba
     <Menu ref={actionMenuRef} id="attribute-search-action-menu" onSelect={onActionMenuSelect} selected={action}>
       <MenuContent>
         <MenuList>
-          <MenuItem hasCheckbox isSelected={action?.includes(ClusterActions.PowerOn)} itemId={ClusterActions.PowerOn}>
-            {ClusterActions.PowerOn}
+          <MenuItem
+            hasCheckbox
+            isSelected={action?.includes(ActionOperations.POWER_ON)}
+            itemId={ActionOperations.POWER_ON}
+          >
+            {ActionOperations.POWER_ON}
           </MenuItem>
-          <MenuItem hasCheckbox isSelected={action?.includes(ClusterActions.PowerOff)} itemId={ClusterActions.PowerOff}>
-            {ClusterActions.PowerOff}
+          <MenuItem
+            hasCheckbox
+            isSelected={action?.includes(ActionOperations.POWER_OFF)}
+            itemId={ActionOperations.POWER_OFF}
+          >
+            {ActionOperations.POWER_OFF}
           </MenuItem>
         </MenuList>
       </MenuContent>

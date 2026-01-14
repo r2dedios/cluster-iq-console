@@ -1,4 +1,5 @@
 import { parseISO, format } from 'date-fns';
+import { createParser } from 'nuqs';
 
 export function parseScanTimestamp(ts: string | undefined) {
   if (!ts) return 'N/A';
@@ -25,3 +26,17 @@ export function resolveResourcePath(resourceType: string, resourceName: string):
   // Fallback / defensive default
   return '#';
 }
+
+// Nullable boolean: "true" -> true, "false" -> false, missing/other -> null
+export const parseAsBooleanNullable = createParser<boolean | null>({
+  parse: value => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return null;
+  },
+  serialize: value => {
+    // nuqs expects a string; return empty string to represent "unset"
+    if (value === null) return '';
+    return value ? 'true' : 'false';
+  },
+});

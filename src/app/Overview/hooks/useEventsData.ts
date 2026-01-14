@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { api } from '@api';
-import { Event } from '@app/types/events';
+import { api, SystemEventResponseApi } from '@api';
 
 export const useEventsData = () => {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<SystemEventResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

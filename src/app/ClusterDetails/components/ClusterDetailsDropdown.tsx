@@ -1,9 +1,9 @@
-import { ResourceStatusApi } from '@api';
+import { startCluster, stopCluster, ResourceStatusApi } from '@api';
 import { Dropdown, DropdownItem, DropdownList, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { ModalPowerManagement } from './ModalPowerManagement';
-import { ActionOperations, ActionTypes } from '@app/types/types';
+import { ActionOperations } from '@app/types/types';
+import { ClusterActionConfirm } from './ClusterActionConfirm';
 
 interface ClusterDetailsDropdownProps {
   clusterStatus: ResourceStatusApi | null;
@@ -11,28 +11,37 @@ interface ClusterDetailsDropdownProps {
 
 export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropdownProps> = () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  useParams();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [actionOperation, setActionOperation] = React.useState<ActionOperations | null>(null);
-  const [actionType, setActionType] = React.useState<ActionTypes | null>(null);
+
+  const { clusterID } = useParams();
+  const { userEmail } = useParams();
 
   const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    const operation = value as ActionOperations | undefined;
+    const operation = value as ActionOperations;
+
     if (operation === ActionOperations.POWER_ON || operation === ActionOperations.POWER_OFF) {
+      // Open modal with selected operation
       setActionOperation(operation);
-      setActionType(ActionTypes.INSTANT_ACTION);
-    } else {
-      setActionOperation(null);
-      setActionType(ActionTypes.SCHEDULED_ACTION);
+      setIsModalOpen(true);
     }
-    setIsModalOpen(true);
+
     setIsOpen(false);
+  };
+
+  const actionCreate = (clusterId: string, operation: string, userEmail: string, description: string) => {
+    if (operation === ActionOperations.POWER_ON) {
+      startCluster(clusterId, userEmail, description);
+    } else if (operation === ActionOperations.POWER_OFF) {
+      stopCluster(clusterId, userEmail, description);
+    } else {
+      console.error('Operation not supported for InstantAction');
+    }
   };
 
   const resetModalState = () => {
     setIsModalOpen(false);
     setActionOperation(null);
-    setActionType(null);
   };
 
   return (
@@ -41,33 +50,33 @@ export const ClusterDetailsDropdown: React.FunctionComponent<ClusterDetailsDropd
         isOpen={isOpen}
         onSelect={onSelect}
         onOpenChange={setIsOpen}
-        popperProps={{
-          position: 'end',
-        }}
+        popperProps={{ position: 'end' }}
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
+          <MenuToggle ref={toggleRef} onClick={() => setIsOpen(v => !v)} isExpanded={isOpen}>
             Actions
           </MenuToggle>
         )}
       >
         <DropdownList>
-          <DropdownItem value={ActionOperations.POWER_ON} type={ActionTypes.INSTANT_ACTION} key="power on">
+          <DropdownItem value={ActionOperations.POWER_ON} key="power-on">
             {ActionOperations.POWER_ON}
           </DropdownItem>
-          <DropdownItem value={ActionOperations.POWER_OFF} type={ActionTypes.INSTANT_ACTION} key="power off">
+          <DropdownItem value={ActionOperations.POWER_OFF} key="power-off">
             {ActionOperations.POWER_OFF}
-          </DropdownItem>
-          <DropdownItem value="schedule" key="schedule">
-            {ActionTypes.SCHEDULED_ACTION}
           </DropdownItem>
         </DropdownList>
       </Dropdown>
 
-      <ModalPowerManagement
+      <ClusterActionConfirm
         isOpen={isModalOpen}
+        onConfirm={() => {
+          if (!clusterID || !actionOperation) return;
+          actionCreate(clusterID, actionOperation, userEmail!, '');
+          resetModalState();
+        }}
         onClose={resetModalState}
         actionOperation={actionOperation}
-        actionType={actionType}
+        clusterId={clusterID!}
       />
     </>
   );

@@ -7,7 +7,8 @@ import Clusters from './Clusters/Clusters';
 import ClusterDetails from './ClusterDetails/ClusterDetails';
 import AccountDetails from './AccountDetails/AccountDetails';
 import ServerDetails from './ServerDetails/ServerDetails';
-import AuditLogs from './Observe/AuditLogs/AuditLogs';
+import AuditLogs from './Actions/AuditLogs/AuditLogs';
+import Scheduler from './Actions/Scheduler/Schedule';
 import Servers from './Servers/Servers';
 import Accounts from './Accounts/Accounts';
 import { NuqsAdapter } from 'nuqs/adapters/react';
@@ -37,6 +38,7 @@ const AppRoutes = (): React.ReactElement => (
       <Route path="clusters/:clusterID" element={<ClusterDetails />} />
       <Route path="instances" element={<Servers />} />
       <Route path="instances/:instanceID" element={<ServerDetails />} />
+      <Route path="actions/scheduler" element={<Scheduler />} />
       <Route path="actions/audit-logs" element={<AuditLogs />} />
     </Routes>
   </RouteDebugWrapper>

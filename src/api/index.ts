@@ -1,5 +1,6 @@
 import { HttpClient } from './http-client';
 import { Accounts } from './Accounts';
+import { Actions } from './Actions';
 import { Clusters } from './Clusters';
 import { Events } from './Events';
 import { Instances } from './Instances';
@@ -39,6 +40,7 @@ http.instance.interceptors.request.use(config => {
 // Initialize API classes
 export const api = {
   accounts: new Accounts(http),
+  actions: new Actions(http),
   clusters: new Clusters(http),
   events: new Events(http),
   instances: new Instances(http),

@@ -1,11 +1,11 @@
-import { ClusterActions, ResultStatus } from '@app/types/types';
+import { ActionOperations, ResultStatus } from '@app/types/types';
 import { ProviderApi } from '@api';
 
 export interface AuditLogsTableToolbarProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
-  action: ClusterActions[] | null;
-  setAction: (value: ClusterActions[] | null) => void;
+  action: ActionOperations[] | null;
+  setAction: (value: ActionOperations[] | null) => void;
   result: ResultStatus[] | null;
   setResult: (value: ResultStatus[] | null) => void;
   providerSelections: ProviderApi[] | null;
@@ -16,7 +16,7 @@ export interface AuditLogsTableToolbarProps {
 
 export interface AuditLogsTableProps {
   accountName?: string;
-  action?: ClusterActions[];
+  action?: ActionOperations[];
   provider?: ProviderApi[];
   result?: ResultStatus[];
   triggered_by?: string;

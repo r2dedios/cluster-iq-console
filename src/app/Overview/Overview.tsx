@@ -18,6 +18,7 @@ import { ProviderApi } from '@api';
 import { renderContent } from './utils/cardRendererUtils.tsx';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useEventsData } from './hooks/useEventsData';
+import { DashboardState } from './types';
 
 const AggregateStatusCards: React.FunctionComponent = () => {
   const { inventoryData } = useDashboardData();
@@ -27,7 +28,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
     return <LoadingSpinner />;
   }
 
-  const dashboardState = {
+  const dashboardState: DashboardState = {
     clustersByStatus: {
       running: inventoryData?.clusters?.running || 0,
       stopped: inventoryData?.clusters?.stopped || 0,
@@ -42,11 +43,13 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       [ProviderApi.AWSProvider]: inventoryData.providers?.aws?.clusterCount || 0,
       [ProviderApi.GCPProvider]: inventoryData.providers?.gcp?.clusterCount || 0,
       [ProviderApi.AzureProvider]: inventoryData.providers?.azure?.clusterCount || 0,
+      [ProviderApi.UnknownProvider]: 0,
     },
     accountsByProvider: {
       [ProviderApi.AWSProvider]: inventoryData.providers?.aws?.accountCount || 0,
       [ProviderApi.GCPProvider]: inventoryData.providers?.gcp?.accountCount || 0,
       [ProviderApi.AzureProvider]: inventoryData.providers?.azure?.accountCount || 0,
+      [ProviderApi.UnknownProvider]: 0,
     },
     instances: (inventoryData?.instances?.running || 0) + (inventoryData?.instances?.stopped || 0),
     lastScanTimestamp: inventoryData?.scanner?.lastScanTimestamp,

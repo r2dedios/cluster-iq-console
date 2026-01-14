@@ -1,9 +1,9 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { ClusterActions, ResultStatus } from '@app/types/types';
+import { ActionOperations, ResultStatus } from '@app/types/types';
 import { api, SystemEventResponseApi } from '@api';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import React, { useEffect, useState } from 'react';
-import { getResultIcon } from '@app/utils/renderUtils';
+import { getResultIcon, renderOperationLabel } from '@app/utils/renderUtils';
 import { useTableSort } from '@app/hooks/useTableSort.tsx';
 import { EmptyState, EmptyStateHeader, EmptyStateIcon } from '@patternfly/react-core';
 import { TablePagination } from '@app/components/common/TablesPagination';
@@ -18,7 +18,7 @@ const columnNames = {
   resource: 'Resource',
   account: 'Account',
   provider: 'Provider',
-  loggedBy: 'Logged by',
+  triggeredBy: 'Triggered By',
   description: 'Description',
   date: 'Date',
 };
@@ -69,7 +69,7 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
     }
 
     if (action?.length) {
-      filtered = filtered.filter(event => action.includes(event.action as ClusterActions));
+      filtered = filtered.filter(event => action.includes(event.action as ActionOperations));
     }
 
     if (provider?.length) {
@@ -89,11 +89,11 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   }, [data, accountName, action, provider, result, triggered_by, page, perPage]);
 
   const getSortableRowValues = (event: SystemEventResponseApi): (string | number | null)[] => {
-    const { action, result, resourceName, accountId, provider, triggeredBy, description, timestamp } = event;
+    const { action, result, resourceId, accountId, provider, triggeredBy, description, timestamp } = event;
     return [
       action ?? null,
       result ?? null,
-      resourceName ?? null,
+      resourceId ?? null,
       accountId ?? null,
       provider ?? null,
       triggeredBy ?? null,
@@ -117,41 +117,41 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
       <Table aria-label="Events table">
         <Thead>
           <Tr>
-            <Th sort={getSortParams(0)}>{columnNames.action}</Th>
-            <Th sort={getSortParams(1)}>{columnNames.result}</Th>
             <Th sort={getSortParams(2)}>{columnNames.resource}</Th>
+            <Th sort={getSortParams(0)}>{columnNames.action}</Th>
             <Th sort={getSortParams(3)}>{columnNames.account}</Th>
             <Th sort={getSortParams(4)}>{columnNames.provider}</Th>
-            <Th sort={getSortParams(5)}>{columnNames.loggedBy}</Th>
+            <Th sort={getSortParams(5)}>{columnNames.triggeredBy}</Th>
             <Th>{columnNames.description}</Th>
+            <Th sort={getSortParams(1)}>{columnNames.result}</Th>
             <Th sort={getSortParams(7)}>{columnNames.date}</Th>
           </Tr>
         </Thead>
         <Tbody>
           {sortedData.map(event => (
             <Tr key={event.id}>
-              <Td>{event.action}</Td>
-              <Td>
-                {getResultIcon(event.result as ResultStatus)} {event.result}
-              </Td>
-              {/*TODO. Hardcoded, adjust later if needed*/}
-              <Td dataLabel={event.resourceName}>
+              <Td dataLabel={event.resourceId}>
                 <Link
                   to={
                     event.resourceType === 'instance'
-                      ? `/instances/${event.resourceName}`
-                      : `/clusters/${event.resourceName}`
+                      ? `/instances/${event.resourceId}`
+                      : `/clusters/${event.resourceId}`
                   }
                 >
-                  {event.resourceName}
+                  {event.resourceId}
                 </Link>
               </Td>
+              <Td>{renderOperationLabel(event.action)}</Td>
               <Td>
                 <Link to={`/accounts/${event.accountId}`}>{event.accountId}</Link>
               </Td>
               <Td>{event.provider}</Td>
               <Td>{event.triggeredBy}</Td>
               <Td>{event.description}</Td>
+              {/*TODO. Hardcoded, adjust later if needed*/}
+              <Td>
+                {getResultIcon(event.result as ResultStatus)} {event.result}
+              </Td>
               <Td>{event.timestamp}</Td>
             </Tr>
           ))}
