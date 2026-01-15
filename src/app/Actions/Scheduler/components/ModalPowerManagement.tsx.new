@@ -1,26 +1,32 @@
 import {
   Button,
   Checkbox,
+  Divider,
   FormHelperText,
-  FormGroup,
-  Form,
-  TextInput,
   HelperText,
   HelperTextItem,
-  Radio,
+  Modal,
+  ModalVariant,
+  ToggleGroup,
+  ToggleGroupItem,
+  Form,
+  FormGroup,
+  TextInput,
+  Tabs,
+  TabTitleText,
+  Tab,
+  Title,
 } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons';
-import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import React from 'react';
-import { ActionOperations, ActionTypes } from '@app/types/types';
+import { ActionStatus, ActionOperations, ActionTypes } from '@app/types/types';
 import DateTimePicker from './DateTimePicker';
 import { AccountTypeaheadSelect } from './AccountSelector';
 import { ClusterTypeaheadSelect } from './ClusterSelector';
-import { ActionStatus } from '@app/types/types';
 import { useUser } from '@app/Contexts/UserContext.tsx';
 import { debug } from '@app/utils/debugLogs';
 import { api, startCluster, stopCluster, AccountResponseApi, ClusterResponseApi, ActionRequestApi } from '@api';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
+import { OutlinedClockIcon, CalendarAltIcon, SyncAltIcon } from '@patternfly/react-icons';
 import cronValidate from 'cron-validate';
 
 interface ModalPowerManagementProps {
@@ -40,12 +46,10 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   const [selectedAccount, setSelectedAccount] = React.useState<AccountResponseApi | null>(null);
   const [selectedCluster, setSelectedCluster] = React.useState<ClusterResponseApi | null>(null);
   const [actionOperation, setActionOperation] = React.useState('');
+  const [actionEnabled, setActionEnabled] = React.useState<boolean>(true);
   const [scheduledDateTime, setScheduledDateTime] = React.useState('');
-  const [showSchedule, setShowSchedule] = React.useState(false);
   const [cronExpression, setCronExpression] = React.useState('');
-  const [cronTouched, setCronTouched] = React.useState(false);
   const [description, setDescription] = React.useState<string>('');
-  const [showDescriptionField, setShowDescriptionField] = React.useState(false);
 
   // Account/Cluster typeahead vars
   const [allAccounts, setAllAccounts] = React.useState<AccountResponseApi[]>([]);
@@ -56,6 +60,17 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
 
   // Action type selection
   const [actionType, setActionType] = React.useState<ActionTypes>(ActionTypes.INSTANT_ACTION);
+  const [isSelected, setIsSelected] = React.useState('');
+
+  const resetExecutionFields = (next: ActionTypes) => {
+    setActionEnabled(true);
+    if (next !== ActionTypes.SCHEDULED_ACTION) {
+      setScheduledDateTime('');
+    }
+    if (next !== ActionTypes.CRON_ACTION) {
+      setCronExpression('');
+    }
+  };
 
   const isValidCronExpression = (expr: string): boolean => {
     if (!expr.trim()) return false;
@@ -111,6 +126,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     // Reset dependent state when account changes / clears
     setSelectedCluster(null);
     setAllClusters([]);
+    setActionEnabled(true);
 
     const accountId = selectedAccount?.accountId;
     if (!accountId) return;
@@ -138,13 +154,10 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   React.useEffect(() => {
     if (isOpen) return;
 
-    setShowDescriptionField(false);
     setDescription('');
-    setShowSchedule(false);
     setActionType(ActionTypes.INSTANT_ACTION);
     setScheduledDateTime('');
     setCronExpression('');
-    setCronTouched(false);
     setSelectedAccount(null);
     setSelectedCluster(null);
     setAllClusters([]);
@@ -157,27 +170,25 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
       return;
     }
 
-    const finalDescription = showDescriptionField ? description : 'Routine maintenance';
-
     // Instant Action run
     if (actionType === ActionTypes.INSTANT_ACTION) {
       if (actionOperation === ActionOperations.POWER_ON) {
         debug('Powering on the cluster');
-        startCluster(selectedCluster?.clusterId, userEmail ?? undefined, finalDescription);
+        startCluster(selectedCluster?.clusterId, userEmail, description);
       } else if (actionOperation === ActionOperations.POWER_OFF) {
         debug('Powering off the cluster');
-        stopCluster(selectedCluster?.clusterId, userEmail ?? undefined, finalDescription);
+        stopCluster(selectedCluster?.clusterId, userEmail, description);
       }
     } else {
       // Creating base action. Tunning depending on ActionType
       const powerActionRequest = {
         accountId: selectedAccount?.accountId,
         clusterId: selectedCluster?.clusterId,
-        enabled: true,
+        enabled: actionEnabled,
         operation: actionOperation,
         region: selectedCluster?.region,
         status: ActionStatus.Pending,
-        description: finalDescription,
+        description: description,
       } as ActionRequestApi;
 
       // Scheduled Action run
@@ -220,7 +231,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   return (
     <Modal
       variant={ModalVariant.small}
-      title="Power management"
+      title="New Action"
       isOpen={isOpen}
       onClose={onClose}
       actions={[
@@ -233,9 +244,51 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
       ]}
       appendTo={document.body}
     >
-      {/* Account selection */}
-
       <Form>
+        {/* Action Type selection */}
+        <Tabs
+          activeKey={actionType}
+          onSelect={(_, key) => {
+            const next = key as ActionTypes;
+            setActionType(next);
+            resetExecutionFields(next);
+          }}
+          isBox
+        >
+          <Tab
+            eventKey={ActionTypes.INSTANT_ACTION}
+            title={
+              <TabTitleText>
+                <OutlinedClockIcon /> Instant Action
+              </TabTitleText>
+            }
+          >
+            Create an Action to be executed immediately
+          </Tab>
+          <Tab
+            eventKey={ActionTypes.SCHEDULED_ACTION}
+            title={
+              <TabTitleText>
+                <CalendarAltIcon /> Schedule Action
+              </TabTitleText>
+            }
+          >
+            Create an Action to be executed in the future
+          </Tab>
+          <Tab
+            eventKey={ActionTypes.CRON_ACTION}
+            title={
+              <TabTitleText>
+                <SyncAltIcon /> Cron Action
+              </TabTitleText>
+            }
+          >
+            Create an Action to be executed as a CronJob
+          </Tab>
+        </Tabs>
+
+        {/* Account selection */}
+        <Title headingLevel="h3">Target</Title>
         <AccountTypeaheadSelect
           accounts={allAccounts}
           selectedAccount={selectedAccount}
@@ -254,105 +307,94 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
           isDisabled={!selectedAccount}
           onClearCluster={onClusterClearButtonClick}
         />
+        <Divider />
 
         {/* Action selection */}
-        <FormGroup label="Action" role="radiogroup" isRequired fieldId="action-operation">
-          <Radio
-            id="action-power-on"
-            name="action"
-            label="Power On"
-            isChecked={actionOperation === ActionOperations.POWER_ON}
-            onChange={() => setActionOperation(ActionOperations.POWER_ON)}
-          />
-          <Radio
-            id="action-power-off"
-            name="action"
-            label="Power Off"
-            isChecked={actionOperation === ActionOperations.POWER_OFF}
-            onChange={() => setActionOperation(ActionOperations.POWER_OFF)}
-          />
+        <Title headingLevel="h3">Action Parameters</Title>
+        <FormGroup label="Action Operation" isRequired>
+          <ToggleGroup aria-label="Action Operation">
+            <ToggleGroupItem
+              text="Power On"
+              buttonId="action-power-on"
+              isSelected={isSelected === 'action-power-on'}
+              onChange={() => {
+                setActionOperation(ActionOperations.POWER_ON);
+                setIsSelected('action-power-on');
+              }}
+            />
+            <ToggleGroupItem
+              text="Power Off"
+              buttonId="action-power-off"
+              isSelected={isSelected === 'action-power-off'}
+              onChange={() => {
+                setActionOperation(ActionOperations.POWER_OFF);
+                setIsSelected('action-power-off');
+              }}
+            />
+          </ToggleGroup>
         </FormGroup>
+        <Divider />
 
         {/* Schedule management */}
-        <FormGroup label="Execution" fieldId="scheduled-action-type">
-          <Checkbox
-            id="scheduled-action-type"
-            name="scheduled-action-type"
-            label="Schedule action"
-            isChecked={showSchedule}
-            onChange={(_event, checked) => {
-              setShowSchedule(checked);
-              setActionType(checked ? ActionTypes.SCHEDULED_ACTION : ActionTypes.INSTANT_ACTION);
-            }}
-          />
-        </FormGroup>
-        {showSchedule && (
+        {actionType !== ActionTypes.INSTANT_ACTION && (
           <>
-            <FormGroup role="radiogroup" fieldId="schedule-type">
-              <Radio
-                id="specific-time"
-                name="scheduleType"
-                label="Specific time"
-                isChecked={actionType === ActionTypes.SCHEDULED_ACTION}
-                onChange={() => setActionType(ActionTypes.SCHEDULED_ACTION)}
-              />
-            </FormGroup>
+            <Title headingLevel="h3">Execution parameters</Title>
             {actionType === ActionTypes.SCHEDULED_ACTION && (
-              <FormGroup fieldId="datetime-picker" isRequired>
-                <DateTimePicker onChange={setScheduledDateTime} />
-              </FormGroup>
+              <>
+                <FormGroup label="Execution time" isRequired>
+                  <DateTimePicker onChange={setScheduledDateTime} />
+                </FormGroup>
+              </>
             )}
-            <FormGroup fieldId="cron-expression-input" isRequired>
-              <Radio
-                id="cron-expression"
-                name="scheduleType"
-                label="Cron expression"
-                isChecked={actionType === ActionTypes.CRON_ACTION}
-                onChange={() => setActionType(ActionTypes.CRON_ACTION)}
+            {actionType === ActionTypes.CRON_ACTION && (
+              <>
+                <FormGroup label="Cron Expression" isRequired>
+                  <TextInput
+                    type="text"
+                    id="cron-expression-input"
+                    value={cronExpression}
+                    onChange={(_event, value) => setCronExpression(value)}
+                    validated={isValidCronExpression(cronExpression) ? 'default' : 'error'}
+                    placeholder="0 0 * * *"
+                  />
+                  <FormHelperText>
+                    <HelperText>
+                      <HelperTextItem>
+                        Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
+                        midnight)
+                      </HelperTextItem>
+                    </HelperText>
+                  </FormHelperText>
+                </FormGroup>
+              </>
+            )}
+            <FormGroup label="Action Enabled" isRequired>
+              <Checkbox
+                id="action-enabled"
+                label="Enable action"
+                isChecked={actionEnabled}
+                onChange={(_event, checked) => setActionEnabled(checked)}
               />
             </FormGroup>
-            {actionType === ActionTypes.CRON_ACTION && (
-              <FormGroup fieldId="cron-expression-input" isRequired>
-                <TextInput
-                  type="text"
-                  id="cron-expression-input"
-                  value={cronExpression}
-                  onChange={(_event, value) => setCronExpression(value)}
-                  onBlur={() => setCronTouched(true)}
-                  validated={cronTouched && !isValidCronExpression(cronExpression) ? 'error' : 'default'}
-                  placeholder="0 0 * * *"
-                />
-                <FormHelperText>
-                  <HelperText>
-                    <HelperTextItem
-                      variant={cronTouched && !isValidCronExpression(cronExpression) ? 'error' : 'default'}
-                      icon={
-                        cronTouched && !isValidCronExpression(cronExpression) ? <ExclamationCircleIcon /> : undefined
-                      }
-                    >
-                      {cronTouched && !isValidCronExpression(cronExpression)
-                        ? 'Invalid cron expression'
-                        : "Format: minute hour day-of-month month day-of-week (e.g., '0 0 * * *' for daily at midnight)"}
-                    </HelperTextItem>
-                  </HelperText>
-                </FormHelperText>
-              </FormGroup>
-            )}
+            <Divider />
           </>
         )}
 
-        {/* Description management */}
-        <FormGroup label="Description" fieldId="description-input">
+        {/* Reason management */}
+        <FormGroup label="Description">
           <TextInput
             type="text"
             id="description-input"
             value={description}
             onChange={(_event, value) => setDescription(value)}
-            placeholder="Enter reason"
+            placeholder="Enter action description"
             aria-label="Reason for action"
           />
         </FormGroup>
       </Form>
     </Modal>
   );
+
+  // Fallback: do not render if action does not match any known case
+  return null;
 };

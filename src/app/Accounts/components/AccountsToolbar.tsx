@@ -98,7 +98,7 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
       return;
     }
 
-    const provider = itemId as CloudProvider;
+    const provider = itemId as ProviderApi;
     setProviderSelections(
       providerSelections && providerSelections.includes(provider)
         ? providerSelections.filter(selection => selection !== provider)
