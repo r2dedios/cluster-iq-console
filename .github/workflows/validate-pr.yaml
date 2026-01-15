@@ -4,8 +4,8 @@ on:
   pull_request:
 
 jobs:
-  typescript-lint:
-    name: TypeScript code validation
+  code-review:
+    name: Code format and style check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

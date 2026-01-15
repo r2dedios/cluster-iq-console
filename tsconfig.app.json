@@ -30,7 +30,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "noImplicitAny": false, // Disable noImplicitAny (temp)
+    "noImplicitAny": false // Disable noImplicitAny (temp)
   },
   "include": ["src"]
 }
