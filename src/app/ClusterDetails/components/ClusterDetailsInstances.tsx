@@ -1,21 +1,25 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
-import { Instance } from '@app/types/types';
 import { renderStatusLabel } from '@app/utils/renderUtils';
-import { getClusterInstances } from '@app/services/api';
+import { sortItems } from '@app/utils/tableFilters';
+import { api, InstanceResponseApi } from '@api';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 const ClusterDetailsInstances: React.FunctionComponent = () => {
-  const [data, setData] = useState<Instance[] | []>([]);
-  const [loading, setLoading] = useState(true);
   const { clusterID } = useParams();
+  const [data, setData] = useState<InstanceResponseApi[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Index of the currently active column
+  const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(1);
+  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log('Fetching data...');
-        const fetchedInstancesPerCluster = await getClusterInstances(clusterID);
+        const { data: fetchedInstancesPerCluster } = await api.clusters.instancesList(clusterID!);
         console.log('Fetched data:', fetchedInstancesPerCluster);
         setData(fetchedInstancesPerCluster);
       } catch (error) {
@@ -26,41 +30,23 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
     };
 
     fetchData();
-  }, []);
+  }, [clusterID]);
+
+  if (!clusterID) {
+    return <LoadingSpinner />;
+  }
 
   console.log('Rendered with data:', data);
 
-  //### Sorting ###
-  // Index of the currently active column
-  const [activeSortIndex, setActiveSortIndex] = React.useState<number | undefined>(0);
-  // sort direction of the currently active column
-  const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
-  // sort dropdown expansion
-  const getSortableRowValues = (instance: Instance): (string | number | null)[] => {
-    const { id, name, availabilityZone, instanceType, status, clusterID, provider } = instance;
-    return [id, name, availabilityZone, instanceType, status, clusterID, provider];
-  };
-
-  // Sorting
   let sortedData = data;
-  if (typeof activeSortIndex === 'number' && activeSortIndex !== null) {
-    sortedData = data.sort((a, b) => {
-      const aValue = getSortableRowValues(a)[activeSortIndex];
-      const bValue = getSortableRowValues(b)[activeSortIndex];
-      if (typeof aValue === 'number') {
-        // Numeric sort
-        if (activeSortDirection === 'asc') {
-          return (aValue as number) - (bValue as number);
-        }
-        return (bValue as number) - (aValue as number);
-      } else {
-        // String sort
-        if (activeSortDirection === 'asc') {
-          return (aValue as string).localeCompare(bValue as string);
-        }
-        return (bValue as string).localeCompare(aValue as string);
-      }
-    });
+  if (activeSortIndex !== undefined && activeSortDirection) {
+    const sortFields: (keyof InstanceResponseApi)[] = [
+      'instanceId',
+      'instanceName',
+      'instanceType',
+      'availabilityZone',
+    ];
+    sortedData = sortItems(data, sortFields[activeSortIndex], activeSortDirection);
   }
 
   // set table column properties
@@ -87,18 +73,18 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
             <Tr>
               <Th sort={getSortParams(0)}>ID</Th>
               <Th sort={getSortParams(1)}>Name</Th>
-              <Th sort={getSortParams(3)}>Type</Th>
-              <Th sort={getSortParams(4)}>Status</Th>
-              <Th sort={getSortParams(2)}>AvailabilityZone</Th>
+              <Th sort={getSortParams(2)}>Type</Th>
+              <Th>Status</Th>
+              <Th sort={getSortParams(3)}>AvailabilityZone</Th>
             </Tr>
           </Thead>
           <Tbody>
             {sortedData.map(instance => (
-              <Tr key={instance.id}>
-                <Td dataLabel={instance.id}>
-                  <Link to={`/servers/${instance.id}`}>{instance.id}</Link>
+              <Tr key={instance.instanceId}>
+                <Td dataLabel={instance.instanceId}>
+                  <Link to={`/instances/${instance.instanceId}`}>{instance.instanceId}</Link>
                 </Td>
-                <Td>{instance.name}</Td>
+                <Td>{instance.instanceName}</Td>
                 <Td>{instance.instanceType}</Td>
                 <Td dataLabel={instance.status}>{renderStatusLabel(instance.status)}</Td>
                 <Td>{instance.availabilityZone}</Td>

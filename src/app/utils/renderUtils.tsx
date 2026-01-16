@@ -1,18 +1,63 @@
-import { ClusterStates, ResultStatus } from '@app/types/types';
 import React from 'react';
+import { ActionTypes, ActionStatus, ActionOperations, ResultStatus } from '@app/types/types';
+import { ResourceStatusApi } from '@api';
 import { Label } from '@patternfly/react-core';
-import { InfoCircleIcon, ExclamationTriangleIcon, ExclamationCircleIcon, UnknownIcon } from '@patternfly/react-icons';
+import {
+  PendingIcon,
+  OnRunningIcon,
+  InfoCircleIcon,
+  ExclamationTriangleIcon,
+  ExclamationCircleIcon,
+  UnknownIcon,
+} from '@patternfly/react-icons';
+
+export function renderActionStatusLabel(labelText: string | null | undefined) {
+  switch (labelText) {
+    case ActionStatus.Running:
+      return <Label color="purple">{labelText}</Label>;
+    case ActionStatus.Success:
+      return <Label color="green">{labelText}</Label>;
+    case ActionStatus.Failed:
+      return <Label color="red">{labelText}</Label>;
+    case ActionStatus.Pending:
+      return <Label color="yellow">{labelText}</Label>;
+    default:
+      return <Label color="grey">{labelText}</Label>;
+  }
+}
 
 export function renderStatusLabel(labelText: string | null | undefined) {
   switch (labelText) {
-    case ClusterStates.Running:
+    case ResourceStatusApi.Running:
       return <Label color="green">{labelText}</Label>;
-    case ClusterStates.Stopped:
+    case ResourceStatusApi.Stopped:
       return <Label color="red">{labelText}</Label>;
-    case ClusterStates.Terminated:
+    case ResourceStatusApi.Terminated:
       return <Label color="purple">{labelText}</Label>;
-    case ClusterStates.Unknown:
-      return <Label color="gold">{labelText}</Label>;
+    default:
+      return <Label color="grey">{labelText}</Label>;
+  }
+}
+
+export function renderActionTypeLabel(labelText: string | null | undefined) {
+  switch (labelText) {
+    case ActionTypes.INSTANT_ACTION:
+      return <Label color="orange">Instant Action</Label>;
+    case ActionTypes.SCHEDULED_ACTION:
+      return <Label color="green">Scheduled Action</Label>;
+    case ActionTypes.CRON_ACTION:
+      return <Label color="blue">Cron Action</Label>;
+    default:
+      return <Label color="grey">{labelText}</Label>;
+  }
+}
+
+export function renderOperationLabel(labelText: string | null | undefined) {
+  switch (labelText) {
+    case ActionOperations.POWER_ON:
+      return <Label color="teal">{labelText}</Label>;
+    case ActionOperations.POWER_OFF:
+      return <Label color="purple">{labelText}</Label>;
     default:
       return <Label color="grey">{labelText}</Label>;
   }
@@ -21,9 +66,18 @@ export function renderStatusLabel(labelText: string | null | undefined) {
 export const getResultIcon = (result: ResultStatus) => {
   return (
     {
-      [ResultStatus.Success]: <InfoCircleIcon color="var(--pf-v5-global--success-color--100)" title="Info" />,
-      [ResultStatus.Failed]: <ExclamationTriangleIcon color="var(--pf-v5-global--danger-color--100)" title="Error" />,
-      [ResultStatus.Warning]: <ExclamationCircleIcon color="var(--pf-v5-global--warning-color--100)" title="Warning" />,
+      [ResultStatus.Success]: (
+        <InfoCircleIcon color="var(--pf-t--global--icon--color--status--success)" title="Success" />
+      ),
+      [ResultStatus.Running]: <OnRunningIcon color="var(--pf-t--global--icon--color--status--info)" title="Running" />,
+      [ResultStatus.Pending]: <PendingIcon color="var(--pf-t--global--icon--color--status--warning)" title="Pending" />,
+      [ResultStatus.Failed]: (
+        <ExclamationTriangleIcon color="var(--pf-t--global--icon--color--status--danger)" title="Error" />
+      ),
+      [ResultStatus.Warning]: (
+        <ExclamationCircleIcon color="var(--pf-t--global--icon--color--status--warning)" title="Warning" />
+      ),
+      [ResultStatus.Unknown]: <UnknownIcon color="gray" title="Unknown" />,
     }[result] || <UnknownIcon color="gray" title="Unknown" />
   );
 };

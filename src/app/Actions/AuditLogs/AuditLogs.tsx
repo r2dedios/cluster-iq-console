@@ -1,14 +1,15 @@
 import React from 'react';
-import { PageSection, PageSectionVariants, Panel, Text, TextContent } from '@patternfly/react-core';
-import AuditLogsTableToolbar from '@app/Observe/AuditLogs/AuditLogsTableToolbar.tsx';
+import { PageSection, Panel, Content } from '@patternfly/react-core';
+import AuditLogsTableToolbar from './AuditLogsTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
-import { CloudProvider, ClusterActions, ResultStatus } from '@app/types/types.tsx';
-import { AuditLogsTable } from '@app/Observe/AuditLogs/AuditLogsTable.tsx';
+import { ActionOperations, ResultStatus } from '@app/types/types.tsx';
+import { ProviderApi } from '@api';
+import { AuditLogsTable } from './AuditLogsTable.tsx';
 
 const filterParams = {
   accountName: parseAsString.withDefault(''),
-  action: parseAsArrayOf(parseAsStringEnum<ClusterActions>(Object.values(ClusterActions))).withDefault([]),
-  provider: parseAsArrayOf(parseAsStringEnum<CloudProvider>(Object.values(CloudProvider))).withDefault([]),
+  action: parseAsArrayOf(parseAsStringEnum<ActionOperations>(Object.values(ActionOperations))).withDefault([]),
+  provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
   result: parseAsArrayOf(parseAsStringEnum<ResultStatus>(Object.values(ResultStatus))).withDefault([]),
   triggered_by: parseAsString.withDefault(''),
 };
@@ -18,12 +19,12 @@ const AuditLogs: React.FunctionComponent = () => {
 
   return (
     <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Audit logs</Text>
-        </TextContent>
+      <PageSection hasBodyWrapper={false}>
+        <Content>
+          <Content component="h1">Audit logs</Content>
+        </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} isFilled>
+      <PageSection hasBodyWrapper={false} isFilled>
         <Panel>
           <AuditLogsTableToolbar
             searchValue={accountName}

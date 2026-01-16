@@ -5,6 +5,21 @@ import { NavLink, useLocation } from 'react-router-dom';
 const SidebarNavigation: React.FunctionComponent = () => {
   const location = useLocation();
 
+  const isInventoryExpanded =
+    location.pathname.startsWith('/accounts') ||
+    location.pathname.startsWith('/clusters') ||
+    location.pathname.startsWith('/instances');
+
+  //const isScanExpanded = location.pathname.startsWith('/scan');
+  //
+  // <NavExpandable title="Scan" groupId="scan-group" isExpanded={isScanExpanded} isHidden>
+  // <NavItem groupId="scan-group" itemId="scan-scheduler" isActive={location.pathname === '/scan/scheduler'}>
+  // <NavLink to="/scan/scheduler">Schedule</NavLink>
+  // </NavItem>
+  // </NavExpandable>
+  //
+  const isActionsExpanded = location.pathname.startsWith('/actions');
+
   return (
     <Nav aria-label="Nav">
       <NavList>
@@ -13,71 +28,33 @@ const SidebarNavigation: React.FunctionComponent = () => {
             Overview
           </NavLink>
         </NavItem>
-        <NavItem itemId="accounts">
-          <NavLink to="/accounts">Accounts</NavLink>
-        </NavItem>
 
-        <NavExpandable title="Clusters" groupId="clusters-group" isExpanded={location.pathname.startsWith('/clusters')}>
-          <NavItem
-            groupId="clusters-group"
-            itemId="clusters-active"
-            isActive={location.pathname === '/clusters' && !location.search}
-          >
-            <NavLink to="/clusters" end>
-              Active
-            </NavLink>
+        <NavExpandable title="Inventory" groupId="inventory-group" isExpanded={isInventoryExpanded}>
+          <NavItem groupId="inventory-group" itemId="accounts" isActive={location.pathname.startsWith('/accounts')}>
+            <NavLink to="/accounts">Accounts</NavLink>
           </NavItem>
-          <NavItem
-            groupId="clusters-group"
-            itemId="clusters-history"
-            isActive={location.pathname === '/clusters' && location.search === '?archived=true'}
-          >
-            <NavLink to="/clusters?archived=true">History</NavLink>
+          <NavItem groupId="inventory-group" itemId="clusters" isActive={location.pathname.startsWith('/clusters')}>
+            <NavLink to="/clusters">Clusters</NavLink>
+          </NavItem>
+          <NavItem groupId="inventory-group" itemId="instances" isActive={location.pathname.startsWith('/instances')}>
+            <NavLink to="/instances">Instances</NavLink>
           </NavItem>
         </NavExpandable>
 
-        <NavExpandable title="Servers" groupId="servers-group" isExpanded={location.pathname.startsWith('/servers')}>
+        <NavExpandable title="Actions" groupId="actions-group" isExpanded={isActionsExpanded}>
           <NavItem
-            groupId="servers-group"
-            itemId="servers-active"
-            isActive={location.pathname === '/servers' && !location.search}
+            groupId="actions-group"
+            itemId="actions-scheduler"
+            isActive={location.pathname === '/actions/scheduler'}
           >
-            <NavLink to="/servers" end>
-              Active
-            </NavLink>
+            <NavLink to="/actions/scheduler">Schedule</NavLink>
           </NavItem>
           <NavItem
-            groupId="servers-group"
-            itemId="servers-history"
-            isActive={location.pathname === '/servers' && location.search === '?archived=true'}
+            groupId="actions-group"
+            itemId="actions-audit-logs"
+            isActive={location.pathname === '/actions/audit-logs'}
           >
-            <NavLink to="/servers?archived=true">History</NavLink>
-          </NavItem>
-        </NavExpandable>
-        <NavExpandable
-          title={'Observe'}
-          groupId={'observe-group'}
-          isExpanded={location.pathname.startsWith('/observe')}
-        >
-          <NavItem
-            groupId={'observe-group'}
-            itemId="audit-logs"
-            isActive={location.pathname === '/observe' && !location.search}
-          >
-            <NavLink to="/observe/audit-logs" end>
-              {' '}
-              Audit logs
-            </NavLink>
-          </NavItem>
-          <NavItem
-            groupId={'observe-group'}
-            itemId="scheduler"
-            isActive={location.pathname === '/observe' && !location.search}
-          >
-            <NavLink to="/observe/scheduler" end>
-              {' '}
-              Scheduler{' '}
-            </NavLink>
+            <NavLink to="/actions/audit-logs">Audit Logs</NavLink>
           </NavItem>
         </NavExpandable>
       </NavList>

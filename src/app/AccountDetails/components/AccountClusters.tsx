@@ -6,7 +6,6 @@ import {
   ToolbarItem,
   Switch,
   EmptyState,
-  EmptyStateIcon,
   Title,
   EmptyStateBody,
   EmptyStateVariant,
@@ -14,23 +13,22 @@ import {
 import { CubesIcon } from '@patternfly/react-icons';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { ClustersTable } from './ClustersTable';
-import { getAccountClusters } from '@app/services/api';
+import { api, ClusterResponseApi } from '@api';
 import { debug } from '@app/utils/debugLogs';
-import { Cluster } from '@app/types/types';
 
 export const AccountClusters: React.FunctionComponent = () => {
-  const [clusters, setClusters] = useState<Cluster[] | []>([]);
+  const [clusters, setClusters] = useState<ClusterResponseApi[]>([]);
   const [showTerminated, setShowTerminated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { accountName } = useParams();
+  const { accountId } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         debug('Fetching data...');
-        const fetchedAccountClusters = await getAccountClusters(accountName);
-        debug('Fetched Account data:', fetchedAccountClusters);
-        setClusters(fetchedAccountClusters);
+        const { data } = await api.accounts.clustersList(accountId);
+        debug('Fetched Account data:', data);
+        setClusters(data.items || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -39,7 +37,7 @@ export const AccountClusters: React.FunctionComponent = () => {
     };
 
     fetchData();
-  }, [accountName]);
+  }, [accountId]);
 
   // Filter terminated clusters
   const displayClusters = showTerminated ? clusters : clusters.filter(cluster => cluster.status !== 'Terminated');
@@ -60,7 +58,6 @@ export const AccountClusters: React.FunctionComponent = () => {
             <Switch
               id="show-terminated-clusters"
               label="Show terminated clusters"
-              labelOff="Show terminated clusters"
               isChecked={showTerminated}
               onChange={handleToggleChange}
             />
@@ -69,11 +66,15 @@ export const AccountClusters: React.FunctionComponent = () => {
       </Toolbar>
 
       {displayClusters.length === 0 ? (
-        <EmptyState variant={EmptyStateVariant.sm}>
-          <EmptyStateIcon icon={CubesIcon} />
-          <Title headingLevel="h4" size="md">
-            No clusters found
-          </Title>
+        <EmptyState
+          titleText={
+            <Title headingLevel="h4" size="md">
+              No clusters found
+            </Title>
+          }
+          icon={CubesIcon}
+          variant={EmptyStateVariant.sm}
+        >
           <EmptyStateBody>
             {!showTerminated ? (
               <>

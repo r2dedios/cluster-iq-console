@@ -1,38 +1,34 @@
-import { PageSection, PageSectionVariants, Panel, TextContent, Text } from '@patternfly/react-core';
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { PageSection, Panel, Content } from '@patternfly/react-core';
+import React from 'react';
 import AccountsToolbar from './components/AccountsToolbar';
 import AccountsTable from './components/AccountsTable';
+import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
+import { ProviderApi } from '@api';
+
+const filterParams = {
+  provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
+  accountName: parseAsString.withDefault(''),
+};
 
 const Accounts: React.FunctionComponent = () => {
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [providerSelections, setProviderSelections] = useState<string[]>([]);
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const cloudProviderFilter = queryParams.get('cloudProvider');
+  const [{ provider, accountName }, setQuery] = useQueryStates(filterParams);
 
   return (
     <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Accounts</Text>
-        </TextContent>
+      <PageSection hasBodyWrapper={false}>
+        <Content>
+          <Content component="h1">Accounts</Content>
+        </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} isFilled>
+      <PageSection hasBodyWrapper={false} isFilled>
         <Panel>
           <AccountsToolbar
-            onSearchChange={setSearchValue}
-            setSearchValue={setSearchValue}
-            searchValue={searchValue}
-            setProviderSelections={setProviderSelections}
-            providerSelections={providerSelections}
+            searchValue={accountName}
+            setSearchValue={value => setQuery({ accountName: value })}
+            providerSelections={provider}
+            setProviderSelections={value => setQuery({ provider: value || null })}
           />
-          <AccountsTable
-            searchValue={searchValue}
-            cloudProviderFilter={cloudProviderFilter}
-            providerSelections={providerSelections}
-            statusFilter={null}
-          />
+          <AccountsTable searchValue={accountName} providerSelections={provider} />
         </Panel>
       </PageSection>
     </React.Fragment>

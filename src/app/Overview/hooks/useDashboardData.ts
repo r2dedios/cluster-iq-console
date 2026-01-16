@@ -1,45 +1,27 @@
 import { useState, useEffect } from 'react';
-import { getInventoryOverview } from '@app/services/api';
-
-interface ProviderDetail {
-  account_count: number;
-  cluster_count: number;
-}
-
-interface InventoryData {
-  clusters: {
-    running: number;
-    stopped: number;
-    unknown: number;
-    archived: number;
-  };
-  instances: {
-    count: number;
-  };
-  providers: {
-    aws: ProviderDetail;
-    gcp: ProviderDetail;
-    azure: ProviderDetail;
-  };
-  scanner?: {
-    last_scan_timestamp: string;
-  };
-}
+import { api, OverviewSummaryApi } from '@api';
 
 export const useDashboardData = () => {
-  const [inventoryData, setInventoryData] = useState<InventoryData | undefined>();
+  const [inventoryData, setInventoryData] = useState<OverviewSummaryApi | undefined>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const inventoryOverview = async () => {
       try {
-        const data = await getInventoryOverview();
+        setLoading(true);
+        setError(null);
+        const { data } = await api.overview.overviewList();
         setInventoryData(data);
       } catch {
+        setError('Failed to fetch inventory data');
         console.error('Failed to fetch inventory data.');
+      } finally {
+        setLoading(false);
       }
     };
     inventoryOverview();
   }, []);
 
-  return { inventoryData };
+  return { inventoryData, loading, error };
 };

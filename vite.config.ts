@@ -21,6 +21,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@api': path.resolve(__dirname, 'src/api'),
       '@app': path.resolve(__dirname, 'src/app'),
       '@assets': path.resolve(__dirname, 'node_modules/@patternfly/react-core/dist/styles/assets'),
       src: path.resolve(__dirname, 'src'),
@@ -45,14 +46,14 @@ export default defineConfig({
         target: process.env.VITE_CIQ_API_URL || 'http://localhost:8081',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, '/api/v1'),
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
+        configure: proxy => {
+          proxy.on('error', err => {
             console.log('proxy error', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
             console.log('sending request to the target:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
+          proxy.on('proxyRes', (proxyRes, req) => {
             console.log('received response from the target:', proxyRes.statusCode, req.url);
           });
         },

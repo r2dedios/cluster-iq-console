@@ -1,126 +1,51 @@
-export type ClusterData = {
-  count: number;
-  clusters: Cluster[];
-};
-
-export type Cluster = {
-  id: string;
-  name: string;
-  provider: string;
-  status: string;
-  region: string;
-  consoleLink: string;
-  accountName: string;
-  instanceCount: number;
-  creationTimestamp: string;
-  lastScanTimestamp: string;
-  totalCost: number;
-  last15DaysCost: number;
-  lastMonthCost: number;
-  currentMonthSoFarCost: number;
-  instances: Instance[];
-};
-
-export type AccountData = {
-  count: number;
-  accounts: Account[];
-};
-
-export type Account = {
-  id: string;
-  name: string;
-  provider: string;
-  clusterCount: number;
-  lastScanTimestamp: string;
-  totalCost: number;
-  last15DaysCost: number;
-  lastMonthCost: number;
-  currentMonthSoFarCost: number;
-  clusters: Record<string, Cluster>;
-};
-
-export type TagData = {
-  count: number;
-  tags: Tag[];
-};
-
-export type Tag = {
-  key: string;
-  value: string;
-};
-
-export type ClusterPerCP = {
-  count: number;
-  accounts: Account[];
-};
-
-export type Instance = {
-  id: string;
-  name: string;
-  availabilityZone: string;
-  instanceType: string;
-  status: string;
-  clusterID: string;
-  provider: string;
-  lastScanTimestamp: string;
-  creationTimestamp: string;
-  dailyCost: number;
-  totalCost: number;
-  tags: Array<Tag>;
-};
-
-export type Instances = {
-  count: number;
-  instances: Instance[];
-};
-
-export type AuditEvent = {
-  id: number;
-  action_name: string;
-  account_id?: string;
-  provider?: string;
-  event_timestamp: string;
-  description?: string;
-  resource_id: string;
-  resource_type: string;
-  result: string;
-  // Should be typed?
-  severity: string;
-  triggered_by: string;
-};
-
-export type AuditEvents = {
-  count: number;
-  events: AuditEvent[];
-};
-
-export enum ClusterStates {
-  Running = 'Running',
-  Stopped = 'Stopped',
-  Terminated = 'Terminated',
-  Unknown = 'Unknown',
-}
-
-export enum CloudProvider {
-  AWS = 'AWS',
-  GCP = 'GCP',
-  Azure = 'Azure',
-}
-
-export enum ClusterActions {
-  PowerOn = 'PowerOn',
-  PowerOff = 'PowerOff',
-}
-
 export enum ResultStatus {
+  Pending = 'Pending',
+  Running = 'Running',
   Success = 'Success',
   Failed = 'Failed',
   Warning = 'Warning',
+  Unknown = 'Unknown',
 }
 
-export enum ScheduledActionStatus {
+export enum ActionStatus {
+  Running = 'Running',
   Success = 'Success',
   Failed = 'Failed',
   Pending = 'Pending',
   Unknown = 'Unknown',
+}
+
+export enum ActionOperations {
+  POWER_ON = 'PowerOn',
+  POWER_OFF = 'PowerOff',
+}
+
+export enum ActionTypes {
+  INSTANT_ACTION = 'instant_action',
+  SCHEDULED_ACTION = 'scheduled_action',
+  CRON_ACTION = 'cron_action',
+}
+
+export interface BaseAction {
+  type: 'instant_action' | 'scheduled_action' | 'cron_action';
+  operation: 'PowerOff' | 'PowerOn';
+  target: {
+    clusterID: string;
+  };
+  status: 'Pending';
+  enabled: boolean;
+}
+
+export interface ScheduledAction extends BaseAction {
+  type: 'scheduled_action';
+  time: string;
+}
+
+export interface CronAction extends BaseAction {
+  type: 'cron_action';
+  cronExp: string;
+}
+
+export interface InstantAction {
+  description?: string;
 }

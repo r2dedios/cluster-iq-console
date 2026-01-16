@@ -8,72 +8,130 @@ import {
   Grid,
   GridItem,
   PageSection,
-  PageSectionVariants,
-  TextContent,
-  Text,
+  Content,
+  Alert,
+  Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateFooter,
+  EmptyStateActions,
 } from '@patternfly/react-core';
+import { CubesIcon } from '@patternfly/react-icons';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { generateCards } from './components/CardData';
-import { CloudProvider } from './types';
-import { renderContent } from './components/CardRenderer';
+import { ProviderApi } from '@api';
+import { renderContent } from './utils/cardRendererUtils.tsx';
 import { useDashboardData } from './hooks/useDashboardData';
+import { useEventsData } from './hooks/useEventsData';
+import { DashboardState } from './types';
 
 const AggregateStatusCards: React.FunctionComponent = () => {
-  const { inventoryData } = useDashboardData();
+  const { inventoryData, loading, error } = useDashboardData();
+  const { events, loading: eventsLoading, error: eventsError } = useEventsData();
 
-  if (!inventoryData) {
+  if (loading) {
     return <LoadingSpinner />;
   }
 
-  const dashboardState = {
+  if (error || !inventoryData) {
+    return (
+      <PageSection hasBodyWrapper={false}>
+        <EmptyState variant="lg" titleText="Unable to load dashboard" headingLevel="h1" icon={CubesIcon}>
+          <EmptyStateBody>Dashboard unavailable. Refresh to try again.</EmptyStateBody>
+          <EmptyStateFooter>
+            <EmptyStateActions>
+              <Button variant="primary" onClick={() => window.location.reload()}>
+                Refresh page
+              </Button>
+            </EmptyStateActions>
+          </EmptyStateFooter>
+        </EmptyState>
+      </PageSection>
+    );
+  }
+
+  const dashboardState: DashboardState = {
     clustersByStatus: {
       running: inventoryData?.clusters?.running || 0,
       stopped: inventoryData?.clusters?.stopped || 0,
-      unknown: inventoryData?.clusters?.unknown || 0,
       terminated: inventoryData?.clusters?.archived || 0,
     },
+    instancesByStatus: {
+      running: inventoryData?.instances?.running || 0,
+      stopped: inventoryData?.instances?.stopped || 0,
+      terminated: inventoryData?.instances?.archived || 0,
+    },
     clustersByProvider: {
-      [CloudProvider.AWS]: inventoryData.providers.aws?.cluster_count || 0,
-      [CloudProvider.GCP]: inventoryData.providers.gcp?.cluster_count || 0,
-      [CloudProvider.AZURE]: inventoryData.providers.azure?.cluster_count || 0,
+      [ProviderApi.AWSProvider]: inventoryData.providers?.aws?.clusterCount || 0,
+      [ProviderApi.GCPProvider]: inventoryData.providers?.gcp?.clusterCount || 0,
+      [ProviderApi.AzureProvider]: inventoryData.providers?.azure?.clusterCount || 0,
+      [ProviderApi.UnknownProvider]: 0,
     },
     accountsByProvider: {
-      [CloudProvider.AWS]: inventoryData.providers.aws?.account_count || 0,
-      [CloudProvider.GCP]: inventoryData.providers.gcp?.account_count || 0,
-      [CloudProvider.AZURE]: inventoryData.providers.azure?.account_count || 0,
+      [ProviderApi.AWSProvider]: inventoryData.providers?.aws?.accountCount || 0,
+      [ProviderApi.GCPProvider]: inventoryData.providers?.gcp?.accountCount || 0,
+      [ProviderApi.AzureProvider]: inventoryData.providers?.azure?.accountCount || 0,
+      [ProviderApi.UnknownProvider]: 0,
     },
-    instances: inventoryData.instances.count,
-    lastScanTimestamp: inventoryData.scanner?.last_scan_timestamp,
+    instances: (inventoryData?.instances?.running || 0) + (inventoryData?.instances?.stopped || 0),
+    lastScanTimestamp: inventoryData?.scanner?.lastScanTimestamp,
   };
 
-  const cardData = generateCards(dashboardState);
+  const cardData = generateCards(dashboardState, events);
 
   return (
     <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Overview</Text>
-        </TextContent>
+      <PageSection hasBodyWrapper={false}>
+        <Content>
+          <Content component="h1">Overview</Content>
+        </Content>
       </PageSection>
-      <PageSection>
+      <PageSection hasBodyWrapper={false}>
         <Grid hasGutter>
-          {Object.entries(cardData).map(([, cards], groupIndex) => (
-            <GridItem key={groupIndex}>
-              <Gallery
-                hasGutter
-                style={
-                  {
-                    '--pf-v5-l-gallery--GridTemplateColumns--min': '30%',
-                  } as any
-                }
-              >
-                {cards.map((card, cardIndex) => (
-                  <Card style={{ textAlign: 'center' }} key={`${groupIndex}${cardIndex}`} component="div">
-                    <CardTitle>{card.title}</CardTitle>
-                    <CardBody>{renderContent(card.content, card.layout)}</CardBody>
-                  </Card>
-                ))}
-              </Gallery>
+          {Object.entries(cardData).map(([groupName, cards], groupIndex) => (
+            <GridItem key={groupIndex} span={groupName === 'activityCards' ? 12 : undefined}>
+              {groupName === 'activityCards' ? (
+                // Full width Activity card with double height
+                <Card className="pf-v6-u-min-height" component="div">
+                  <CardTitle className="pf-v6-u-text-align-center">{cards[0].title}</CardTitle>
+                  <CardBody className="pf-v6-u-p-md">
+                    {eventsLoading ? (
+                      <LoadingSpinner />
+                    ) : eventsError ? (
+                      <Alert variant="danger" title="Unable to load events" isInline>
+                        <p>{eventsError}</p>
+                        <p>Check the console for more details or try refreshing the page.</p>
+                      </Alert>
+                    ) : cards[0].customComponent ? (
+                      cards[0].customComponent
+                    ) : (
+                      renderContent(cards[0].content, cards[0].layout, cards[0].totalCount)
+                    )}
+                  </CardBody>
+                </Card>
+              ) : (
+                // Regular cards in Gallery
+                <Gallery
+                  hasGutter
+                  style={
+                    {
+                      '--pf-v6-l-gallery--GridTemplateColumns--min': '30%',
+                    } as any
+                  }
+                >
+                  {cards.map((card, cardIndex) => (
+                    <Card key={`${groupIndex}${cardIndex}`} component="div" className="pf-v6-u-min-height">
+                      <CardTitle
+                        className="pf-v6-u-text-align-center"
+                        style={{ textAlign: 'center', justifyContent: 'center' }}
+                      >
+                        {card.title}
+                      </CardTitle>
+                      <CardBody>{renderContent(card.content, card.layout, card.totalCount)}</CardBody>
+                    </Card>
+                  ))}
+                </Gallery>
+              )}
             </GridItem>
           ))}
         </Grid>
